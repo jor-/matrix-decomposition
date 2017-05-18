@@ -6,6 +6,7 @@ Welcome to matrix_decomposition's documentation!
     :caption: Contents:
     
     decompositions
+    changelog
 
 
 
