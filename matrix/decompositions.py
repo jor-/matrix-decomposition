@@ -1,9 +1,13 @@
 import abc
+import copy
 
 import numpy as np
 import scipy.sparse
 
+import matrix.constants
+import matrix.errors
 import matrix.permute
+import matrix.util
 
 
 class DecompositionBase(metaclass=abc.ABCMeta):
@@ -12,7 +16,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     This class is a base class for matrix decompositions.
     """
 
-    def __init__(self, p=None):
+    def __init__(self, p=None, decomposition_type=None):
         """
         Parameters
         ----------
@@ -20,10 +24,15 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             The permutation vector used for the decomposition.
             This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
             optional, default: no permutation
+        decomposition_type : str
+            Type of this decomposition.
+            optional, default: type not specified
         """
 
         if p is not None:
             self._p = p
+        if decomposition_type is not None:
+            self._decomposition_type = decomposition_type
 
     # *** permutation *** #
 
@@ -158,6 +167,112 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """:class:`numpy.matrix` or :class:`scipy.sparse.spmatrix`: The composed matrix represented by this decomposition."""
         raise NotImplementedError
 
+    @property
+    def decomposition_type(self):
+        """:class:`str`: The type of this decompositon."""
+        return self._decomposition_type
+
+    # *** compare methods *** #
+
+    def __eq__(self, other):
+        if not isinstance(other, DecompositionBase):
+            return False
+        if not self.decomposition_type == other.decomposition_type:
+            return False
+        if self.is_permuted and other.is_permuted:
+            return np.all(self.p == other.p)
+        else:
+            return not self.is_permuted and not other.is_permuted
+
+    # *** convert type *** #
+
+    def copy(self):
+        """ Copy this decomposition.
+
+        Returns
+        -------
+        matrix.decompositions.DecompositionBase
+            A copy of this decomposition.
+        """
+        return copy.deepcopy(self)
+
+    def is_type(self, decomposition_type):
+        """ Whether this is a decomposition of the passed type.
+
+        Parameters
+        ----------
+        decomposition_type : str
+            The decomposition type according to which is checked.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition of the passed type.
+        """
+
+        if decomposition_type is None:
+            return True
+        else:
+            try:
+                return self._decomposition_type == decomposition_type
+            except AttributeError:
+                False
+
+    def to(self, decomposition_type, copy=False):
+        """ Convert decomposition to passed type.
+
+        Parameters
+        ----------
+        decomposition_type : str
+            The decomposition type to which this decomposition is converted.
+        copy : bool
+            Whether the data of this decomposition should always be copied or only if needed.
+
+        Returns
+        -------
+        matrix.decompositions.DecompositionBase
+            If the type of this decomposition is not `decomposition_type`, a decompostion of type
+            `decomposition_type` is returned which represents the same decomposed matrix as this
+            decomposition. Otherwise this decomposition or a copy of it is returned, depending on
+            `copy`.
+        """
+
+        if self.is_type(decomposition_type):
+            if copy:
+                return self.copy()
+            else:
+                return self
+        else:
+            raise matrix.errors.MatrixDecompositionNoConversionImplementedError(
+                original_decomposition=self, desired_decomposition_type=decomposition_type)
+
+    def to_any(self, *decomposition_types, copy=False):
+        """ Convert decomposition to any of the passed types.
+
+        Parameters
+        ----------
+        *decomposition_types : str
+            The decomposition types to any of them this this decomposition is converted.
+        copy : bool
+            Whether the data of this decomposition should always be copied or only if needed.
+
+        Returns
+        -------
+        matrix.decompositions.DecompositionBase
+            If the type of this decomposition is not in `decomposition_types`, a decompostion of
+            type `decomposition_type[0]` is returned which represents the same decomposed matrix
+            as this decomposition. Otherwise this decomposition or a copy of it is returned,
+            depending on `copy`.
+        """
+
+        if len(decomposition_types) == 0 or any(map(self.is_type, decomposition_types)):
+            if copy:
+                return self.copy()
+            else:
+                return self
+        else:
+            return self.to(decomposition_types[0])
+
 
 class LDL_Decomposition(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -182,7 +297,7 @@ class LDL_Decomposition(DecompositionBase):
 
         self.L = L
         self.d = d
-        super().__init__(p=p)
+        super().__init__(p=p, decomposition_type=matrix.constants.LDL_DECOMPOSITION_TYPE)
 
     # *** base properties *** #
 
@@ -237,6 +352,53 @@ class LDL_Decomposition(DecompositionBase):
             LD[i, i] = d[i]
         return LD
 
+    # *** compare methods *** #
+
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        return np.all(self.d == other.d) and matrix.util.equal(self.L, other.L)
+
+    # *** convert type *** #
+
+    def to_LL_Decomposition(self):
+        L = self.L
+        d = self.d
+        p = self.p
+
+        # check d for negative entries
+        d_negative_mask = d < 0
+        if np.any(d_negative_mask):
+            i = np.where(d_negative_mask)[0][0]
+            p_i = p[i]
+            raise matrix.errors.MatrixNoLLDecompositionPossibleError(
+                problematic_leading_principal_submatrix_index=p_i)
+        del d_negative_mask
+
+        # compute new d
+        d = np.sqrt(d)
+
+        # compute new L
+        D = scipy.sparse.diags(d)
+        L = L @ D
+
+        # construct new decompostion
+        return LL_Decomposition(L, p=p)
+
+    def to_LDL_DecompositionCompressed(self):
+        return LDL_DecompositionCompressed(self.LD, p=self.p)
+
+    def to(self, decomposition_type, copy=False):
+        try:
+            return super().to(decomposition_type, copy=copy)
+        except matrix.errors.MatrixDecompositionNoConversionImplementedError:
+            if decomposition_type == matrix.constants.LL_DECOMPOSITION_TYPE:
+                return self.to_LL_Decomposition()
+            elif decomposition_type == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
+                return self.to_LDL_DecompositionCompressed()
+            else:
+                raise
+
 
 class LDL_DecompositionCompressed(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -258,7 +420,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
             optional, default: no permutation
         """
         self.LD = LD
-        super().__init__(p=p)
+        super().__init__(p=p, decomposition_type=matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE)
 
     # *** base properties *** #
 
@@ -310,6 +472,29 @@ class LDL_DecompositionCompressed(DecompositionBase):
             L[i, i] = 1
         return L
 
+    # *** compare methods *** #
+
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        return matrix.util.equal(self.LD, other.LD)
+
+    # *** convert type *** #
+
+    def to_LDL_Decomposition(self):
+        return LDL_Decomposition(self.L, self.d, p=self.p)
+
+    def to(self, decomposition_type, copy=False):
+        try:
+            return super().to(decomposition_type, copy=copy)
+        except matrix.errors.MatrixDecompositionNoConversionImplementedError:
+            if decomposition_type == matrix.constants.LDL_DECOMPOSITION_TYPE:
+                return self.to_LDL_Decomposition()
+            elif decomposition_type == matrix.constants.LL_DECOMPOSITION_TYPE:
+                return self.to_LDL_Decomposition().to_LL_Decomposition()
+            else:
+                raise
+
 
 class LL_Decomposition(DecompositionBase):
     """ A matrix decomposition where :math:`LL^H` is the decomposed (permuted) matrix.
@@ -330,7 +515,7 @@ class LL_Decomposition(DecompositionBase):
             optional, default: no permutation
         """
         self.L = L
-        super().__init__(p=p)
+        super().__init__(p=p, decomposition_type=matrix.constants.LL_DECOMPOSITION_TYPE)
 
     # *** base properties *** #
 
@@ -361,3 +546,65 @@ class LL_Decomposition(DecompositionBase):
         if not self.is_sparse:
             L = np.asmatrix(L)
         self._L = L
+
+    # *** compare methods *** #
+
+    def __eq__(self, other):
+        if not super().__eq__(other):
+            return False
+        return matrix.util.equal(self.L, other.L)
+
+    # *** convert type *** #
+
+    @property
+    def _d(self):
+        """:py:class:`numpy.ndarray`: The diagonal vector of `L`."""
+        d = self.L.diagonal()
+        if not self.is_sparse:
+            d = d.A1
+        return d
+
+    def to_LDL_Decomposition(self):
+        L = self.L
+        p = self.p
+
+        # compute new L
+        d = self._d
+        d_inverse = 1 / d
+        d_zero_mask = d == 0
+        d_inverse[d_zero_mask] = 0
+        assert np.all(np.isfinite(d_inverse[np.isfinite(d)]))
+        D_inverse = scipy.sparse.diags(d_inverse)
+        L = L @ D_inverse
+
+        # set all diagonal elements to one (due to rounding errors)
+        n = self.n
+        for i in range(n):
+            assert np.isclose(L[i, i], 1) or d_zero_mask[i] or not np.isfinite(L[i, i])
+            L[i, i] = 1
+
+        # compute new d
+        d = d**2
+
+        # check entries where diagonal is zero
+        if np.any(d_zero_mask):
+            for i in np.where(d_zero_mask)[0]:
+                for j in range(i + 1, n):
+                    if not np.isclose(L[j, i], 0):
+                        p_i = i[i]
+                        raise matrix.errors.MatrixNoLLDecompositionPossibleError(
+                            problematic_leading_principal_submatrix_index=p_i)
+
+        # construct new decompostion
+        return LDL_Decomposition(L, d, p=p)
+
+    def to(self, decomposition_type, copy=False):
+        try:
+            return super().to(decomposition_type, copy=copy)
+        except matrix.errors.MatrixDecompositionNoConversionImplementedError:
+            if decomposition_type == matrix.constants.LDL_DECOMPOSITION_TYPE:
+                return self.to_LDL_Decomposition()
+            elif decomposition_type == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
+                return self.to_LDL_Decomposition().to_LDL_DecompositionCompressed()
+            else:
+                raise

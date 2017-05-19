@@ -71,8 +71,8 @@ class MatrixNoLLDecompositionPossibleError(MatrixNoDecompositionPossibleWithProb
         super().__init__(matrix=matrix, decomposition_decription='LL^H', problematic_leading_principal_submatrix_index=problematic_leading_principal_submatrix_index, subdecomposition=subdecomposition)
 
 
-class MatrixDecompositionNoConvertationImplementedError(MatrixError):
-    """ A decomposition convertation is not implemented for this type. """
+class MatrixDecompositionNoConversionImplementedError(MatrixError):
+    """ A decomposition conversion is not implemented for this type. """
 
     def __init__(self, original_decomposition=None, desired_decomposition_type=None):
         message = 'Decomposition'
