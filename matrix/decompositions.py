@@ -558,7 +558,7 @@ class LL_Decomposition(DecompositionBase):
 
     @property
     def _d(self):
-        """:py:class:`numpy.ndarray`: The diagonal vector of `L`."""
+        """:class:`numpy.ndarray`: The diagonal vector of `L`."""
         d = self.L.diagonal()
         if not self.is_sparse:
             d = d.A1

@@ -24,6 +24,22 @@ class MatrixError(Exception):
             return ''
 
 
+class MatrixNotSquareError(MatrixError):
+    """ A matrix is not a square matrix although this is required. """
+
+    def __init__(self, matrix=None):
+        message = 'Matrix{matrix_decription} is not a square matrix.'
+        super().__init__(matrix=matrix, message=message)
+
+
+class MatrixNotFiniteError(MatrixError):
+    """ A matrix is has non-finite entires although a finite matrix is required. """
+
+    def __init__(self, matrix=None):
+        message = 'Matrix{matrix_decription} has not finite entries.'
+        super().__init__(matrix=matrix, message=message)
+
+
 class MatrixNoDecompositionPossibleError(MatrixError):
     """ The matrix decomposition is not possible for this matrix. """
 
@@ -36,6 +52,18 @@ class MatrixNoDecompositionPossibleError(MatrixError):
         if message is not None:
             total_message += message
         super().__init__(matrix=matrix, message=total_message)
+
+
+class MatrixNoDecompositionPossibleTooManyEntriesError(MatrixNoDecompositionPossibleError):
+    """ The matrix decomposition is not possible for this matrix because it would have too many entries. """
+
+    def __init__(self, matrix_index_type=None):
+        message = 'Matrix '
+        if matrix_index_type is not None:
+            message += 'of type {} '.format(matrix_index_type)
+        message += 'can not store as many entries.'
+        super().__init__(message=message)
+        self.matrix_index_type = matrix_index_type
 
 
 class MatrixNoDecompositionPossibleWithProblematicSubdecompositionError(MatrixNoDecompositionPossibleError):
