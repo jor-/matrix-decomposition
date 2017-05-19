@@ -34,6 +34,7 @@ install:
     - source activate test-environment
     # install needed packages
     - conda install -q scipy
+    - conda install -q scikit-sparse -c conda-forge
     - if [ "${PY_TEST}" == "1" ]; then
           conda install -q pytest;
       fi
@@ -44,7 +45,7 @@ install:
           conda install -q pycodestyle;
       fi
     # install package
-    - python setup.py install
+    - python3 setup.py install
 script:
     - if [ "${PY_TEST}" == "1" ]; then
           pytest;
