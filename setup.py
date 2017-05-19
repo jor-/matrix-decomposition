@@ -89,4 +89,7 @@ setuptools.setup(
         'numpy',
         'scipy>=0.19',
     ],
+    extras_require = {
+        'decompose_sparse': ['scikit-sparse>=0.4.2'],
+    },
 )
