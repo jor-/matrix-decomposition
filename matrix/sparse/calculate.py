@@ -1,7 +1,6 @@
 import warnings
 
 import numpy as np
-import sksparse.cholmod
 
 import matrix.sparse.constants
 import matrix.sparse.permute
@@ -57,6 +56,10 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     matrix.errors.MatrixNoDecompositionPossibleError
         If the decomposition of `A` is not possible.
     """
+    try:
+        import sksparse.cholmod
+    except ImportError as e:
+        raise Exception('scikit-sparse is not installed.') from e
 
     # check matrix A
     matrix.util.check_square_matrix(A)
