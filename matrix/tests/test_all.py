@@ -24,11 +24,15 @@ def random_matrix(n, dense=True):
     return A
 
 
-def random_square_matrix(n, dense=True, positive_semi_definite=False):
+def random_square_matrix(n, dense=True, positive_semi_definite=False, positive_definite=False):
     A = random_matrix(n, dense=dense)
     A = A + A.H
-    if positive_semi_definite:
+    if positive_semi_definite or positive_definite:
         A = A @ A
+    if positive_definite:
+        min_diag_value = 1
+        for i in range(n):
+            A[i, i] += min_diag_value
     return A
 
 
@@ -160,3 +164,24 @@ def test_decompose(n, dense, permutation_method, check_finite, return_type):
     else:
         A_composed_dense = A_composed.todense()
     np.testing.assert_array_almost_equal(A_dense, A_composed_dense)
+
+
+# *** positive definite *** #
+
+test_positive_definite_setups = [
+    (n, dense)
+    for n in (100,)
+    for dense in (True, False)
+]
+
+
+@pytest.mark.parametrize('n, dense', test_positive_definite_setups)
+def test_positive_definite(n, dense):
+    A = random_square_matrix(n, dense=dense, positive_semi_definite=True)
+    assert matrix.is_positive_semi_definite(A)
+    assert not matrix.is_positive_semi_definite(-A)
+    A = random_square_matrix(n, dense=dense, positive_definite=True)
+    assert matrix.is_positive_semi_definite(A)
+    assert not matrix.is_positive_semi_definite(-A)
+    assert matrix.is_positive_definite(A)
+    assert not matrix.is_positive_definite(-A)
