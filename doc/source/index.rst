@@ -5,6 +5,7 @@ Welcome to matrix_decomposition's documentation!
     :maxdepth: 2
     :caption: Contents:
     
+    functions
     decompositions
     errors
     changelog
