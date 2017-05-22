@@ -49,23 +49,26 @@ def symmetric(A, p, inplace=False, warn_if_wrong_format=True):
 
     Parameters
     ----------
-    A : scipy.sparse.spmatrix (with shape (m, m))
+    A : scipy.sparse.spmatrix
         The matrix that should be permuted.
-    p : numpy.ndarray (with shape (m,))
+        It must have the shape (m, m).
+    p : numpy.ndarray
         The permutation vector.
-    inplace : bool, optional
+        It must have the shape (m,).
+    inplace : bool
         Whether the permutation should be done inplace or not.
-        default : False
-    warn_if_wrong_format : bool, optional
+        optional, default : False
+    warn_if_wrong_format : bool
         Whether the warn if the matrix `A` is not in the needed sparse format.
-        default : True
+        optional, default : True
 
     Returns
     -------
-    numpy.ndarray (with shape (m, m))
+    numpy.ndarray
         The matrix `A` symmetrically permuted by the permutation vector `p`.
         For the returned matrix `B` holds for all i, j in range(m):
         B[i,j] == A[p[i],p[j]]
+        It has the shape (m, m).
     """
 
     if p is not None:
