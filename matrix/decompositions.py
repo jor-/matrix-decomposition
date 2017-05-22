@@ -273,6 +273,20 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         else:
             return self.to(decomposition_types[0])
 
+    # *** positive definite checks *** #
+
+    @property
+    @abc.abstractmethod
+    def is_positive_semi_definite(self):
+        """:class:`bool`: Whether the matrix represented by this decomposition is positive semi-definite."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def is_positive_definite(self):
+        """:class:`bool`: Whether the matrix represented by this decomposition is positive definite."""
+        raise NotImplementedError
+
 
 class LDL_Decomposition(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -399,6 +413,15 @@ class LDL_Decomposition(DecompositionBase):
             else:
                 raise
 
+    # *** positive definite checks *** #
+
+    def is_positive_semi_definite(self):
+        return np.all(self.d >= 0)
+
+    def is_positive_definite(self):
+        eps = np.finfo(self.d.dtype).resolution
+        return np.all(self.d > eps)
+
 
 class LDL_DecompositionCompressed(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -494,6 +517,16 @@ class LDL_DecompositionCompressed(DecompositionBase):
                 return self.to_LDL_Decomposition().to_LL_Decomposition()
             else:
                 raise
+
+    # *** positive definite checks *** #
+
+    def is_positive_semi_definite(self):
+        return np.all(self.d >= 0)
+
+    def is_positive_definite(self):
+        d = self.d
+        eps = np.finfo(self.d.dtype).resolution
+        return np.all(d > eps)
 
 
 class LL_Decomposition(DecompositionBase):
@@ -608,3 +641,13 @@ class LL_Decomposition(DecompositionBase):
                 return self.to_LDL_Decomposition().to_LDL_DecompositionCompressed()
             else:
                 raise
+
+    # *** positive definite checks *** #
+
+    def is_positive_semi_definite(self):
+        return True
+
+    def is_positive_definite(self):
+        d = self._d
+        eps = np.finfo(d.dtype).resolution
+        return np.all(d > eps)

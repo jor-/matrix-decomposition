@@ -49,3 +49,53 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         return matrix.sparse.calculate.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
     else:
         return matrix.dense.calculate.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
+
+
+def is_positive_semi_definite(A):
+    """
+    Checks if the passed matrix is positive semi-definite.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be checked.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+
+    Returns
+    -------
+    bool
+        Whether `A` is positive semi-definite.
+    """
+
+    try:
+        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=True)
+    except matrix.errors.MatrixNoDecompositionPossibleError:
+        return False
+    else:
+        return decomposition.is_positive_semi_definite()
+
+
+def is_positive_definite(A):
+    """
+    Checks if the passed matrix is positive definite.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be checked.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+
+    Returns
+    -------
+    bool
+        Whether `A` is positive definite.
+    """
+
+    try:
+        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=True)
+    except matrix.errors.MatrixNoDecompositionPossibleError:
+        return False
+    else:
+        return decomposition.is_positive_definite()
