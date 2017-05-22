@@ -26,9 +26,9 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
-        :const:`matrix.constants.PERMUTATION_METHODS`.
+        :const:`matrix.PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
-        :const:`matrix.sparse.constants.SPARSE_PERMUTATION_METHODS`.
+        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
         optional, default: no permutation
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
@@ -38,7 +38,7 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
-        It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.
+        It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.
         If return_type is None the type of the returned decomposition is
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
@@ -143,9 +143,9 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
-        :const:`matrix.constants.PERMUTATION_METHODS`.
+        :const:`matrix.PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
-        :const:`matrix.sparse.constants.SPARSE_PERMUTATION_METHODS`.
+        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
         optional, default: No permutation is done.
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
@@ -155,7 +155,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
-        It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.
+        It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.
         optional, default : The type of the decomposition is chosen by the function itself.
     callback : callable
         In each iteration `callback(i, r)` is called where `i` is the index of

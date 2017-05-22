@@ -7,23 +7,23 @@ The most important are summarized here.
 decompose a matrix
 ------------------
 
-.. autofunction:: matrix.calculate.decompose
+.. autofunction:: matrix.decompose
 
-.. autodata:: matrix.constants.PERMUTATION_METHODS
+.. autodata:: matrix.PERMUTATION_METHODS
 
-.. autodata:: matrix.sparse.constants.SPARSE_PERMUTATION_METHODS
+.. autodata:: matrix.SPARSE_PERMUTATION_METHODS
 
-.. autodata:: matrix.constants.DECOMPOSITION_TYPES
+.. autodata:: matrix.DECOMPOSITION_TYPES
 
 examine positive definiteness
 -----------------------------
 
-.. autofunction:: matrix.calculate.is_positive_semi_definite
+.. autofunction:: matrix.is_positive_semi_definite
 
-.. autofunction:: matrix.calculate.is_positive_definite
+.. autofunction:: matrix.is_positive_definite
 
 approximate by a decomposition
 ------------------------------
 
-.. autofunction:: matrix.calculate.approximate
+.. autofunction:: matrix.approximate
 
