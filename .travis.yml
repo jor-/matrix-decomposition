@@ -53,6 +53,9 @@ script:
           sphinx-build -nW -b html -d doc/build/doctrees/ doc/source/ doc/build/html/;
       fi
     - if [ "${PYCODESTYLE}" == "1" ]; then
-          pycodestyle --ignore=E501 matrix/;
+          pycodestyle --ignore=E402,E501 matrix/;
       fi
+    # E402 = module level import not at top of file
+    # E501 = line too long
+    #
 
