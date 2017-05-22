@@ -30,8 +30,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             optional, default: no permutation
         """
 
-        if p is not None:
-            self._p = p
+        self.p = p
 
     # *** permutation *** #
 
@@ -55,6 +54,16 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             return self._p
         except AttributeError:
             return np.arange(self.n)
+
+    @p.setter
+    def p(self, p):
+        if p is not None:
+            self._p = p
+        else:
+            try:
+                del self._p
+            except AttributeError:
+                pass
 
     @property
     def p_inverse(self):
@@ -297,14 +306,16 @@ class LDL_Decomposition(DecompositionBase):
     _decomposition_type = matrix.constants.LDL_DECOMPOSITION_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
-    def __init__(self, L, d, p=None):
+    def __init__(self, L=None, d=None, p=None):
         """
         Parameters
         ----------
         L : numpy.ndarray or scipy.sparse.spmatrix
             The matrix `L` of the decomposition.
+            optional, If it is not set yet, it must be set later.
         d : numpy.ndarray
             The vector of the diagonal components of `D` of the decompositon.
+            optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.
             This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
@@ -340,10 +351,16 @@ class LDL_Decomposition(DecompositionBase):
 
     @L.setter
     def L(self, L):
-        self._L = L
-        if not self.is_sparse:
-            L = np.asmatrix(L)
-        self._L = L
+        if L is not None:
+            self._L = L
+            if not self.is_sparse:
+                L = np.asmatrix(L)
+            self._L = L
+        else:
+            try:
+                del self._L
+            except AttributeError:
+                pass
 
     @property
     def d(self):
@@ -352,7 +369,13 @@ class LDL_Decomposition(DecompositionBase):
 
     @d.setter
     def d(self, d):
-        self._d = np.asarray(d)
+        if d is not None:
+            self._d = np.asarray(d)
+        else:
+            try:
+                del self._d
+            except AttributeError:
+                pass
 
     @property
     def D(self):
@@ -436,12 +459,13 @@ class LDL_DecompositionCompressed(DecompositionBase):
     _decomposition_type = matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
-    def __init__(self, LD, p=None):
+    def __init__(self, LD=None, p=None):
         """
         Parameters
         ----------
         LD : numpy.ndarray or scipy.sparse.spmatrix
             A matrix whose diagonal values are the diagonal values of `D` and whose off-diagonal values are those of `L`.
+            optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.
             This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
@@ -473,10 +497,16 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     @LD.setter
     def LD(self, LD):
-        self._LD = LD
-        if not self.is_sparse:
-            LD = np.asmatrix(LD)
-        self._LD = LD
+        if LD is not None:
+            self._LD = LD
+            if not self.is_sparse:
+                LD = np.asmatrix(LD)
+            self._LD = LD
+        else:
+            try:
+                del self._LD
+            except AttributeError:
+                pass
 
     @property
     def d(self):
@@ -546,12 +576,13 @@ class LL_Decomposition(DecompositionBase):
     _decomposition_type = matrix.constants.LL_DECOMPOSITION_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
-    def __init__(self, L, p=None):
+    def __init__(self, L=None, p=None):
         """
         Parameters
         ----------
         L : numpy.ndarray or scipy.sparse.spmatrix
             The matrix `L` of the decomposition.
+            optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.
             This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
@@ -585,10 +616,16 @@ class LL_Decomposition(DecompositionBase):
 
     @L.setter
     def L(self, L):
-        self._L = L
-        if not self.is_sparse:
-            L = np.asmatrix(L)
-        self._L = L
+        if L is not None:
+            self._L = L
+            if not self.is_sparse:
+                L = np.asmatrix(L)
+            self._L = L
+        else:
+            try:
+                del self._L
+            except AttributeError:
+                pass
 
     # *** compare methods *** #
 
