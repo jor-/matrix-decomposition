@@ -44,6 +44,7 @@ install:
     - if [ "${PYCODESTYLE}" == "1" ]; then
           conda install -q pycodestyle;
       fi
+    - conda list
     # install package
     - python3 setup.py install
 script:
