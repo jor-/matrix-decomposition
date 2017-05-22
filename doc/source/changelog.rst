@@ -1,5 +1,10 @@
 Changelog
-=====================
+=========
+
+
+v0.3
+----
+    * dense and sparse matrices are now decomposable into several types (LL, LDL, LDL compressed) 
 
 
 v0.2
