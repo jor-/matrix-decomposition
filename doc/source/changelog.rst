@@ -2,6 +2,11 @@ Changelog
 =========
 
 
+v0.4
+----
+    * matrices can now be examined if they are positive definite or positive semi-definite
+
+
 v0.3
 ----
     * dense and sparse matrices are now decomposable into several types (LL, LDL, LDL compressed) 
