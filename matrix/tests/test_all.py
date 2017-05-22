@@ -125,3 +125,38 @@ def test_convert(n, dense, decomposition_type, copy):
         equal = decomposition_type == convert_decomposition_type
         equal_calculated = decomposition == converted_decomposition
         assert equal == equal_calculated
+
+
+# *** decompose *** #
+
+def supported_permutation_methods(dense):
+    if dense:
+        return matrix.dense.PERMUTATION_METHODS
+    else:
+        return matrix.sparse.PERMUTATION_METHODS
+
+
+test_decompose_setups = [
+    (n, dense, permutation_method, check_finite, return_type)
+    for n in (100,)
+    for dense in (True, False)
+    for permutation_method in supported_permutation_methods(dense)
+    for check_finite in (True, False)
+    for return_type in matrix.DECOMPOSITION_TYPES
+]
+
+
+@pytest.mark.parametrize('n, dense, permutation_method, check_finite, return_type', test_decompose_setups)
+def test_decompose(n, dense, permutation_method, check_finite, return_type):
+    A = random_square_matrix(n, dense=dense, positive_semi_definite=True)
+    if dense:
+        A_dense = A
+    else:
+        A_dense = A.todense()
+    decomposition = matrix.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
+    A_composed = decomposition.composed_matrix
+    if dense:
+        A_composed_dense = A_composed
+    else:
+        A_composed_dense = A_composed.todense()
+    np.testing.assert_array_almost_equal(A_dense, A_composed_dense)
