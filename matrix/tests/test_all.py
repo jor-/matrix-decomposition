@@ -5,8 +5,6 @@ import pytest
 import matrix
 import matrix.constants
 import matrix.decompositions
-import matrix.dense
-import matrix.sparse
 import matrix.permute
 
 
@@ -135,9 +133,9 @@ def test_convert(n, dense, decomposition_type, copy):
 
 def supported_permutation_methods(dense):
     if dense:
-        return matrix.dense.PERMUTATION_METHODS
+        return matrix.PERMUTATION_METHODS
     else:
-        return matrix.sparse.PERMUTATION_METHODS
+        return matrix.SPARSE_PERMUTATION_METHODS
 
 
 test_decompose_setups = [
