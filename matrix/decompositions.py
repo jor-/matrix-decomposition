@@ -16,7 +16,10 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     This class is a base class for matrix decompositions.
     """
 
-    def __init__(self, p=None, decomposition_type=None):
+    _decomposition_type = matrix.constants.BASE_DECOMPOSITION_TYPE
+    """ :class:`str`: The type of this decomposition represented as string. """
+
+    def __init__(self, p=None):
         """
         Parameters
         ----------
@@ -24,15 +27,10 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             The permutation vector used for the decomposition.
             This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
             optional, default: no permutation
-        decomposition_type : str
-            Type of this decomposition.
-            optional, default: type not specified
         """
 
         if p is not None:
             self._p = p
-        if decomposition_type is not None:
-            self._decomposition_type = decomposition_type
 
     # *** permutation *** #
 
@@ -295,6 +293,9 @@ class LDL_Decomposition(DecompositionBase):
     Only the diagonal values of `D` are stored.
     """
 
+    _decomposition_type = matrix.constants.LDL_DECOMPOSITION_TYPE
+    """ :class:`str`: The type of this decomposition represented as string. """
+
     def __init__(self, L, d, p=None):
         """
         Parameters
@@ -311,7 +312,7 @@ class LDL_Decomposition(DecompositionBase):
 
         self.L = L
         self.d = d
-        super().__init__(p=p, decomposition_type=matrix.constants.LDL_DECOMPOSITION_TYPE)
+        super().__init__(p=p)
 
     # *** base properties *** #
 
@@ -431,6 +432,9 @@ class LDL_DecompositionCompressed(DecompositionBase):
     and whose off-diagonal values are those of `L`.
     """
 
+    _decomposition_type = matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE
+    """ :class:`str`: The type of this decomposition represented as string. """
+
     def __init__(self, LD, p=None):
         """
         Parameters
@@ -443,7 +447,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
             optional, default: no permutation
         """
         self.LD = LD
-        super().__init__(p=p, decomposition_type=matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE)
+        super().__init__(p=p)
 
     # *** base properties *** #
 
@@ -536,6 +540,9 @@ class LL_Decomposition(DecompositionBase):
     This decomposition is also called Cholesky decomposition.
     """
 
+    _decomposition_type = matrix.constants.LL_DECOMPOSITION_TYPE
+    """ :class:`str`: The type of this decomposition represented as string. """
+
     def __init__(self, L, p=None):
         """
         Parameters
@@ -548,7 +555,7 @@ class LL_Decomposition(DecompositionBase):
             optional, default: no permutation
         """
         self.L = L
-        super().__init__(p=p, decomposition_type=matrix.constants.LL_DECOMPOSITION_TYPE)
+        super().__init__(p=p)
 
     # *** base properties *** #
 
