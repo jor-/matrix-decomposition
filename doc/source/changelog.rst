@@ -2,6 +2,11 @@ Changelog
 =========
 
 
+v0.6
+----
+    * decompositions are now saveable and loadable
+
+
 v0.5
 ----
     * matrices can now be approximated by decompositions
