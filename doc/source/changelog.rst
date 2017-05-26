@@ -2,6 +2,11 @@ Changelog
 =========
 
 
+v0.5
+----
+    * matrices can now be approximated by decompositions
+
+
 v0.4
 ----
     * matrices can now be examined if they are positive definite or positive semi-definite
