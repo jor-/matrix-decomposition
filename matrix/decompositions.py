@@ -1,5 +1,6 @@
 import abc
 import copy
+import os
 import warnings
 
 import numpy as np
@@ -295,6 +296,84 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """:class:`bool`: Whether the matrix represented by this decomposition is positive definite."""
         raise NotImplementedError
 
+    # *** save and load *** #
+
+    def _attribute_file(self, directory_name, attribute_name, is_sparse):
+        if is_sparse:
+            file_extension = matrix.constants.SPARSE_FILE_EXTENSION
+        else:
+            file_extension = matrix.constants.DENSE_FILE_EXTENSION
+        decomposition_type = self.decomposition_type
+        filename = matrix.constants.DECOMPOSITION_ATTRIBUTE_FILENAME.format(
+            decomposition_type=self.decomposition_type,
+            attribute_name=attribute_name,
+            file_extension=file_extension)
+        file = os.path.join(directory_name, filename)
+        return file
+
+    def _save_attribute(self, directory_name, attribute_name):
+        os.makedirs(directory_name, exist_ok=True)
+        value = getattr(self, attribute_name)
+        is_sparse = scipy.sparse.issparse(value)
+        file = self._attribute_file(directory_name, attribute_name, is_sparse)
+        if is_sparse:
+            scipy.sparse.save_npz(file, value)
+        else:
+            np.save(file, value)
+
+    def _save_attributes(self, directory_name, *attribute_names):
+        for attribute_name in attribute_names:
+            self._save_attribute(directory_name, attribute_name)
+
+    def _load_attribute(self, directory_name, attribute_name, is_sparse=None):
+        is_sparse_undetermined = is_sparse is None
+        if is_sparse_undetermined:
+            is_sparse = False
+        file = self._attribute_file(directory_name, attribute_name, is_sparse)
+        try:
+            if is_sparse:
+                value = scipy.sparse.load_npz(file)
+            else:
+                value = np.load(file)
+        except FileNotFoundError:
+            if is_sparse_undetermined:
+                self._load_attribute(directory_name, attribute_name, is_sparse=not is_sparse)
+            else:
+                raise
+        else:
+            setattr(self, attribute_name, value)
+
+    def _load_attributes(self, directory_name, *attribute_names):
+        for attribute_name in attribute_names:
+            self._load_attribute(directory_name, attribute_name)
+
+    @abc.abstractmethod
+    def save(self, directory_name):
+        """ Saves this decomposition.
+
+        Parameters
+        ----------
+        directory_name : str
+            A directory where this decomposition should be saved.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def load(self, directory_name):
+        """ Loads a decomposition of this type.
+
+        Parameters
+        ----------
+        directory_name : str
+            A directory where this decomposition is saved.
+
+        Raises
+        ----------
+        FileNotFoundError
+            If the files are not found in the passed directory.
+        """
+        raise NotImplementedError
+
 
 class LDL_Decomposition(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -447,6 +526,14 @@ class LDL_Decomposition(DecompositionBase):
         eps = np.finfo(self.d.dtype).resolution
         return np.all(self.d > eps)
 
+    # *** save and load *** #
+
+    def save(self, directory_name):
+        self._save_attributes(directory_name, 'L', 'd', 'p')
+
+    def load(self, directory_name):
+        self._load_attributes(directory_name, 'L', 'd', 'p')
+
 
 class LDL_DecompositionCompressed(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -564,6 +651,14 @@ class LDL_DecompositionCompressed(DecompositionBase):
         d = self.d
         eps = np.finfo(self.d.dtype).resolution
         return np.all(d > eps)
+
+    # *** save and load *** #
+
+    def save(self, directory_name):
+        self._save_attributes(directory_name, 'LD', 'p')
+
+    def load(self, directory_name):
+        self._load_attributes(directory_name, 'LD', 'p')
 
 
 class LL_Decomposition(DecompositionBase):
@@ -703,3 +798,11 @@ class LL_Decomposition(DecompositionBase):
         d = self._d
         eps = np.finfo(d.dtype).resolution
         return np.all(d > eps)
+
+    # *** save and load *** #
+
+    def save(self, directory_name):
+        self._save_attributes(directory_name, 'L', 'p')
+
+    def load(self, directory_name):
+        self._load_attributes(directory_name, 'L', 'p')
