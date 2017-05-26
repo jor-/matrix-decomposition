@@ -244,18 +244,19 @@ def test_approximate(n, dense, permutation_method, check_finite, return_type, t,
 # *** save and load *** #
 
 test_save_and_load_setups = [
-    (n, dense, decomposition_type)
+    (n, dense, decomposition_type, filename_prefix)
     for n in (100,)
     for dense in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for filename_prefix in (None, 'TEST')
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type', test_save_and_load_setups)
-def test_save_and_load(n, dense, decomposition_type):
+@pytest.mark.parametrize('n, dense, decomposition_type, filename_prefix', test_save_and_load_setups)
+def test_save_and_load(n, dense, decomposition_type, filename_prefix):
     decomposition = random_decomposition(decomposition_type, n, dense=dense)
     decomposition_other = type(decomposition)()
     with tempfile.TemporaryDirectory() as tmp_dir:
-        decomposition.save(tmp_dir)
-        decomposition_other.load(tmp_dir)
+        decomposition.save(tmp_dir, filename_prefix=filename_prefix)
+        decomposition_other.load(tmp_dir, filename_prefix=filename_prefix)
     assert decomposition == decomposition_other
