@@ -77,6 +77,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         else:
             p = matrix.permute.permutation_vector(A, permutation_method)
             A = matrix.sparse.permute.symmetric(A, p)
+            A = A.tocsc()
         permutation_method = 'natural'
     else:
         assert permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS

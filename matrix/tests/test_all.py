@@ -1,3 +1,6 @@
+import tempfile
+import warnings
+
 import numpy as np
 import scipy.sparse
 import pytest
@@ -19,6 +22,7 @@ def random_matrix(n, dense=True):
     else:
         density = 0.1
         A = scipy.sparse.rand(n, n, density=density, random_state=random_state)
+        A = A.tocsc()
     return A
 
 
@@ -32,8 +36,10 @@ def random_square_matrix(n, dense=True, positive_semi_definite=False, positive_d
             min_diag_value = 0
         if positive_definite:
             min_diag_value = max(min_diag_value, 1)
-        for i in range(n):
-            A[i, i] += min_diag_value
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+            for i in range(n):
+                A[i, i] += min_diag_value
     return A
 
 

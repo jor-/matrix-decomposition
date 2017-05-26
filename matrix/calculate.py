@@ -1,6 +1,7 @@
 import warnings
 
 import numpy as np
+import scipy.sparse
 
 import matrix.dense.calculate
 
@@ -132,7 +133,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     min_diag_value : float
         Each component of the diagonal of the matrix `D` in an returned `LDL` decomposition
         is forced to be greater or equal to `min_diag_value`.
-        optional, default : No minimal value is forced.
+        optional, default : 0.
     max_diag_value : float
         Each component of the diagonal of the matrix `D` in an returned `LDL` decomposition
         is forced to be lower or equal to `max_diag_value`.
@@ -215,21 +216,16 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
     # check min_diag_value and max_diag_value
     if min_diag_value is None:
-        if return_type == matrix.constants.LL_DECOMPOSITION_TYPE:
-            min_diag_value = min_diag_value_LL
-        else:
-            min_diag_value = - np.inf
-            min_diag_value = min_diag_value_LL
-            warnings.warn('Only positive min_diag_values are supported for now. Setting min_diag_value to {}.'.format(min_diag_value))
+        min_diag_value = min_diag_value_LL
     else:
         if return_type == matrix.constants.LL_DECOMPOSITION_TYPE:
             if min_diag_value < 0:
-                raise ValueError('min_diag_value {} has to be greater or equal zero if return value is {}.'.format(min_diag_value, return_type))
+                raise ValueError('If return type is {}, min_diag_value {} has to be greater or equal zero .'.format(return_type, min_diag_value))
             elif min_diag_value < min_diag_value_LL:
                 warnings.warn('Setting min_diag_value to resolution {} of matrix data type {}.'.format(min_diag_value, A.dtype))
         else:
             if min_diag_value <= 0:
-                raise ValueError('Only positive min_diag_values are supported for now.')
+                raise ValueError('Only min_diag_values greater zero are supported.')
             elif min_diag_value < min_diag_value_LL:
                 warnings.warn('Setting min_diag_value to resolution {} of matrix data type {}.'.format(min_diag_value, A.dtype))
 
@@ -408,7 +404,9 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
                 if A_ii_index is not None:
                     A.data[A_ii_index] = A_ii_new
                 elif A_ii_new != 0:
-                    A[i, i] = A_ii_new
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+                        A[i, i] = A_ii_new
 
                 # eliminate zeros
                 A.eliminate_zeros()

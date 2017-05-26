@@ -1,5 +1,6 @@
 import abc
 import copy
+import warnings
 
 import numpy as np
 import scipy.sparse
@@ -495,8 +496,10 @@ class LDL_DecompositionCompressed(DecompositionBase):
         """:class:`numpy.matrix` or :class:`scipy.sparse.spmatrix`: The matrix `L` of the decomposition."""
 
         L = self.LD.copy()
-        for i in range(self.n):
-            L[i, i] = 1
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+            for i in range(self.n):
+                L[i, i] = 1
         return L
 
     # *** compare methods *** #
@@ -608,25 +611,16 @@ class LL_Decomposition(DecompositionBase):
         L = self.L
         p = self.p
 
-        # compute new L
+        # d inverse
         d = self._d
-        d_inverse = 1 / d
         d_zero_mask = d == 0
+        d_inverse = np.empty(d.shape)
         d_inverse[d_zero_mask] = 0
+        d_inverse[~d_zero_mask] = 1 / d[~d_zero_mask]
         assert np.all(np.isfinite(d_inverse[np.isfinite(d)]))
-        D_inverse = scipy.sparse.diags(d_inverse)
-        L = L @ D_inverse
-
-        # set all diagonal elements to one (due to rounding errors)
-        n = self.n
-        for i in range(n):
-            assert np.isclose(L[i, i], 1) or d_zero_mask[i] or not np.isfinite(L[i, i])
-            L[i, i] = 1
-
-        # compute new d
-        d = d**2
 
         # check entries where diagonal is zero
+        n = self.n
         if np.any(d_zero_mask):
             for i in np.where(d_zero_mask)[0]:
                 for j in range(i + 1, n):
@@ -634,6 +628,20 @@ class LL_Decomposition(DecompositionBase):
                         p_i = i[i]
                         raise matrix.errors.MatrixNoLLDecompositionPossibleError(
                             problematic_leading_principal_submatrix_index=p_i)
+
+        # compute new L
+        D_inverse = scipy.sparse.diags(d_inverse)
+        L = L @ D_inverse
+
+        # set all diagonal elements to one (due to rounding errors)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+            for i in range(n):
+                assert np.isclose(L[i, i], 1) or d_zero_mask[i] or not np.isfinite(L[i, i])
+                L[i, i] = 1
+
+        # compute new d
+        d = d**2
 
         # construct new decompostion
         return LDL_Decomposition(L, d, p=p)
