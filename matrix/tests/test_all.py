@@ -239,3 +239,23 @@ def test_approximate(n, dense, permutation_method, check_finite, return_type, t,
             assert decomposition.d.min() >= min_diag_value
         if max_diag_value is not None:
             assert decomposition.d.max() <= max_diag_value
+
+
+# *** save and load *** #
+
+test_save_and_load_setups = [
+    (n, dense, decomposition_type)
+    for n in (100,)
+    for dense in (True, False)
+    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+]
+
+
+@pytest.mark.parametrize('n, dense, decomposition_type', test_save_and_load_setups)
+def test_save_and_load(n, dense, decomposition_type):
+    decomposition = random_decomposition(decomposition_type, n, dense=dense)
+    decomposition_other = type(decomposition)()
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        decomposition.save(tmp_dir)
+        decomposition_other.load(tmp_dir)
+    assert decomposition == decomposition_other
