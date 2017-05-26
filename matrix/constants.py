@@ -28,6 +28,9 @@ PERMUTATION_METHODS = NO_PERMUTATION_METHODS + UNIVERSAL_PERMUTATION_METHODS
 from matrix.sparse.constants import SPARSE_PERMUTATION_METHODS
 
 # *** save and load *** #
-DECOMPOSITION_ATTRIBUTE_FILENAME = 'decomposition_{decomposition_type}_-_attribute_{attribute_name}.{file_extension}'
+FILENAME_INFO_SEPERATOR = '_-_'
+DECOMPOSITION_ATTRIBUTE_FILENAME = FILENAME_INFO_SEPERATOR.join([
+    'decomposition_{decomposition_type}',
+    'attribute_{attribute_name}.{file_extension}'])
 DENSE_FILE_EXTENSION = 'npy'
 SPARSE_FILE_EXTENSION = 'npz'

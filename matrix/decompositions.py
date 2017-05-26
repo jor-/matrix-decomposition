@@ -298,7 +298,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
     # *** save and load *** #
 
-    def _attribute_file(self, directory_name, attribute_name, is_sparse):
+    def _attribute_file(self, directory_name, attribute_name, is_sparse, filename_prefix=None):
         if is_sparse:
             file_extension = matrix.constants.SPARSE_FILE_EXTENSION
         else:
@@ -308,28 +308,30 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             decomposition_type=self.decomposition_type,
             attribute_name=attribute_name,
             file_extension=file_extension)
+        if filename_prefix is not None:
+            filename = matrix.constants.FILENAME_INFO_SEPERATOR.join([filename_prefix, filename])
         file = os.path.join(directory_name, filename)
         return file
 
-    def _save_attribute(self, directory_name, attribute_name):
+    def _save_attribute(self, directory_name, attribute_name, filename_prefix=None):
         os.makedirs(directory_name, exist_ok=True)
         value = getattr(self, attribute_name)
         is_sparse = scipy.sparse.issparse(value)
-        file = self._attribute_file(directory_name, attribute_name, is_sparse)
+        file = self._attribute_file(directory_name, attribute_name, is_sparse, filename_prefix=filename_prefix)
         if is_sparse:
             scipy.sparse.save_npz(file, value)
         else:
             np.save(file, value)
 
-    def _save_attributes(self, directory_name, *attribute_names):
+    def _save_attributes(self, directory_name, *attribute_names, filename_prefix=None):
         for attribute_name in attribute_names:
-            self._save_attribute(directory_name, attribute_name)
+            self._save_attribute(directory_name, attribute_name, filename_prefix=filename_prefix)
 
-    def _load_attribute(self, directory_name, attribute_name, is_sparse=None):
+    def _load_attribute(self, directory_name, attribute_name, is_sparse=None, filename_prefix=None):
         is_sparse_undetermined = is_sparse is None
         if is_sparse_undetermined:
             is_sparse = False
-        file = self._attribute_file(directory_name, attribute_name, is_sparse)
+        file = self._attribute_file(directory_name, attribute_name, is_sparse, filename_prefix=filename_prefix)
         try:
             if is_sparse:
                 value = scipy.sparse.load_npz(file)
@@ -337,35 +339,39 @@ class DecompositionBase(metaclass=abc.ABCMeta):
                 value = np.load(file)
         except FileNotFoundError:
             if is_sparse_undetermined:
-                self._load_attribute(directory_name, attribute_name, is_sparse=not is_sparse)
+                self._load_attribute(directory_name, attribute_name, is_sparse=not is_sparse, filename_prefix=filename_prefix)
             else:
                 raise
         else:
             setattr(self, attribute_name, value)
 
-    def _load_attributes(self, directory_name, *attribute_names):
+    def _load_attributes(self, directory_name, *attribute_names, filename_prefix=None):
         for attribute_name in attribute_names:
-            self._load_attribute(directory_name, attribute_name)
+            self._load_attribute(directory_name, attribute_name, filename_prefix=filename_prefix)
 
     @abc.abstractmethod
-    def save(self, directory_name):
+    def save(self, directory_name, filename_prefix=None):
         """ Saves this decomposition.
 
         Parameters
         ----------
         directory_name : str
             A directory where this decomposition should be saved.
+        filename_prefix : str
+            A prefix for the filenames of the attributes of this decomposition.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
-    def load(self, directory_name):
+    def load(self, directory_name, filename_prefix=None):
         """ Loads a decomposition of this type.
 
         Parameters
         ----------
         directory_name : str
             A directory where this decomposition is saved.
+        filename_prefix : str
+            A prefix for the filenames of the attributes of this decomposition.
 
         Raises
         ----------
@@ -528,11 +534,11 @@ class LDL_Decomposition(DecompositionBase):
 
     # *** save and load *** #
 
-    def save(self, directory_name):
-        self._save_attributes(directory_name, 'L', 'd', 'p')
+    def save(self, directory_name, filename_prefix=None):
+        self._save_attributes(directory_name, 'L', 'd', 'p', filename_prefix=filename_prefix)
 
-    def load(self, directory_name):
-        self._load_attributes(directory_name, 'L', 'd', 'p')
+    def load(self, directory_name, filename_prefix=None):
+        self._load_attributes(directory_name, 'L', 'd', 'p', filename_prefix=filename_prefix)
 
 
 class LDL_DecompositionCompressed(DecompositionBase):
@@ -654,11 +660,11 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     # *** save and load *** #
 
-    def save(self, directory_name):
-        self._save_attributes(directory_name, 'LD', 'p')
+    def save(self, directory_name, filename_prefix=None):
+        self._save_attributes(directory_name, 'LD', 'p', filename_prefix=filename_prefix)
 
-    def load(self, directory_name):
-        self._load_attributes(directory_name, 'LD', 'p')
+    def load(self, directory_name, filename_prefix=None):
+        self._load_attributes(directory_name, 'LD', 'p', filename_prefix=filename_prefix)
 
 
 class LL_Decomposition(DecompositionBase):
@@ -801,8 +807,8 @@ class LL_Decomposition(DecompositionBase):
 
     # *** save and load *** #
 
-    def save(self, directory_name):
-        self._save_attributes(directory_name, 'L', 'p')
+    def save(self, directory_name, filename_prefix=None):
+        self._save_attributes(directory_name, 'L', 'p', filename_prefix=filename_prefix)
 
-    def load(self, directory_name):
-        self._load_attributes(directory_name, 'L', 'p')
+    def load(self, directory_name, filename_prefix=None):
+        self._load_attributes(directory_name, 'L', 'p', filename_prefix=filename_prefix)
