@@ -20,10 +20,3 @@ def equal(A, B):
 def check_square_matrix(A):
     if len(A.shape) != 2 or A.shape[0] != A.shape[1]:
         raise matrix.errors.MatrixNotSquareError(matrix=A)
-
-
-def convert_to_min_dtype(A, min_dtype):
-    min_dtype = np.dtype(min_dtype)
-    if A.dtype < min_dtype:
-        A = A.astype(min_dtype)
-    return A
