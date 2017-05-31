@@ -169,13 +169,18 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         An approximative decompostion of `A` of type `return_type`.
     """
 
-    # check input matrix A
+    # convert input matrix A to needed type
     is_sparse = matrix.sparse.util.is_sparse(A)
-
     if not is_sparse:
         A = np.asanyarray(A)
-    matrix.util.check_square_matrix(A)
+    A_dtype = np.result_type(A.dtype, np.float)
+    if is_sparse:
+        A = A.astype(A_dtype)
+    else:
+        A = A.astype(A_dtype, copy=False)
 
+    # check input matrix A
+    matrix.util.check_square_matrix(A)
     if check_finite:
         if is_sparse:
             matrix.sparse.util.check_finite_matrix(A)
@@ -262,6 +267,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     # convert input matrix
     if is_sparse:
         A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True)
+    assert A.dtype == A_dtype
 
     # calculate approximation of A
     finished = False
