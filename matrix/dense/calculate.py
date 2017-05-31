@@ -72,8 +72,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
 
     # check matrix A
     matrix.util.check_square_matrix(A)
-    if check_finite:
-        matrix.dense.util.check_finite_matrix(A)
+    matrix.dense.util.check_finite(A, check_finite=check_finite)
 
     # check and apply permutation_method
     if permutation_method is not None:

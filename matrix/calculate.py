@@ -192,11 +192,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
     # check input matrix A
     matrix.util.check_square_matrix(A)
-    if check_finite:
-        if is_sparse:
-            matrix.sparse.util.check_finite_matrix(A)
-        else:
-            matrix.dense.util.check_finite_matrix(A)
+    matrix.util.check_finite(A, check_finite=check_finite)
 
     # check target vector t
     n = A.shape[0]

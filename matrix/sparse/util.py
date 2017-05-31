@@ -15,8 +15,12 @@ def equal(A, B):
     return A.shape == B.shape and (A != B).nnz == 0
 
 
-def check_finite_matrix(A):
-    if not np.all(np.isfinite(A.data)):
+def is_finite(A):
+    return np.all(np.isfinite(A.data))
+
+
+def check_finite(A, check_finite=True):
+    if check_finite and not is_finite(A):
         raise matrix.errors.MatrixNotFiniteError(matrix=A)
 
 

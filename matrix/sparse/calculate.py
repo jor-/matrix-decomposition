@@ -95,8 +95,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True)
     if use_long:
         A = matrix.sparse.util.convert_index_dtype(A, np.int64)
-    if check_finite:
-        matrix.sparse.util.check_finite_matrix(A)
+    matrix.sparse.util.check_finite(A, check_finite)
 
     # calculate decomposition
     try:

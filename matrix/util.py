@@ -1,3 +1,5 @@
+import scipy.sparse
+
 import matrix.dense.util
 import matrix.sparse.util
 
@@ -20,3 +22,15 @@ def equal(A, B):
 def check_square_matrix(A):
     if len(A.shape) != 2 or A.shape[0] != A.shape[1]:
         raise matrix.errors.MatrixNotSquareError(matrix=A)
+
+
+def is_finite(A):
+    if scipy.sparse.issparse(A):
+        return matrix.sparse.util.is_finite(A)
+    else:
+        return matrix.dense.util.is_finite(A)
+
+
+def check_finite(A, check_finite=True):
+    if check_finite and not is_finite(A):
+        raise matrix.errors.MatrixNotFiniteError(matrix=A)
