@@ -321,3 +321,33 @@ def test_is_invertible(n, dense, decomposition_type, invertible):
             decomposition.check_invertible()
     else:
         decomposition.check_invertible()
+
+
+# *** solve *** #
+
+test_solve_setups = [
+    (n, dense, decomposition_type, invertible, b)
+    for n in (10,)
+    for dense in (True, False)
+    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for invertible in (True, False)
+    for b in (random_vector(n), np.zeros(n), np.arange(n))
+]
+
+
+@pytest.mark.parametrize('n, dense, decomposition_type, invertible, b', test_solve_setups)
+def test_solve(n, dense, decomposition_type, invertible, b):
+    # make random decomposition
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, finite=True, invertible=invertible)
+    if invertible:
+        # calculate solution
+        x = decomposition.solve(b)
+        # verify solution
+        A = decomposition.composed_matrix
+        y = A @ x
+        if dense:
+            y = y.A1
+        assert np.all(np.isclose(b, y))
+    else:
+        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+            decomposition.solve(b)
