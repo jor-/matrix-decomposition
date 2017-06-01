@@ -84,7 +84,7 @@ def is_positive_semi_definite(A):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=True)
-    except matrix.errors.MatrixNoDecompositionPossibleError:
+    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_positive_semi_definite()
@@ -109,7 +109,7 @@ def is_positive_definite(A):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=True)
-    except matrix.errors.MatrixNoDecompositionPossibleError:
+    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_positive_definite()
