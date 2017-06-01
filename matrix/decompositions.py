@@ -320,6 +320,37 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
         return self.is_positive_semi_definite() and not self.is_singular()
 
+    @abc.abstractmethod
+    def is_finite(self):
+        """
+        Returns whether this is a decomposition representing a finite matrix.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition representing a finite matrix.
+        """
+        raise NotImplementedError
+
+    def check_finite(self, check_finite=True):
+        """
+        Check if this is a decomposition representing a finite matrix.
+
+        Parameters
+        ----------
+        check_finite : bool
+            Whether to perform this check.
+            default: True
+
+        Raises
+        -------
+        matrix.errors.MatrixDecompositionNotFiniteError
+            If this is a decomposition representing a non-finite matrix.
+        """
+
+        if check_finite and not self.is_finite():
+            raise matrix.errors.MatrixDecompositionNotFiniteError(decomposition=self)
+
 
     # *** save and load *** #
 
@@ -553,6 +584,9 @@ class LDL_Decomposition(DecompositionBase):
         eps = np.finfo(self.d.dtype).resolution
         return np.all(self.d > eps)
 
+    def is_finite(self):
+        return matrix.util.is_finite(self.L) and matrix.util.is_finite(self.d)
+
     # *** save and load *** #
 
     def save(self, directory_name, filename_prefix=None):
@@ -677,6 +711,9 @@ class LDL_DecompositionCompressed(DecompositionBase):
         d = self.d
         eps = np.finfo(self.d.dtype).resolution
         return np.all(d > eps)
+
+    def is_finite(self):
+        return matrix.util.is_finite(self.LD)
 
     # *** save and load *** #
 
@@ -823,6 +860,9 @@ class LL_Decomposition(DecompositionBase):
         d = self._d
         eps = np.finfo(d.dtype).resolution
         return np.all(d > eps)
+
+    def is_finite(self):
+        return matrix.util.is_finite(self.L)
 
     # *** save and load *** #
 
