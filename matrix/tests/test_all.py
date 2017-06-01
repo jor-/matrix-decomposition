@@ -67,10 +67,16 @@ def random_permutation_vector(n):
     return p
 
 
-def random_decomposition(decomposition_type, n, dense=True):
+def random_decomposition(decomposition_type, n, dense=True, finite=True):
+    # make random decomposition
     LD = random_lower_triangle_matrix(n, dense=dense)
     p = random_permutation_vector(n)
     decomposition = matrix.decompositions.LDL_DecompositionCompressed(LD, p)
+    # apply finite
+    if not finite:
+        decomposition = decomposition.to(matrix.constants.LDL_DECOMPOSITION_TYPE)
+        decomposition.d[np.random.randint(n)] = np.nan
+    # return correct type
     decomposition = decomposition.to(decomposition_type)
     return decomposition
 
@@ -260,3 +266,27 @@ def test_save_and_load(n, dense, decomposition_type, filename_prefix):
         decomposition.save(tmp_dir, filename_prefix=filename_prefix)
         decomposition_other.load(tmp_dir, filename_prefix=filename_prefix)
     assert decomposition == decomposition_other
+
+
+# *** is finite *** #
+
+test_is_finite_setups = [
+    (n, dense, decomposition_type, finite)
+    for n in (100,)
+    for dense in (True, False)
+    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for finite in (True, False)
+]
+
+
+@pytest.mark.parametrize('n, dense, decomposition_type, finite', test_is_finite_setups)
+def test_is_finite(n, dense, decomposition_type, finite):
+    # make random decomposition
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, finite=finite)
+    # test
+    assert decomposition.is_finite() == finite
+    if not finite:
+        with np.testing.assert_raises(matrix.errors.MatrixDecompositionNotFiniteError):
+            decomposition.check_finite()
+    else:
+        decomposition.check_finite()
