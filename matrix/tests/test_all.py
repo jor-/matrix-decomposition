@@ -67,7 +67,7 @@ def random_permutation_vector(n):
     return p
 
 
-def random_decomposition(decomposition_type, n, dense=True, finite=True):
+def random_decomposition(decomposition_type, n, dense=True, finite=True, invertible=None):
     # make random decomposition
     LD = random_lower_triangle_matrix(n, dense=dense)
     p = random_permutation_vector(n)
@@ -76,6 +76,13 @@ def random_decomposition(decomposition_type, n, dense=True, finite=True):
     if not finite:
         decomposition = decomposition.to(matrix.constants.LDL_DECOMPOSITION_TYPE)
         decomposition.d[np.random.randint(n)] = np.nan
+    # apply singular
+    if invertible is not None:
+        decomposition = decomposition.to(matrix.constants.LDL_DECOMPOSITION_TYPE)
+        if invertible:
+            decomposition.d = decomposition.d + 1
+        else:
+            decomposition.d[np.random.randint(n)] = 0
     # return correct type
     decomposition = decomposition.to(decomposition_type)
     return decomposition
@@ -290,3 +297,27 @@ def test_is_finite(n, dense, decomposition_type, finite):
             decomposition.check_finite()
     else:
         decomposition.check_finite()
+
+
+# *** is invertible *** #
+
+test_is_invertible_setups = [
+    (n, dense, decomposition_type, invertible)
+    for n in (100,)
+    for dense in (True, False)
+    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for invertible in (True, False)
+]
+
+
+@pytest.mark.parametrize('n, dense, decomposition_type, invertible', test_is_finite_setups)
+def test_is_invertible(n, dense, decomposition_type, invertible):
+    # make random decomposition
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, invertible=invertible)
+    # test
+    assert decomposition.is_invertible() == invertible
+    if not invertible:
+        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+            decomposition.check_invertible()
+    else:
+        decomposition.check_invertible()
