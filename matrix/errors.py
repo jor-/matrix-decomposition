@@ -1,3 +1,5 @@
+# *** base exception *** #
+
 
 class MatrixError(Exception):
     """ An exception related to a matrix.
@@ -24,6 +26,8 @@ class MatrixError(Exception):
             return ''
 
 
+# *** matrix exceptions *** #
+
 class MatrixNotSquareError(MatrixError):
     """ A matrix is not a square matrix although this is required. """
 
@@ -35,13 +39,14 @@ class MatrixNotSquareError(MatrixError):
 class MatrixNotFiniteError(MatrixError):
     """ A matrix has non-finite entries although a finite matrix is required. """
 
-    def __init__(self, matrix=None, message=None):
-        if message is None:
-            message = 'Matrix{matrix_decription} has not finite entries.'
+    def __init__(self, matrix=None):
+        message = 'Matrix{matrix_decription} has not finite entries.'
         super().__init__(matrix=matrix, message=message)
 
 
-class MatrixDecompositionNotFiniteError(MatrixNotFiniteError):
+# *** general decomposition exceptions *** #
+
+class MatrixDecompositionNotFiniteError(MatrixError):
     """ A decomposition of a matrix has non-finite entries although a finite matrix is required. """
 
     def __init__(self, decomposition=None):
@@ -66,6 +71,8 @@ class MatrixDecompositionSingularError(MatrixError):
         message += 'represents a singular matrix.'
         super().__init__(message=message)
 
+
+# *** decomposition not calculable exceptions *** #
 
 class MatrixNoDecompositionPossibleError(MatrixError):
     """ The matrix decomposition is not possible for this matrix. """
