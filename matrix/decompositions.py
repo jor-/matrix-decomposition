@@ -351,6 +351,42 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         if check_finite and not self.is_finite():
             raise matrix.errors.MatrixDecompositionNotFiniteError(decomposition=self)
 
+    @abc.abstractmethod
+    def is_singular(self):
+        """
+        Returns whether this is a decomposition representing a singular matrix.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition representing a singular matrix.
+        """
+        raise NotImplementedError
+
+    def is_invertible(self):
+        """
+        Returns whether this is a decomposition representing an invertible matrix.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition representing an invertible matrix.
+        """
+
+        return not self.is_singular()
+
+    def check_invertible(self):
+        """
+        Check if this is a decomposition representing an invertible matrix.
+
+        Raises
+        -------
+        matrix.errors.MatrixDecompositionSingularError
+            If this is a decomposition representing a singular matrix.
+        """
+
+        if self.is_singular():
+            raise matrix.errors.MatrixDecompositionSingularError(decomposition=self)
 
     # *** save and load *** #
 
@@ -587,6 +623,9 @@ class LDL_Decomposition(DecompositionBase):
     def is_finite(self):
         return matrix.util.is_finite(self.L) and matrix.util.is_finite(self.d)
 
+    def is_singular(self):
+        return np.any(self.d == 0)
+
     # *** save and load *** #
 
     def save(self, directory_name, filename_prefix=None):
@@ -714,6 +753,9 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     def is_finite(self):
         return matrix.util.is_finite(self.LD)
+
+    def is_singular(self):
+        return np.any(self.d == 0)
 
     # *** save and load *** #
 
@@ -863,6 +905,9 @@ class LL_Decomposition(DecompositionBase):
 
     def is_finite(self):
         return matrix.util.is_finite(self.L)
+
+    def is_singular(self):
+        return np.any(self._d == 0)
 
     # *** save and load *** #
 
