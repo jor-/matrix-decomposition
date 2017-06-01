@@ -54,6 +54,19 @@ class MatrixDecompositionNotFiniteError(MatrixNotFiniteError):
         super().__init__(message=message)
 
 
+class MatrixDecompositionSingularError(MatrixError):
+    """ A decomposition represents a singular matrix although a non-singular matrix is required. """
+
+    def __init__(self, decomposition=None):
+        # compose message
+        message = 'Decomposition '
+        if decomposition is not None:
+            self.decomposition = decomposition
+            message += str(decomposition) + ' '
+        message += 'represents a singular matrix.'
+        super().__init__(message=message)
+
+
 class MatrixNoDecompositionPossibleError(MatrixError):
     """ The matrix decomposition is not possible for this matrix. """
 
