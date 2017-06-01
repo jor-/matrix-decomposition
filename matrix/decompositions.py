@@ -33,6 +33,12 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         self.p = p
 
+    # *** str *** #
+
+    def __str__(self):
+        return '{decomposition_type} decomposition of matrix with shape ({n}, {n})'.format(
+            decomposition_type=self.decomposition_type, n=self.n)
+
     # *** permutation *** #
 
     @property
