@@ -303,7 +303,6 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             file_extension = matrix.constants.SPARSE_FILE_EXTENSION
         else:
             file_extension = matrix.constants.DENSE_FILE_EXTENSION
-        decomposition_type = self.decomposition_type
         filename = matrix.constants.DECOMPOSITION_ATTRIBUTE_FILENAME.format(
             decomposition_type=self.decomposition_type,
             attribute_name=attribute_name,
