@@ -54,6 +54,11 @@ MatrixDecompositionNotFiniteError
 .. autoclass:: matrix.errors.MatrixDecompositionNotFiniteError
     :show-inheritance:
 
+MatrixDecompositionSingularError
+--------------------------------
+.. autoclass:: matrix.errors.MatrixDecompositionSingularError
+    :show-inheritance:
+
 
 The following exception is the base exception from which all other exceptions in this package are derived.
 
