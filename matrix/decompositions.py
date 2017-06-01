@@ -490,13 +490,11 @@ class LDL_Decomposition(DecompositionBase):
         p = self.p
 
         # check d for negative entries
-        d_negative_mask = d < 0
-        if np.any(d_negative_mask):
-            i = np.where(d_negative_mask)[0][0]
-            p_i = p[i]
-            raise matrix.errors.MatrixNoLLDecompositionPossibleError(
-                problematic_leading_principal_submatrix_index=p_i)
-        del d_negative_mask
+        for i in range(len(d)):
+            if d[i] < 0:
+                p_i = p[i]
+                raise matrix.errors.MatrixNoLLDecompositionPossibleError(
+                    problematic_leading_principal_submatrix_index=p_i)
 
         # compute new d
         d = np.sqrt(d)
