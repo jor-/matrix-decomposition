@@ -33,11 +33,25 @@ class MatrixNotSquareError(MatrixError):
 
 
 class MatrixNotFiniteError(MatrixError):
-    """ A matrix is has non-finite entires although a finite matrix is required. """
+    """ A matrix has non-finite entries although a finite matrix is required. """
 
-    def __init__(self, matrix=None):
-        message = 'Matrix{matrix_decription} has not finite entries.'
+    def __init__(self, matrix=None, message=None):
+        if message is None:
+            message = 'Matrix{matrix_decription} has not finite entries.'
         super().__init__(matrix=matrix, message=message)
+
+
+class MatrixDecompositionNotFiniteError(MatrixNotFiniteError):
+    """ A decomposition of a matrix has non-finite entries although a finite matrix is required. """
+
+    def __init__(self, decomposition=None):
+        # compose message
+        message = 'Decomposition '
+        if decomposition is not None:
+            self.decomposition = decomposition
+            message += str(decomposition) + ' '
+        message += 'has non-finite entries.'
+        super().__init__(message=message)
 
 
 class MatrixNoDecompositionPossibleError(MatrixError):
