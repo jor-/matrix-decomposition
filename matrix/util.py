@@ -34,3 +34,16 @@ def is_finite(A):
 def check_finite(A, check_finite=True):
     if check_finite and not is_finite(A):
         raise matrix.errors.MatrixNotFiniteError(matrix=A)
+
+
+def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):
+    if scipy.sparse.issparse(A):
+        return matrix.sparse.util.solve_triangular(
+            A, b,
+            lower=lower, unit_diagonal=unit_diagonal,
+            overwrite_b=overwrite_b, check_finite=check_finite)
+    else:
+        return matrix.dense.util.solve_triangular(
+            A, b,
+            lower=lower, unit_diagonal=unit_diagonal,
+            overwrite_b=overwrite_b, check_finite=check_finite)

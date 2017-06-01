@@ -2,6 +2,7 @@ import warnings
 
 import numpy as np
 import scipy.sparse
+import scipy.sparse.linalg
 
 import matrix.errors
 import matrix.sparse.util
@@ -62,3 +63,22 @@ def convert_index_dtype(A, dtype):
     A.indices = np.asanyarray(A.indices, dtype=dtype)
     A.indptr = np.asanyarray(A.indptr, dtype=dtype)
     return A
+
+
+def set_diagonal(A, diagonal_value):
+    assert A.ndim == 2
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+        for i in range(min(A.shape)):
+            A[i, i] = diagonal_value
+
+
+def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):
+    if check_finite:
+        check_finite(A)
+        check_finite(b)
+    A = A.tocsr(copy=True)
+    if unit_diagonal:
+        matrix.sparse.util.set_diagonal(A, 1)
+    b = b.astype(np.result_type(A.data, b, np.float), copy=not overwrite_b)  # this has to be done due to a bug in scipy (see pull reqeust #7449)
+    return scipy.sparse.linalg.spsolve_triangular(A, b, lower=lower, overwrite_A=True, overwrite_b=overwrite_b)
