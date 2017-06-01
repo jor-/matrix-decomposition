@@ -13,21 +13,21 @@ import matrix.permute
 
 # *** random values *** #
 
-def random_matrix(n, dense=True):
+def random_matrix(n, m, dense=True):
     random_state = 1234
     if dense:
         np.random.seed(random_state)
-        A = np.random.rand(n, n)
+        A = np.random.rand(n, m)
         A = np.asmatrix(A)
     else:
         density = 0.1
-        A = scipy.sparse.rand(n, n, density=density, random_state=random_state)
+        A = scipy.sparse.rand(n, m, density=density, random_state=random_state)
         A = A.tocsc()
     return A
 
 
 def random_square_matrix(n, dense=True, positive_semi_definite=False, positive_definite=False, min_diag_value=None):
-    A = random_matrix(n, dense=dense)
+    A = random_matrix(n, n, dense=dense)
     A = A + A.H
     if positive_semi_definite or positive_definite:
         A = A @ A
@@ -44,7 +44,7 @@ def random_square_matrix(n, dense=True, positive_semi_definite=False, positive_d
 
 
 def random_lower_triangle_matrix(n, dense=True):
-    A = random_matrix(n, dense=dense)
+    A = random_matrix(n, n, dense=dense)
     if dense:
         A = np.tril(A)
     else:
