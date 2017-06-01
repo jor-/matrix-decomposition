@@ -47,6 +47,14 @@ MatrixNotFiniteError
     :show-inheritance:
 
 
+The following exceptions can occur if the matrix represented by a decomposition has an invalid characteristic.
+
+MatrixDecompositionNotFiniteError
+---------------------------------
+.. autoclass:: matrix.errors.MatrixDecompositionNotFiniteError
+    :show-inheritance:
+
+
 The following exception is the base exception from which all other exceptions in this package are derived.
 
 MatrixError
