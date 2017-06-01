@@ -166,12 +166,6 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
     @property
     @abc.abstractmethod
-    def is_sparse(self):
-        """:class:`bool`: Whether this is a sparse decompositon."""
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
     def composed_matrix(self):
         """:class:`numpy.matrix` or :class:`scipy.sparse.spmatrix`: The composed matrix represented by this decomposition."""
         raise NotImplementedError
@@ -282,19 +276,44 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         else:
             return self.to(decomposition_types[0])
 
-    # *** positive definite checks *** #
+    # *** features of decomposition *** #
 
-    @property
+    @abc.abstractmethod
+    def is_sparse(self):
+        """
+        Returns whether this is a decomposition of a sparse matrix.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition of a sparse matrix.
+        """
+        raise NotImplementedError
+
     @abc.abstractmethod
     def is_positive_semi_definite(self):
-        """:class:`bool`: Whether the matrix represented by this decomposition is positive semi-definite."""
+        """
+        Returns whether this is a decomposition of a positive semi-definite matrix.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition of a positive semi-definite matrix.
+        """
         raise NotImplementedError
 
-    @property
-    @abc.abstractmethod
     def is_positive_definite(self):
-        """:class:`bool`: Whether the matrix represented by this decomposition is positive definite."""
-        raise NotImplementedError
+
+        """
+        Returns whether this is a decomposition of a positive definite matrix.
+
+        Returns
+        -------
+        bool
+            Whether this is a decomposition of a positive definite matrix.
+        """
+        return self.is_positive_semi_definite() and not self.is_singular()
+
 
     # *** save and load *** #
 
@@ -417,10 +436,6 @@ class LDL_Decomposition(DecompositionBase):
         return self.L.shape[0]
 
     @property
-    def is_sparse(self):
-        return scipy.sparse.issparse(self.L)
-
-    @property
     def composed_matrix(self):
         A = self.L @ self.D @ self.L.H
         A = self.unpermute_matrix(A)
@@ -437,7 +452,7 @@ class LDL_Decomposition(DecompositionBase):
     def L(self, L):
         if L is not None:
             self._L = L
-            if not self.is_sparse:
+            if not self.is_sparse():
                 L = np.asmatrix(L)
             self._L = L
         else:
@@ -520,7 +535,10 @@ class LDL_Decomposition(DecompositionBase):
             else:
                 raise
 
-    # *** positive definite checks *** #
+    # *** features of decomposition *** #
+
+    def is_sparse(self):
+        return scipy.sparse.issparse(self.L)
 
     def is_positive_semi_definite(self):
         return np.all(self.d >= 0)
@@ -571,10 +589,6 @@ class LDL_DecompositionCompressed(DecompositionBase):
         return self.LD.shape[0]
 
     @property
-    def is_sparse(self):
-        return scipy.sparse.issparse(self.LD)
-
-    @property
     def composed_matrix(self):
         return self.to_LDL_Decomposition().composed_matrix
 
@@ -589,7 +603,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def LD(self, LD):
         if LD is not None:
             self._LD = LD
-            if not self.is_sparse:
+            if not self.is_sparse():
                 LD = np.asmatrix(LD)
             self._LD = LD
         else:
@@ -602,7 +616,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def d(self):
         """:class:`numpy.ndarray`: The diagonal vector of the matrix `D` of the decomposition."""
         d = self.LD.diagonal()
-        if not self.is_sparse:
+        if not self.is_sparse():
             d = d.A1
         return d
 
@@ -645,7 +659,10 @@ class LDL_DecompositionCompressed(DecompositionBase):
             else:
                 raise
 
-    # *** positive definite checks *** #
+    # *** features of decomposition *** #
+
+    def is_sparse(self):
+        return scipy.sparse.issparse(self.LD)
 
     def is_positive_semi_definite(self):
         return np.all(self.d >= 0)
@@ -696,10 +713,6 @@ class LL_Decomposition(DecompositionBase):
         return self.L.shape[0]
 
     @property
-    def is_sparse(self):
-        return scipy.sparse.issparse(self.L)
-
-    @property
     def composed_matrix(self):
         A = self.L @ self.L.H
         A = self.unpermute_matrix(A)
@@ -716,7 +729,7 @@ class LL_Decomposition(DecompositionBase):
     def L(self, L):
         if L is not None:
             self._L = L
-            if not self.is_sparse:
+            if not self.is_sparse():
                 L = np.asmatrix(L)
             self._L = L
         else:
@@ -738,7 +751,7 @@ class LL_Decomposition(DecompositionBase):
     def _d(self):
         """:class:`numpy.ndarray`: The diagonal vector of `L`."""
         d = self.L.diagonal()
-        if not self.is_sparse:
+        if not self.is_sparse():
             d = d.A1
         return d
 
@@ -792,7 +805,10 @@ class LL_Decomposition(DecompositionBase):
             else:
                 raise
 
-    # *** positive definite checks *** #
+    # *** features of decomposition *** #
+
+    def is_sparse(self):
+        return scipy.sparse.issparse(self.L)
 
     def is_positive_semi_definite(self):
         return True
