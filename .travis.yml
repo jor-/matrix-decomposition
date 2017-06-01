@@ -36,6 +36,7 @@ install:
     - conda install -q scipy
     - conda install -q scikit-sparse -c conda-forge
     - if [ "${PY_TEST}" == "1" ]; then
+          conda install -q nose;
           conda install -q pytest;
       fi
     - if [ "${SPHINX_TEST}" == "1" ]; then
