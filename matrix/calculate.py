@@ -53,6 +53,10 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
     ------
     matrix.errors.MatrixNoDecompositionPossibleError
         If the decomposition of `A` is not possible.
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
     """
 
     if matrix.sparse.util.is_sparse(A):
@@ -167,6 +171,13 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     -------
     matrix.decompositions.DecompositionBase
         An approximative decompostion of `A` of type `return_type`.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
     """
 
     # convert input matrix A to needed type

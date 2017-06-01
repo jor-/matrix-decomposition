@@ -55,6 +55,10 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     ------
     matrix.errors.MatrixNoDecompositionPossibleError
         If the decomposition of `A` is not possible.
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
     """
     try:
         import sksparse.cholmod
@@ -163,6 +167,10 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
     ------
     matrix.errors.MatrixNoDecompositionPossibleError
         If the decomposition of `A` is not possible.
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
     """
 
     try:
