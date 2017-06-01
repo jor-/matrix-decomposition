@@ -471,6 +471,44 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    # *** solve systems of linear equations *** #
+
+    @abc.abstractmethod
+    def solve(self, b, overwrite_b=False, check_finite=True):
+        """
+        Solve the equation `A x = b` regarding `x`, where `A` is the composed matrix represented by this decomposition.
+
+        Parameters
+        ----------
+        b : numpy.ndarray
+            Right-hand side vector or matrix in equation `A x = b`.
+            Ii must hold `b.shape[0] == self.n`.
+        overwrite_b : bool
+            Allow overwriting data in `b`.
+            Enabling gives a performance gain.
+            optional, default: False
+        check_finite : bool
+            Whether to check that the input matrix contains only finite numbers.
+            Disabling may result in problems (crashes, non-termination) if
+            the inputs do contain infinities or NaNs.
+            (disabling may improve performance)
+            optional, default: True
+
+        Returns
+        -------
+        numpy.ndarray
+            An `x` so that `A x = b`.
+            The shape of `x` matches the shape of `b`.
+
+        Raises
+        ------
+        matrix.errors.MatrixDecompositionSingularError
+            If this is a decomposition representing a singular matrix.
+        matrix.errors.MatrixDecompositionNotFiniteError
+            If this is a decomposition representing a non-finite matrix and `check_finite` is True.
+        """
+        raise NotImplementedError
+
 
 class LDL_Decomposition(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -634,6 +672,22 @@ class LDL_Decomposition(DecompositionBase):
     def load(self, directory_name, filename_prefix=None):
         self._load_attributes(directory_name, 'L', 'd', 'p', filename_prefix=filename_prefix)
 
+    # *** solve systems of linear equations *** #
+
+    def solve(self, b, overwrite_b=False, check_finite=True):
+        # check
+        self.check_invertible()
+        matrix.util.check_finite(b, check_finite=check_finite)
+        self.check_finite(check_finite=check_finite)
+        # solve
+        x = b[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, check_finite=False)
+        x = x / self.d
+        x = matrix.util.solve_triangular(self.L.H, x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
+        x = x[self.p_inverse]
+        # return
+        return x
+
 
 class LDL_DecompositionCompressed(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -764,6 +818,22 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     def load(self, directory_name, filename_prefix=None):
         self._load_attributes(directory_name, 'LD', 'p', filename_prefix=filename_prefix)
+
+    # *** solve systems of linear equations *** #
+
+    def solve(self, b, overwrite_b=False, check_finite=True):
+        # check
+        self.check_invertible()
+        matrix.util.check_finite(b, check_finite=check_finite)
+        self.check_finite(check_finite=check_finite)
+        # solve
+        x = b[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, check_finite=False)
+        x = x / self.d
+        x = matrix.util.solve_triangular(self.L.H, x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
+        x = x[self.p_inverse]
+        # return
+        return x
 
 
 class LL_Decomposition(DecompositionBase):
@@ -916,3 +986,18 @@ class LL_Decomposition(DecompositionBase):
 
     def load(self, directory_name, filename_prefix=None):
         self._load_attributes(directory_name, 'L', 'p', filename_prefix=filename_prefix)
+
+    # *** solve systems of linear equations *** #
+
+    def solve(self, b, overwrite_b=False, check_finite=True):
+        # check
+        self.check_invertible()
+        matrix.util.check_finite(b, check_finite=check_finite)
+        self.check_finite(check_finite=check_finite)
+        # solve
+        x = b[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True, check_finite=False)
+        x = matrix.util.solve_triangular(self.L.H, x, lower=False, unit_diagonal=False, overwrite_b=True, check_finite=False)
+        x = x[self.p_inverse]
+        # return
+        return x
