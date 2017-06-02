@@ -38,12 +38,12 @@ setuptools.setup(
     # Name
     name = 'matrix-decomposition',
     
-    # Desctiption
-    description = 'allows to decompose (factorize) dense and sparse matrices',
+    # Description
+    description = 'decompose (factorize) dense and sparse matrices and solve associated systems of linear equations',
     long_description = long_description,
 
     # Keywords
-    keywords = 'decomposition factorization decompose factorize dense sparse matrix matrices',
+    keywords = 'decomposition factorization decompose factorize dense sparse matrix matrices Cholesky positive definite systems of linear equations',
 
     # Homepage
     url = 'https://github.com/jor-/matrix_decomposition',
