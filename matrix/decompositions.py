@@ -476,7 +476,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def solve(self, b, overwrite_b=False, check_finite=True):
         """
-        Solve the equation `A x = b` regarding `x`, where `A` is the composed matrix represented by this decomposition.
+        Solves the equation `A x = b` regarding `x`, where `A` is the composed matrix represented by this decomposition.
 
         Parameters
         ----------
@@ -488,10 +488,10 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Enabling gives a performance gain.
             optional, default: False
         check_finite : bool
-            Whether to check that the input matrix contains only finite numbers.
-            Disabling may result in problems (crashes, non-termination) if
-            the inputs do contain infinities or NaNs.
-            (disabling may improve performance)
+            Whether to check that the this decomposition and b` contain only finite numbers.
+            Disabling may result in problems (crashes, non-termination)
+            if they contain infinities or NaNs.
+            Disabling gives a performance gain.
             optional, default: True
 
         Returns

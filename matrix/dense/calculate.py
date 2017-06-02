@@ -29,9 +29,9 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         optional, default: no permutation
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination) if
-        the inputs do contain infinities or NaNs.
-        (disabling may improve performance)
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
         optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
@@ -45,7 +45,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         optional, default: False
     clean : bool
         Whether to set the zero entries in the triangular Cholesky to zero.
-        (disabling may improve performance)
+        Disabling gives a performance gain.
         optional, default: True
 
     Returns
@@ -129,9 +129,9 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         optional, default: no permutation
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination) if
-        the inputs do contain infinities or NaNs.
-        (disabling may improve performance)
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
         optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.

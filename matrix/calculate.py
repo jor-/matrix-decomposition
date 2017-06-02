@@ -33,9 +33,9 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         optional, default: no permutation
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination) if
-        the inputs do contain infinities or NaNs.
-        (disabling may improve performance)
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
         optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
@@ -154,9 +154,9 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         optional, default: No permutation is done.
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination) if
-        the inputs do contain infinities or NaNs.
-        (disabling may improve performance)
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
         optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
