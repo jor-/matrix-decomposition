@@ -468,3 +468,86 @@ def is_positive_definite(A, check_finite=True):
         return False
     else:
         return decomposition.is_positive_definite()
+
+
+def is_invertible(A, check_finite=True):
+    """
+    Returns whether the passed matrix is an invertible matrix.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be checked.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    check_finite : bool
+        Whether to check that `A` contain only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if they contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+
+    Returns
+    -------
+    bool
+        Whether `A` is invertible.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
+    """
+
+    try:
+        decomposition = decompose(A, check_finite=check_finite)
+    except matrix.errors.MatrixNotSquareError:
+        return False
+    else:
+        return decomposition.is_invertible()
+
+
+def solve(A, b, overwrite_b=False, check_finite=True):
+    """
+    Solves the equation `A x = b` regarding `x`.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be checked.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    b : numpy.ndarray
+        Right-hand side vector or matrix in equation `A x = b`.
+        Ii must hold `b.shape[0] == A.shape[0]`.
+    overwrite_b : bool
+        Allow overwriting data in `b`.
+        Enabling gives a performance gain.
+        optional, default: False
+    check_finite : bool
+        Whether to check that `A` and b` contain only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if they contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+
+    Returns
+    -------
+    numpy.ndarray
+        An `x` so that `A x = b`.
+        The shape of `x` matches the shape of `b`.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
+    matrix.errors.MatrixSingularError
+        If `A` is singular.
+    """
+
+    decomposition = decompose(A, check_finite=check_finite)
+    try:
+        return decomposition.solve(b, overwrite_b=overwrite_b, check_finite=False)
+    except matrix.errors.MatrixDecompositionSingularError as e:
+        raise matrix.errors.MatrixSingularError from e

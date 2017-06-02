@@ -16,4 +16,4 @@ SPARSE_PERMUTATION_METHODS = matrix.constants.SPARSE_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
 
 # *** functions *** #
-from matrix.calculate import decompose, is_positive_semi_definite, is_positive_definite, approximate
+from matrix.calculate import decompose, approximate, is_positive_semi_definite, is_positive_definite, is_invertible, solve
