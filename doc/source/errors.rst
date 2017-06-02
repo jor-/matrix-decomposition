@@ -46,6 +46,11 @@ MatrixNotFiniteError
 .. autoclass:: matrix.errors.MatrixNotFiniteError
     :show-inheritance:
 
+MatrixSingularError
+-------------------
+.. autoclass:: matrix.errors.MatrixSingularError
+    :show-inheritance:
+
 
 The following exceptions can occur if the matrix represented by a decomposition has an invalid characteristic.
 
