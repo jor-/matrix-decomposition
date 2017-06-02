@@ -44,6 +44,14 @@ class MatrixNotFiniteError(MatrixError):
         super().__init__(matrix=matrix, message=message)
 
 
+class MatrixSingularError(MatrixError):
+    """ A matrix is singular although an invertible matrix is required. """
+
+    def __init__(self, matrix=None):
+        message = 'Matrix{matrix_decription} is singular.'
+        super().__init__(matrix=matrix, message=message)
+
+
 # *** general decomposition exceptions *** #
 
 class MatrixDecompositionNotFiniteError(MatrixError):
