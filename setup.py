@@ -65,12 +65,12 @@ setuptools.setup(
 
         # Intended Audience, Topic
         'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: Mathematics'
+        'Topic :: Scientific/Engineering :: Mathematics',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Utilities'
+        'Topic :: Utilities',
 
         # Licence (should match "license" above)
-        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)'
+        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
 
         # Supported Python versions
         'Programming Language :: Python',
