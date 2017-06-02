@@ -65,56 +65,6 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         return matrix.dense.calculate.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
 
 
-def is_positive_semi_definite(A):
-    """
-    Checks if the passed matrix is positive semi-definite.
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse.spmatrix
-        The matrix that should be checked.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
-
-    Returns
-    -------
-    bool
-        Whether `A` is positive semi-definite.
-    """
-
-    try:
-        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=True)
-    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
-        return False
-    else:
-        return decomposition.is_positive_semi_definite()
-
-
-def is_positive_definite(A):
-    """
-    Checks if the passed matrix is positive definite.
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse.spmatrix
-        The matrix that should be checked.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
-
-    Returns
-    -------
-    bool
-        Whether `A` is positive definite.
-    """
-
-    try:
-        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=True)
-    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
-        return False
-    else:
-        return decomposition.is_positive_definite()
-
-
 def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_value=None, permutation_method=None, check_finite=True, return_type=None, callback=None):
     """
     Computes an approximative decomposition of a matrix.
@@ -446,3 +396,75 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
     decomposition = decomposition.to(return_type)
     return decomposition
+
+
+def is_positive_semi_definite(A, check_finite=True):
+    """
+    Returns whether the passed matrix is positive semi-definite.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be checked.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    check_finite : bool
+        Whether to check that `A` contain only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if they contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+
+    Returns
+    -------
+    bool
+        Whether `A` is positive semi-definite.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
+    """
+
+    try:
+        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
+    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
+        return False
+    else:
+        return decomposition.is_positive_semi_definite()
+
+
+def is_positive_definite(A, check_finite=True):
+    """
+    Returns whether the passed matrix is positive definite.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be checked.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    check_finite : bool
+        Whether to check that `A` contain only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if they contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+
+    Returns
+    -------
+    bool
+        Whether `A` is positive definite.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
+    """
+
+    try:
+        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
+    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
+        return False
+    else:
+        return decomposition.is_positive_definite()
