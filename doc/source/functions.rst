@@ -4,6 +4,7 @@ Functions
 Several functions are included in this package.
 The most important are summarized here.
 
+
 decompose a matrix
 ------------------
 
@@ -15,15 +16,25 @@ decompose a matrix
 
 .. autodata:: matrix.DECOMPOSITION_TYPES
 
-examine positive definiteness
------------------------------
+
+approximate a matrix by a decomposition
+---------------------------------------
+
+.. autofunction:: matrix.approximate
+
+
+examine a matrix
+----------------
+
+.. autofunction:: matrix.is_invertible
 
 .. autofunction:: matrix.is_positive_semi_definite
 
 .. autofunction:: matrix.is_positive_definite
 
-approximate by a decomposition
-------------------------------
 
-.. autofunction:: matrix.approximate
+solve system of linear equations
+--------------------------------
+
+.. autofunction:: matrix.solve
 
