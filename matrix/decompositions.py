@@ -616,8 +616,8 @@ class LDL_Decomposition(DecompositionBase):
         p = self.p
 
         # check d for negative entries
-        for i in range(len(d)):
-            if d[i] < 0:
+        for i, d_i in enumerate(d):
+            if d_i < 0:
                 p_i = p[i]
                 raise matrix.errors.MatrixNoLLDecompositionPossibleError(
                     problematic_leading_principal_submatrix_index=p_i)
