@@ -133,7 +133,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     # convert input matrix A to needed type
     is_sparse = matrix.sparse.util.is_sparse(A)
     if not is_sparse:
-        A = np.asanyarray(A)
+        A = np.asarray(A)
     A_dtype = np.result_type(A.dtype, np.float)
     if is_sparse:
         A = A.astype(A_dtype)
@@ -378,7 +378,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
                 A[:, i] *= reduction_factor
 
                 # apply min_abs_value in column
-                A[np.abs(A[:, i].A1) < min_abs_value, i] = 0
+                A[np.abs(A[:, i]) < min_abs_value, i] = 0
 
                 # set row
                 A[i, :] = A[:, i].T
