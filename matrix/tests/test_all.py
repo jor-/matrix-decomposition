@@ -354,6 +354,50 @@ def test_is_invertible(n, dense, complex_values, decomposition_type, invertible)
         decomposition.check_invertible()
 
 
+# *** multiply *** #
+
+test_multiply_setups = [
+    (n, dense, complex_values, decomposition_type, invertible, x, y)
+    for n in (10,)
+    for dense in (True, False)
+    for complex_values in (True, False)
+    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for invertible in (True, False)
+    for x in (np.zeros(n), np.arange(n), random_vector(n), random_vector(n, complex_values=True), random_matrix(n, 3), random_matrix(n, 3, complex_values=True))
+    for y in (None, np.zeros(n), np.arange(n), random_vector(n), random_vector(n, complex_values=True), random_matrix(n, 3), random_matrix(n, 3, complex_values=True))
+]
+
+
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, invertible, x, y', test_multiply_setups)
+def test_multiply(n, dense, complex_values, decomposition_type, invertible, x, y):
+    # prepare decomposition and values
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values, invertible=invertible)
+    A = decomposition.composed_matrix
+    if not dense:
+        A = A.todense().getA()
+    if y is None:
+        y_H = x.transpose().conj()
+    else:
+        y_H = y.transpose().conj()
+    # test matrix multiplication
+    res = decomposition.matrix_right_side_multiplication(x)
+    np.testing.assert_array_almost_equal(res, A @ x)
+    res = decomposition.matrix_both_sides_multiplication(x, y)
+    np.testing.assert_array_almost_equal(res, y_H @ A @ x)
+    # test inverse matrix multiplication
+    if invertible:
+        B = np.linalg.inv(A)
+        res = decomposition.inverse_matrix_right_side_multiplication(x)
+        np.testing.assert_array_almost_equal(res, B @ x)
+        res = decomposition.inverse_matrix_both_sides_multiplication(x, y)
+        np.testing.assert_array_almost_equal(res, y_H @ B @ x)
+    else:
+        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+            decomposition.inverse_matrix_right_side_multiplication(x)
+        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+            decomposition.inverse_matrix_both_sides_multiplication(x, y)
+
+
 # *** solve *** #
 
 test_solve_setups = [
@@ -363,7 +407,7 @@ test_solve_setups = [
     for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
     for invertible in (True, False)
-    for b in (random_vector(n), np.zeros(n), np.arange(n))
+    for b in (random_vector(n), np.zeros(n), np.arange(n), random_matrix(n, 2))
 ]
 
 
