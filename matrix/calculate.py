@@ -313,7 +313,6 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
                 L_row_i_until_column_i = L_or_LD_row_i_data[:-1]
                 d_until_i = d[L_or_LD_row_i_columns[:-1]]
             else:
-                L_or_LD_row_i = L_or_LD_row_i.A1
                 L_row_i_until_column_i = L_or_LD_row_i[:i_permuted]
                 d_until_i = d[:i_permuted]
 

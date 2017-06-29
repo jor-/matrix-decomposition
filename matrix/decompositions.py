@@ -65,12 +65,17 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     @p.setter
     def p(self, p):
         if p is not None:
+            p = matrix.util.as_vector(p)
             self._p = p
         else:
-            try:
-                del self._p
-            except AttributeError:
-                pass
+            del self.p
+
+    @p.deleter
+    def p(self):
+        try:
+            del self._p
+        except AttributeError:
+            pass
 
     @property
     def p_inverse(self):
@@ -115,7 +120,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     @property
     def P(self):
         """ :class:`scipy.sparse.dok_matrix`: The permutation matrix.
-        P @ A @ P.H is the matrix A permuted by the permutation of the decomposition"""
+        P @ A @ P.T is the matrix A permuted by the permutation of the decomposition"""
 
         p = self.p
         n = len(p)
@@ -548,7 +553,7 @@ class LDL_Decomposition(DecompositionBase):
 
     @property
     def composed_matrix(self):
-        A = self.L @ self.D @ self.L.H
+        A = self.L @ self.D @ self.L.transpose().conj()
         A = self.unpermute_matrix(A)
         return A
 
@@ -562,9 +567,7 @@ class LDL_Decomposition(DecompositionBase):
     @L.setter
     def L(self, L):
         if L is not None:
-            self._L = L
-            if not self.is_sparse():
-                L = np.asmatrix(L)
+            L = matrix.util.as_matrix(L)
             self._L = L
         else:
             try:
@@ -580,7 +583,8 @@ class LDL_Decomposition(DecompositionBase):
     @d.setter
     def d(self, d):
         if d is not None:
-            self._d = np.asarray(d)
+            d = matrix.util.as_vector(d)
+            self._d = d
         else:
             try:
                 del self._d
@@ -683,7 +687,7 @@ class LDL_Decomposition(DecompositionBase):
         x = b[self.p]
         x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, check_finite=False)
         x = x / self.d
-        x = matrix.util.solve_triangular(self.L.H, x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
+        x = matrix.util.solve_triangular(self.L.conj().transpose(), x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
         x = x[self.p_inverse]
         # return
         return x
@@ -735,9 +739,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     @LD.setter
     def LD(self, LD):
         if LD is not None:
-            self._LD = LD
-            if not self.is_sparse():
-                LD = np.asmatrix(LD)
+            LD = matrix.util.as_matrix(LD)
             self._LD = LD
         else:
             try:
@@ -748,9 +750,10 @@ class LDL_DecompositionCompressed(DecompositionBase):
     @property
     def d(self):
         """:class:`numpy.ndarray`: The diagonal vector of the matrix `D` of the decomposition."""
-        d = self.LD.diagonal()
+        LD = self.LD
         if not self.is_sparse():
-            d = d.A1
+            LD = np.asarray(LD)
+        d = LD.diagonal()
         return d
 
     @property
@@ -761,7 +764,6 @@ class LDL_DecompositionCompressed(DecompositionBase):
     @property
     def L(self):
         """:class:`numpy.matrix` or :class:`scipy.sparse.spmatrix`: The matrix `L` of the decomposition."""
-
         L = self.LD.copy()
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
@@ -830,7 +832,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
         x = b[self.p]
         x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, check_finite=False)
         x = x / self.d
-        x = matrix.util.solve_triangular(self.L.H, x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
+        x = matrix.util.solve_triangular(self.L.conj().transpose(), x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
         x = x[self.p_inverse]
         # return
         return x
@@ -869,7 +871,7 @@ class LL_Decomposition(DecompositionBase):
 
     @property
     def composed_matrix(self):
-        A = self.L @ self.L.H
+        A = self.L @ self.L.transpose().conj()
         A = self.unpermute_matrix(A)
         return A
 
@@ -883,9 +885,7 @@ class LL_Decomposition(DecompositionBase):
     @L.setter
     def L(self, L):
         if L is not None:
-            self._L = L
-            if not self.is_sparse():
-                L = np.asmatrix(L)
+            L = matrix.util.as_matrix(L)
             self._L = L
         else:
             try:
@@ -905,9 +905,10 @@ class LL_Decomposition(DecompositionBase):
     @property
     def _d(self):
         """:class:`numpy.ndarray`: The diagonal vector of `L`."""
-        d = self.L.diagonal()
+        L = self.L
         if not self.is_sparse():
-            d = d.A1
+            L = np.asarray(L)
+        d = L.diagonal()
         return d
 
     def to_LDL_Decomposition(self):
@@ -997,7 +998,7 @@ class LL_Decomposition(DecompositionBase):
         # solve
         x = b[self.p]
         x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True, check_finite=False)
-        x = matrix.util.solve_triangular(self.L.H, x, lower=False, unit_diagonal=False, overwrite_b=True, check_finite=False)
+        x = matrix.util.solve_triangular(self.L.conj().transpose(), x, lower=False, unit_diagonal=False, overwrite_b=True, check_finite=False)
         x = x[self.p_inverse]
         # return
         return x

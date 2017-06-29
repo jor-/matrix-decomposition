@@ -1,9 +1,35 @@
+import numpy as np
 import scipy.sparse
 
 import matrix.dense.util
 import matrix.sparse.util
 
 import matrix.errors
+
+
+def as_matrix_or_array(A, check_ndim_values=None):
+    if not scipy.sparse.issparse(A):
+        A = np.asanyarray(A)
+    if check_ndim_values is not None and A.ndim not in check_ndim_values:
+        raise ValueError('The number of dimensions of the input should be in '
+                         '{} but it is {}.'.format(check_ndim_values, A.ndim))
+    return A
+
+
+def as_matrix_or_vector(A):
+    return as_matrix_or_array(A, check_ndim_values=(1, 2))
+
+
+def as_matrix(A):
+    return as_matrix_or_array(A, check_ndim_values=(2,))
+
+
+def as_vector(A):
+    A = np.asarray(A)
+    if A.ndim != 1:
+        raise ValueError('The number of dimensions of the input should be 1 '
+                         'but it is {}.'.format(A.ndim))
+    return A
 
 
 def equal(A, B):

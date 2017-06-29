@@ -377,8 +377,6 @@ def test_solve(n, dense, complex_values, decomposition_type, invertible, b):
         # verify solution
         A = decomposition.composed_matrix
         y = A @ x
-        if dense:
-            y = y.A1
         assert np.all(np.isclose(b, y))
     else:
         with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
