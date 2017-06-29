@@ -233,9 +233,6 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         # try to compute decomposition
         try:
             decomposition = decompose(A, permutation_method=decomposition_permutation_method, check_finite=False)
-        except matrix.errors.MatrixNoDecompositionPossibleError as e:
-            decomposition = e.subdecomposition
-            bad_index = e.problematic_leading_principal_submatrix_index
         except matrix.errors.MatrixNoDecompositionPossibleTooManyEntriesError as e:
             if is_sparse and (A.indices.dtype != np.int64 or A.indptr != np.int64):
                 warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
@@ -243,6 +240,9 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
                 return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, check_finite=False, return_type=return_type, callback=callback)
             else:
                 raise
+        except matrix.errors.MatrixNoDecompositionPossibleWithProblematicSubdecompositionError as e:
+            decomposition = e.subdecomposition
+            bad_index = e.problematic_leading_principal_submatrix_index
         else:
             bad_index = n
 
