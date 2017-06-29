@@ -917,7 +917,7 @@ class LL_Decomposition(DecompositionBase):
         # d inverse
         d = self._d
         d_zero_mask = d == 0
-        d_inverse = np.empty(d.shape)
+        d_inverse = np.empty_like(d)
         d_inverse[d_zero_mask] = 0
         d_inverse[~d_zero_mask] = 1 / d[~d_zero_mask]
         assert np.all(np.isfinite(d_inverse[np.isfinite(d)]))
