@@ -11,24 +11,35 @@ import matrix.decompositions
 import matrix.permute
 
 
+RANDOM_STATE = 1234
+
+
 # *** random values *** #
 
-def random_matrix(n, m, dense=True):
-    random_state = 1234
+def random_matrix(n, m, dense=True, complex_values=False):
+    np.random.seed(RANDOM_STATE)
     if dense:
-        np.random.seed(random_state)
+        # generate random matrix
         A = np.random.rand(n, m)
-        A = np.asmatrix(A)
+        # apply complex values
+        if complex_values:
+            A = A + np.random.rand(n, m) * 1j
     else:
+        # generate random matrix
         density = 0.1
-        A = scipy.sparse.rand(n, m, density=density, random_state=random_state)
+        A = scipy.sparse.rand(n, m, density=density, random_state=RANDOM_STATE)
         A = A.tocsc()
+        # apply complex values
+        if complex_values:
+            B = A.copy()
+            B.data = np.random.rand(len(B.data)) * 1j
+            A = A + B
     return A
 
 
-def random_square_matrix(n, dense=True, positive_semi_definite=False, positive_definite=False, min_diag_value=None):
-    A = random_matrix(n, n, dense=dense)
-    A = A + A.H
+def random_hermitian_matrix(n, dense=True, complex_values=False, positive_semi_definite=False, positive_definite=False, min_diag_value=None):
+    A = random_matrix(n, n, dense=dense, complex_values=complex_values)
+    A = A + A.transpose().conj()
     if positive_semi_definite or positive_definite:
         A = A @ A
     if min_diag_value is not None or positive_definite:
@@ -43,47 +54,58 @@ def random_square_matrix(n, dense=True, positive_semi_definite=False, positive_d
     return A
 
 
-def random_lower_triangle_matrix(n, dense=True):
-    A = random_matrix(n, n, dense=dense)
+def random_lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diagonal=False, finite=True, invertible=None):
+    # create random triangle matrix
+    if complex_values and real_values_diagonal:
+        A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values)
+    else:
+        A = random_matrix(n, n, dense=dense, complex_values=complex_values)
     if dense:
         A = np.tril(A)
     else:
         A = scipy.sparse.tril(A).tocsc()
+    # apply desired characteristics
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+        # apply finite
+        if not finite:
+            i = np.random.randint(n)
+            j = np.random.randint(i + 1)
+            A[i, j] = np.nan
+            A[i, i] = np.nan
+        # apply invertible
+        if invertible is not None:
+            if invertible:
+                for i in range(n):
+                    if np.isclose(A[i, i], 0, atol=10**-4):
+                        A[i, i] = A[i, i] + 1
+            else:
+                i = np.random.randint(n)
+                A[i, i] = 0
     return A
 
 
-def random_vector(n):
-    random_state = 1234
-    np.random.seed(random_state)
+def random_vector(n, complex_values=False):
+    np.random.seed(RANDOM_STATE)
     v = np.random.rand(n)
+    if complex_values:
+        v = v + np.random.rand(n) * 1j
     return v
 
 
 def random_permutation_vector(n):
-    random_state = 1234
-    np.random.seed(random_state)
+    np.random.seed(RANDOM_STATE)
     p = np.arange(n)
     np.random.shuffle(p)
     return p
 
 
-def random_decomposition(decomposition_type, n, dense=True, finite=True, invertible=None):
-    # make random decomposition
-    LD = random_lower_triangle_matrix(n, dense=dense)
+def random_decomposition(decomposition_type, n, dense=True, complex_values=False, finite=True, invertible=None):
+    # make random parts of decomposition
+    LD = random_lower_triangle_matrix(n, dense=dense, complex_values=complex_values, real_values_diagonal=True, finite=finite, invertible=invertible)
     p = random_permutation_vector(n)
+    # make decomposition of correct type
     decomposition = matrix.decompositions.LDL_DecompositionCompressed(LD, p)
-    # apply finite
-    if not finite:
-        decomposition = decomposition.to(matrix.constants.LDL_DECOMPOSITION_TYPE)
-        decomposition.d[np.random.randint(n)] = np.nan
-    # apply singular
-    if invertible is not None:
-        decomposition = decomposition.to(matrix.constants.LDL_DECOMPOSITION_TYPE)
-        if invertible:
-            decomposition.d = decomposition.d + 1
-        else:
-            decomposition.d[np.random.randint(n)] = 0
-    # return correct type
     decomposition = decomposition.to(decomposition_type)
     return decomposition
 
@@ -91,16 +113,17 @@ def random_decomposition(decomposition_type, n, dense=True, finite=True, inverti
 # *** permute *** #
 
 test_permute_setups = [
-    (n, dense)
+    (n, dense, complex_values)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense', test_permute_setups)
-def test_permute(n, dense):
+@pytest.mark.parametrize('n, dense, complex_values', test_permute_setups)
+def test_permute(n, dense, complex_values):
     p = random_permutation_vector(n)
-    A = random_square_matrix(n, dense=dense, positive_semi_definite=True)
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
     A_permuted = matrix.permute.symmetric(A, p)
     for i in range(n):
         for j in range(n):
@@ -113,19 +136,20 @@ def test_permute(n, dense):
 # *** equal *** #
 
 test_equal_setups = [
-    (n, dense, decomposition_type)
+    (n, dense, complex_values, decomposition_type)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type', test_equal_setups)
-def test_equal(n, dense, decomposition_type):
-    decomposition = random_decomposition(decomposition_type, n, dense=dense)
-    for (n_other, dense_other, decomposition_type_other) in test_equal_setups:
-        decomposition_other = random_decomposition(decomposition_type_other, n_other, dense=dense_other)
-        equal = n == n_other and dense == dense_other and decomposition_type == decomposition_type_other
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type', test_equal_setups)
+def test_equal(n, dense, complex_values, decomposition_type):
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values)
+    for (n_other, dense_other, complex_values_other, decomposition_type_other) in test_equal_setups:
+        decomposition_other = random_decomposition(decomposition_type_other, n_other, dense=dense_other, complex_values=complex_values_other)
+        equal = n == n_other and dense == dense_other and complex_values == complex_values_other and decomposition_type == decomposition_type_other
         equal_calculated = decomposition == decomposition_other
         assert equal == equal_calculated
 
@@ -133,17 +157,18 @@ def test_equal(n, dense, decomposition_type):
 # *** convert *** #
 
 test_convert_setups = [
-    (n, dense, decomposition_type, copy)
+    (n, dense, complex_values, decomposition_type, copy)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
     for copy in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type, copy', test_convert_setups)
-def test_convert(n, dense, decomposition_type, copy):
-    decomposition = random_decomposition(decomposition_type, n, dense=dense)
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, copy', test_convert_setups)
+def test_convert(n, dense, complex_values, decomposition_type, copy):
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values)
     for convert_decomposition_type in matrix.constants.DECOMPOSITION_TYPES:
         converted_decomposition = decomposition.to(convert_decomposition_type, copy=copy)
         equal = decomposition_type == convert_decomposition_type
@@ -161,18 +186,19 @@ def supported_permutation_methods(dense):
 
 
 test_decompose_setups = [
-    (n, dense, permutation_method, check_finite, return_type)
+    (n, dense, complex_values, permutation_method, check_finite, return_type)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for permutation_method in supported_permutation_methods(dense)
     for check_finite in (True, False)
     for return_type in matrix.DECOMPOSITION_TYPES
 ]
 
 
-@pytest.mark.parametrize('n, dense, permutation_method, check_finite, return_type', test_decompose_setups)
-def test_decompose(n, dense, permutation_method, check_finite, return_type):
-    A = random_square_matrix(n, dense=dense, positive_semi_definite=True)
+@pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type', test_decompose_setups)
+def test_decompose(n, dense, complex_values, permutation_method, check_finite, return_type):
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
     if dense:
         A_dense = A
     else:
@@ -189,18 +215,19 @@ def test_decompose(n, dense, permutation_method, check_finite, return_type):
 # *** positive definite *** #
 
 test_positive_definite_setups = [
-    (n, dense)
+    (n, dense, complex_values)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense', test_positive_definite_setups)
-def test_positive_definite(n, dense):
-    A = random_square_matrix(n, dense=dense, positive_semi_definite=True)
+@pytest.mark.parametrize('n, dense, complex_values', test_positive_definite_setups)
+def test_positive_definite(n, dense, complex_values):
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
     assert matrix.is_positive_semi_definite(A)
     assert not matrix.is_positive_semi_definite(-A)
-    A = random_square_matrix(n, dense=dense, positive_definite=True)
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_definite=True)
     assert matrix.is_positive_semi_definite(A)
     assert not matrix.is_positive_semi_definite(-A)
     assert matrix.is_positive_definite(A)
@@ -210,21 +237,22 @@ def test_positive_definite(n, dense):
 # *** approximate *** #
 
 test_approximate_setups = [
-    (n, dense, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value)
+    (n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value)
     for n in (10,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for permutation_method in supported_permutation_methods(dense)
     for check_finite in (True, False)
     for return_type in matrix.DECOMPOSITION_TYPES
     for min_abs_value in (None, 10**-8)
     for min_diag_value in (None, 10**-4)
     for max_diag_value_shift in (None, 1 + np.random.rand(1) * 10)
-    for t in (None, np.random.rand(n) + 10**-4)
+    for t in (None, random_vector(n) + 10**-4)
 ]
 
 
-@pytest.mark.parametrize('n, dense, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value', test_approximate_setups)
-def test_approximate(n, dense, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value):
+@pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value', test_approximate_setups)
+def test_approximate(n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value):
     if t is None:
         if min_diag_value is None:
             A_min_diag_value = 10**-6
@@ -234,7 +262,7 @@ def test_approximate(n, dense, permutation_method, check_finite, return_type, t,
         A_min_diag_value = None
         assert min_diag_value is None or min_diag_value <= t.min()
 
-    A = random_square_matrix(n, dense=dense, min_diag_value=A_min_diag_value)
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, min_diag_value=A_min_diag_value)
 
     if max_diag_value_shift is not None:
         if t is None:
@@ -257,17 +285,18 @@ def test_approximate(n, dense, permutation_method, check_finite, return_type, t,
 # *** save and load *** #
 
 test_save_and_load_setups = [
-    (n, dense, decomposition_type, filename_prefix)
+    (n, dense, complex_values, decomposition_type, filename_prefix)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
     for filename_prefix in (None, 'TEST')
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type, filename_prefix', test_save_and_load_setups)
-def test_save_and_load(n, dense, decomposition_type, filename_prefix):
-    decomposition = random_decomposition(decomposition_type, n, dense=dense)
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, filename_prefix', test_save_and_load_setups)
+def test_save_and_load(n, dense, complex_values, decomposition_type, filename_prefix):
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values)
     decomposition_other = type(decomposition)()
     with tempfile.TemporaryDirectory() as tmp_dir:
         decomposition.save(tmp_dir, filename_prefix=filename_prefix)
@@ -278,18 +307,19 @@ def test_save_and_load(n, dense, decomposition_type, filename_prefix):
 # *** is finite *** #
 
 test_is_finite_setups = [
-    (n, dense, decomposition_type, finite)
+    (n, dense, complex_values, decomposition_type, finite)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
     for finite in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type, finite', test_is_finite_setups)
-def test_is_finite(n, dense, decomposition_type, finite):
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, finite', test_is_finite_setups)
+def test_is_finite(n, dense, complex_values, decomposition_type, finite):
     # make random decomposition
-    decomposition = random_decomposition(decomposition_type, n, dense=dense, finite=finite)
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values, finite=finite)
     # test
     assert decomposition.is_finite() == finite
     if not finite:
@@ -302,18 +332,19 @@ def test_is_finite(n, dense, decomposition_type, finite):
 # *** is invertible *** #
 
 test_is_invertible_setups = [
-    (n, dense, decomposition_type, invertible)
+    (n, dense, complex_values, decomposition_type, invertible)
     for n in (100,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
     for invertible in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type, invertible', test_is_finite_setups)
-def test_is_invertible(n, dense, decomposition_type, invertible):
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, invertible', test_is_finite_setups)
+def test_is_invertible(n, dense, complex_values, decomposition_type, invertible):
     # make random decomposition
-    decomposition = random_decomposition(decomposition_type, n, dense=dense, invertible=invertible)
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values, invertible=invertible)
     # test
     assert decomposition.is_invertible() == invertible
     if not invertible:
@@ -326,19 +357,20 @@ def test_is_invertible(n, dense, decomposition_type, invertible):
 # *** solve *** #
 
 test_solve_setups = [
-    (n, dense, decomposition_type, invertible, b)
+    (n, dense, complex_values, decomposition_type, invertible, b)
     for n in (10,)
     for dense in (True, False)
+    for complex_values in (True, False)
     for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
     for invertible in (True, False)
     for b in (random_vector(n), np.zeros(n), np.arange(n))
 ]
 
 
-@pytest.mark.parametrize('n, dense, decomposition_type, invertible, b', test_solve_setups)
-def test_solve(n, dense, decomposition_type, invertible, b):
+@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, invertible, b', test_solve_setups)
+def test_solve(n, dense, complex_values, decomposition_type, invertible, b):
     # make random decomposition
-    decomposition = random_decomposition(decomposition_type, n, dense=dense, finite=True, invertible=invertible)
+    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values, finite=True, invertible=invertible)
     if invertible:
         # calculate solution
         x = decomposition.solve(b)
