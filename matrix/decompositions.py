@@ -225,7 +225,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             try:
                 return self._decomposition_type == decomposition_type
             except AttributeError:
-                False
+                return False
 
     def to(self, decomposition_type, copy=False):
         """ Convert decomposition to passed type.
