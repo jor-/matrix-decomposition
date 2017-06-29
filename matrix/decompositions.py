@@ -476,32 +476,128 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    # *** solve systems of linear equations *** #
+    # *** multiply *** #
+
+    def matrix_right_side_multiplication(self, x):
+        """
+        Calculates the right side (matrix-matrix or matrix-vector) product `A @ x`, where `A` is the composed matrix represented by this decomposition.
+
+        Parameters
+        ----------
+        x : numpy.ndarray or scipy.sparse.spmatrix
+            Vector or matrix in the product in the
+            matrix-matrix or matrix-vector `A @ x`.
+            It must hold `self.n == x.shape[0]`.
+
+        Returns
+        -------
+        numpy.ndarray or scipy.sparse.spmatrix
+            The result of `A @ x`.
+        """
+
+        x = matrix.util.as_matrix_or_vector(x)
+        return self.composed_matrix @ x
+
+    def matrix_both_sides_multiplication(self, x, y=None):
+        """
+        Calculates the both sides (matrix-matrix or matrix-vector) product `y.H @ A @ x`, where `A` is the composed matrix represented by this decomposition.
+
+        Parameters
+        ----------
+        x : numpy.ndarray or scipy.sparse.spmatrix
+            Vector or matrix in the product `y.H @ A @ x`.
+            It must hold `self.n == x.shape[0]`.
+        y : numpy.ndarray or scipy.sparse.spmatrix
+            Vector or matrix in the product `y.H @ A @ x`.
+            It must hold `self.n == y.shape[0]`.
+            optional, default: If y is not passed, x is used as y.
+
+        Returns
+        -------
+        numpy.ndarray or scipy.sparse.spmatrix
+            The result of `x.H @ A @ y`.
+        """
+
+        x = matrix.util.as_matrix_or_vector(x)
+        if y is None:
+            y = x
+        else:
+            y = matrix.util.as_matrix_or_vector(y)
+        y = y.transpose().conj()
+        return y @ self.matrix_right_side_multiplication(x)
 
     @abc.abstractmethod
-    def solve(self, b, overwrite_b=False, check_finite=True):
+    def inverse_matrix_right_side_multiplication(self, x):
+        """
+        Calculates the right side (matrix-matrix or matrix-vector) product `B @ x`, where `B` is the matrix inverse of the composed matrix represented by this decomposition.
+
+        Parameters
+        ----------
+        x : numpy.ndarray or scipy.sparse.spmatrix
+            Vector or matrix in the product in the
+            matrix-matrix or matrix-vector `B @ x`.
+            It must hold `self.n == x.shape[0]`.
+
+        Returns
+        -------
+        numpy.ndarray or scipy.sparse.spmatrix
+            The result of `B @ x`.
+
+        Raises
+        ------
+        matrix.errors.MatrixDecompositionSingularError
+            If this is a decomposition representing a singular matrix.
+        """
+        raise NotImplementedError
+
+    def inverse_matrix_both_sides_multiplication(self, x, y=None):
+        """
+        Calculates the both sides (matrix-matrix or matrix-vector) product `y.H @ B @ x`, where `B` is the mattrix inverse of the composed matrix represented by this decomposition.
+
+        Parameters
+        ----------
+        x : numpy.ndarray or scipy.sparse.spmatrix
+            Vector or matrix in the product `y.H @ B @ x`.
+            It must hold `self.n == x.shape[0]`.
+        y : numpy.ndarray or scipy.sparse.spmatrix
+            Vector or matrix in the product `y.H @ B @ x`.
+            It must hold `self.n == y.shape[0]`.
+            optional, default: If y is not passed, x is used as y.
+
+        Returns
+        -------
+        numpy.ndarray or scipy.sparse.spmatrix
+            The result of `x.H @ A @ y`.
+
+        Raises
+        ------
+        matrix.errors.MatrixDecompositionSingularError
+            If this is a decomposition representing a singular matrix.
+        """
+
+        x = matrix.util.as_matrix_or_vector(x)
+        if y is None:
+            y = x
+        else:
+            y = matrix.util.as_matrix_or_vector(y)
+        y = y.transpose().conj()
+        return y @ self.inverse_matrix_right_side_multiplication(x)
+
+    # *** solve systems of linear equations *** #
+
+    def solve(self, b):
         """
         Solves the equation `A x = b` regarding `x`, where `A` is the composed matrix represented by this decomposition.
 
         Parameters
         ----------
-        b : numpy.ndarray
+        b : numpy.ndarray or scipy.sparse.spmatrix
             Right-hand side vector or matrix in equation `A x = b`.
-            Ii must hold `b.shape[0] == self.n`.
-        overwrite_b : bool
-            Allow overwriting data in `b`.
-            Enabling gives a performance gain.
-            optional, default: False
-        check_finite : bool
-            Whether to check that the this decomposition and b` contain only finite numbers.
-            Disabling may result in problems (crashes, non-termination)
-            if they contain infinities or NaNs.
-            Disabling gives a performance gain.
-            optional, default: True
+            It must hold `self.n == b.shape[0]`.
 
         Returns
         -------
-        numpy.ndarray
+        numpy.ndarray or scipy.sparse.spmatrix
             An `x` so that `A x = b`.
             The shape of `x` matches the shape of `b`.
 
@@ -509,10 +605,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         ------
         matrix.errors.MatrixDecompositionSingularError
             If this is a decomposition representing a singular matrix.
-        matrix.errors.MatrixDecompositionNotFiniteError
-            If this is a decomposition representing a non-finite matrix and `check_finite` is True.
         """
-        raise NotImplementedError
+
+        return self.inverse_matrix_right_side_multiplication(b)
 
 
 class LDL_Decomposition(DecompositionBase):
@@ -676,21 +771,53 @@ class LDL_Decomposition(DecompositionBase):
     def load(self, directory_name, filename_prefix=None):
         self._load_attributes(directory_name, 'L', 'd', 'p', filename_prefix=filename_prefix)
 
-    # *** solve systems of linear equations *** #
+    # *** multiply *** #
 
-    def solve(self, b, overwrite_b=False, check_finite=True):
-        # check
-        self.check_invertible()
-        matrix.util.check_finite(b, check_finite=check_finite)
-        self.check_finite(check_finite=check_finite)
-        # solve
-        x = b[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, check_finite=False)
-        x = x / self.d
-        x = matrix.util.solve_triangular(self.L.conj().transpose(), x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
+    def matrix_right_side_multiplication(self, x):
+        x = matrix.util.as_matrix_or_vector(x)
+        x = x[self.p]
+        x = self.L.transpose().conj() @ x
+        x = self.D @ x
+        x = self.L @ x
         x = x[self.p_inverse]
-        # return
         return x
+
+    def matrix_both_sides_multiplication(self, x, y=None):
+        x = matrix.util.as_matrix_or_vector(x)
+        x = x[self.p]
+        x = self.L.transpose().conj() @ x
+        if y is not None:
+            y = matrix.util.as_matrix_or_vector(y)
+            y = y[self.p]
+            y = y.transpose().conj()
+            y = y @ self.L
+        else:
+            y = x.transpose().conj()
+        return y @ self.D @ x
+
+    def inverse_matrix_right_side_multiplication(self, x):
+        x = matrix.util.as_matrix_or_vector(x)
+        self.check_invertible()
+        x = x[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True)
+        x = scipy.sparse.diags(1 / self.d) @ x
+        x = matrix.util.solve_triangular(self.L.transpose().conj(), x, lower=False, unit_diagonal=True, overwrite_b=True)
+        x = x[self.p_inverse]
+        return x
+
+    def inverse_matrix_both_sides_multiplication(self, x, y=None):
+        x = matrix.util.as_matrix_or_vector(x)
+        self.check_invertible()
+        x = x[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True)
+        if y is not None:
+            y = matrix.util.as_matrix_or_vector(y)
+            y = y[self.p]
+            y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=True, overwrite_b=True)
+            y = y.transpose().conj()
+        else:
+            y = x.transpose().conj()
+        return y @ scipy.sparse.diags(1 / self.d) @ x
 
 
 class LDL_DecompositionCompressed(DecompositionBase):
@@ -821,21 +948,19 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def load(self, directory_name, filename_prefix=None):
         self._load_attributes(directory_name, 'LD', 'p', filename_prefix=filename_prefix)
 
-    # *** solve systems of linear equations *** #
+    # *** multiply *** #
 
-    def solve(self, b, overwrite_b=False, check_finite=True):
-        # check
-        self.check_invertible()
-        matrix.util.check_finite(b, check_finite=check_finite)
-        self.check_finite(check_finite=check_finite)
-        # solve
-        x = b[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, check_finite=False)
-        x = x / self.d
-        x = matrix.util.solve_triangular(self.L.conj().transpose(), x, lower=False, unit_diagonal=True, overwrite_b=True, check_finite=False)
-        x = x[self.p_inverse]
-        # return
-        return x
+    def matrix_right_side_multiplication(self, x):
+        return self.to_LDL_Decomposition().matrix_right_side_multiplication(x)
+
+    def matrix_both_sides_multiplication(self, x, y=None):
+        return self.to_LDL_Decomposition().matrix_both_sides_multiplication(x, y=y)
+
+    def inverse_matrix_right_side_multiplication(self, x):
+        return self.to_LDL_Decomposition().inverse_matrix_right_side_multiplication(x)
+
+    def inverse_matrix_both_sides_multiplication(self, x, y=None):
+        return self.to_LDL_Decomposition().inverse_matrix_both_sides_multiplication(x, y=y)
 
 
 class LL_Decomposition(DecompositionBase):
@@ -988,17 +1113,49 @@ class LL_Decomposition(DecompositionBase):
     def load(self, directory_name, filename_prefix=None):
         self._load_attributes(directory_name, 'L', 'p', filename_prefix=filename_prefix)
 
-    # *** solve systems of linear equations *** #
+    # *** multiply *** #
 
-    def solve(self, b, overwrite_b=False, check_finite=True):
-        # check
-        self.check_invertible()
-        matrix.util.check_finite(b, check_finite=check_finite)
-        self.check_finite(check_finite=check_finite)
-        # solve
-        x = b[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True, check_finite=False)
-        x = matrix.util.solve_triangular(self.L.conj().transpose(), x, lower=False, unit_diagonal=False, overwrite_b=True, check_finite=False)
+    def matrix_right_side_multiplication(self, x):
+        x = matrix.util.as_matrix_or_vector(x)
+        x = x[self.p]
+        x = self.L.transpose().conj() @ x
+        x = self.L @ x
         x = x[self.p_inverse]
-        # return
         return x
+
+    def matrix_both_sides_multiplication(self, x, y=None):
+        x = matrix.util.as_matrix_or_vector(x)
+        x = x[self.p]
+        L_H = self.L.transpose().conj()
+        x = L_H @ x
+        if y is not None:
+            y = matrix.util.as_matrix_or_vector(y)
+            y = y[self.p]
+            y = L_H @ y
+        else:
+            y = x
+        y = y.transpose().conj()
+        return y @ x
+
+    def inverse_matrix_right_side_multiplication(self, x):
+        x = matrix.util.as_matrix_or_vector(x)
+        self.check_invertible()
+        x = x[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True)
+        x = matrix.util.solve_triangular(self.L.transpose().conj(), x, lower=False, unit_diagonal=False, overwrite_b=True)
+        x = x[self.p_inverse]
+        return x
+
+    def inverse_matrix_both_sides_multiplication(self, x, y=None):
+        x = matrix.util.as_matrix_or_vector(x)
+        self.check_invertible()
+        x = x[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True)
+        if y is not None:
+            y = matrix.util.as_matrix_or_vector(y)
+            y = y[self.p]
+            y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=False, overwrite_b=True)
+        else:
+            y = x
+        y = y.transpose().conj()
+        return y @ x
