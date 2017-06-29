@@ -5,6 +5,7 @@ import scipy.sparse
 import scipy.sparse.linalg
 
 import matrix.errors
+import matrix.dense.util
 import matrix.sparse.util
 
 
@@ -75,10 +76,13 @@ def set_diagonal(A, diagonal_value):
 
 def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):
     if check_finite:
-        check_finite(A)
-        check_finite(b)
+        matrix.sparse.util.check_finite(A)
+        if is_sparse(b):
+            matrix.sparse.util.check_finite(b)
+        else:
+            matrix.dense.util.check_finite(b)
     A = A.tocsr(copy=True)
     if unit_diagonal:
-        matrix.sparse.util.set_diagonal(A, 1)
+        set_diagonal(A, 1)
     b = b.astype(np.result_type(A.data, b, np.float), copy=not overwrite_b)  # this has to be done due to a bug in scipy (see pull reqeust #7449)
     return scipy.sparse.linalg.spsolve_triangular(A, b, lower=lower, overwrite_A=True, overwrite_b=overwrite_b)
