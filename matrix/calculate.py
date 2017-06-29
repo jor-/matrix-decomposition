@@ -318,7 +318,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
                 d_until_i = d[:i_permuted]
 
             # calculate reduction factor
-            d_i_unmodified = A_ii - np.sum(L_row_i_until_column_i**2 * d_until_i)
+            d_i_unmodified = A_ii - np.sum(L_row_i_until_column_i * L_row_i_until_column_i.conj() * d_until_i)
 
             if d_i_unmodified < min_diag_value:
                 reduction_factor = ((t_i - min_diag_value) / (t_i - d_i_unmodified))**(0.5)
