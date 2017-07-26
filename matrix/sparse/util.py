@@ -33,43 +33,77 @@ def check_finite(A, check_finite=True):
         raise matrix.errors.MatrixNotFiniteError(matrix=A)
 
 
-def convert_to_csc(A, warn_if_wrong_format=True, sort_indices=False, eliminate_zeros=False):
+def convert_to_csc_or_csr(A, matrix_format, warn_if_wrong_format=True, sort_indices=False, eliminate_zeros=False, overwrite_A=False, copy=False):
+    # check input
+    matrix_format = matrix_format.upper()
+    POSSIBLE_MATRIX_FORMATS = ('CSC', 'CSR')
+    if matrix_format not in POSSIBLE_MATRIX_FORMATS:
+        raise ValueError('Matrix format has to be in {} but it is {}.'.format(POSSIBLE_MATRIX_FORMATS, matrix_format))
+
+    # convert to sparse matrix
+    copied = False
     if not scipy.sparse.isspmatrix_csc(A):
         if warn_if_wrong_format:
-            warnings.warn('CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
-        A = scipy.sparse.csc_matrix(A)
-    A = matrix.sparse.util.sort_indices(A, sort_indices=sort_indices)
-    A = matrix.sparse.util.eliminate_zeros(A, eliminate_zeros=eliminate_zeros)
+            warnings.warn('{} matrix format is required. Converting to CSC matrix format.'.format(matrix_format), scipy.sparse.SparseEfficiencyWarning)
+        if matrix_format == 'CSC':
+            A = scipy.sparse.csc_matrix(A)
+        else:
+            A = scipy.sparse.csr_matrix(A)
+        copied = True
+
+    # sort indices
+    A_old = A
+    A = matrix.sparse.util.sort_indices(A, sort_indices=sort_indices, overwrite_A=overwrite_A or copied)
+    if A_old is not A:
+        copied = True
+
+    # eliminate zeros
+    A_old = A
+    A = matrix.sparse.util.eliminate_zeros(A, eliminate_zeros=eliminate_zeros, overwrite_A=overwrite_A or copied)
+    if A_old is not A:
+        copied = True
+
+    # copy
+    if copy and not copied:
+        A = A.copy()
+
+    # return
     return A
 
 
-def convert_to_csr(A, warn_if_wrong_format=True, sort_indices=False, eliminate_zeros=False):
-    if not scipy.sparse.isspmatrix_csr(A):
-        if warn_if_wrong_format:
-            warnings.warn('CSR matrix format is required. Converting to CSR matrix format.', scipy.sparse.SparseEfficiencyWarning)
-        A = scipy.sparse.csr_matrix(A)
-    A = matrix.sparse.util.sort_indices(A, sort_indices=sort_indices)
-    A = matrix.sparse.util.eliminate_zeros(A, eliminate_zeros=eliminate_zeros)
-    return A
+def convert_to_csc(A, warn_if_wrong_format=True, sort_indices=False, eliminate_zeros=False, overwrite_A=False, copy=False):
+    return convert_to_csc_or_csr(A, 'CSC', warn_if_wrong_format=warn_if_wrong_format, sort_indices=sort_indices, eliminate_zeros=eliminate_zeros, overwrite_A=overwrite_A, copy=copy)
 
 
-def sort_indices(A, sort_indices=True):
+def convert_to_csr(A, warn_if_wrong_format=True, sort_indices=False, eliminate_zeros=False, overwrite_A=False, copy=False):
+    return convert_to_csc_or_csr(A, 'CSR', warn_if_wrong_format=warn_if_wrong_format, sort_indices=sort_indices, eliminate_zeros=eliminate_zeros, overwrite_A=overwrite_A, copy=copy)
+
+
+def sort_indices(A, sort_indices=True, overwrite_A=False):
     if sort_indices:
-        A.sort_indices()
+        if not A.has_sorted_indices:
+            if not overwrite_A:
+                A = A.copy()
+            A.sort_indices()
     return A
 
 
-def eliminate_zeros(A, eliminate_zeros=True):
+def eliminate_zeros(A, eliminate_zeros=True, overwrite_A=False):
     if eliminate_zeros:
+        if not overwrite_A:
+            A = A.copy()
         A.eliminate_zeros()
     return A
 
 
-def convert_index_dtype(A, dtype):
+def convert_index_dtype(A, dtype, overwrite_A=False):
     if not (scipy.sparse.isspmatrix_csc(A) or scipy.sparse.isspmatrix_csr(A)):
         raise NotImplementedError("Only CSR and CSC are supported yet.")
-    A.indices = np.asanyarray(A.indices, dtype=dtype)
-    A.indptr = np.asanyarray(A.indptr, dtype=dtype)
+    if A.indices.dtype != dtype or A.indptr.dtype != dtype:
+        if not overwrite_A:
+            A = A.copy()
+        A.indices = np.asanyarray(A.indices, dtype=dtype)
+        A.indptr = np.asanyarray(A.indptr, dtype=dtype)
     return A
 
 

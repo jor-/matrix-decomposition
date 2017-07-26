@@ -186,21 +186,26 @@ def supported_permutation_methods(dense):
 
 
 test_decompose_setups = [
-    (n, dense, complex_values, permutation_method, check_finite, return_type)
+    (n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A)
     for n in (100,)
     for dense in (True, False)
     for complex_values in (True, False)
     for permutation_method in supported_permutation_methods(dense)
     for check_finite in (True, False)
     for return_type in matrix.DECOMPOSITION_TYPES
+    for overwrite_A in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type', test_decompose_setups)
-def test_decompose(n, dense, complex_values, permutation_method, check_finite, return_type):
+@pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A', test_decompose_setups)
+def test_decompose(n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A):
     A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
-    decomposition = matrix.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite)
+    if not overwrite_A:
+        A_copied = A.copy()
+    decomposition = matrix.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
     assert matrix.util.almost_equal(decomposition.composed_matrix, A)
+    if not overwrite_A:
+        assert matrix.util.equal(A, A_copied)
 
 
 # *** positive definite *** #

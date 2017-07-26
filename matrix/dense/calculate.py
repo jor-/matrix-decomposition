@@ -12,7 +12,7 @@ import matrix.permute
 import matrix.util
 
 
-def _decompose(A, permutation_method=None, check_finite=True, return_type=None, overwrite=False, clean=True):
+def _decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, clean=True):
     """
     Computes a decomposition of a dense matrix.
 
@@ -27,21 +27,21 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         it is decomposed. It has to be a value in
         :const:`matrix.dense.constants.PERMUTATION_METHODS`.
         optional, default: no permutation
-    check_finite : bool
-        Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination)
-        if the inputs do contain infinities or NaNs.
-        Disabling gives a performance gain.
-        optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
         It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.
         If return_type is None the type of the returned decomposition is
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
-    overwrite : bool
-        Whether to overwrite data in `A`.
-        (enabling may improve performance)
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
         optional, default: False
     clean : bool
         Whether to set the zero entries in the triangular Cholesky to zero.
@@ -51,7 +51,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     Returns
     -------
     matrix.decompositions.DecompositionBase
-        A decompostion of `A`. If `return_type` is not None, the decomposition
+        A decomposition of `A`. If `return_type` is not None, the decomposition
         is of this type.
 
     Raises
@@ -67,7 +67,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     # convert matrix to array
     A_original = A
     A = np.asanyarray(A_original)
-    overwrite = overwrite or scipy.linalg.misc._datacopied(A, A_original)
+    overwrite_A = overwrite_A or scipy.linalg.misc._datacopied(A, A_original)
     del A_original
 
     # check matrix A
@@ -83,7 +83,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
 
     p = matrix.permute.permutation_vector(A, permutation_method)
     A = matrix.dense.permute.symmetric(A, p)
-    overwrite = overwrite or p is not None
+    overwrite_A = overwrite_A or p is not None
 
     # check return type
     supported_return_type = matrix.dense.constants.DECOMPOSITION_TYPES
@@ -93,7 +93,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
 
     # call lapack Cholesky function
     potrf = scipy.linalg.lapack.get_lapack_funcs('potrf', (A,))
-    L, exit_code = potrf(A, lower=True, overwrite_a=overwrite, clean=clean)
+    L, exit_code = potrf(A, lower=True, overwrite_a=overwrite_A, clean=clean)
 
     # make decomposition
     decomposition = matrix.decompositions.LL_Decomposition(L, p=p)
@@ -112,7 +112,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     return decomposition.as_type(return_type)
 
 
-def decompose(A, permutation_method=None, check_finite=True, return_type=None):
+def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
     """
     Computes a decomposition of a dense matrix.
 
@@ -127,23 +127,27 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         it is decomposed. It has to be a value in
         :const:`matrix.dense.constants.PERMUTATION_METHODS`.
         optional, default: no permutation
-    check_finite : bool
-        Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination)
-        if the inputs do contain infinities or NaNs.
-        Disabling gives a performance gain.
-        optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
         It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.
         If return_type is None the type of the returned decomposition is
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
 
     Returns
     -------
     matrix.decompositions.DecompositionBase
-        A decompostion of `A`. If `return_type` is not None, the decomposition
+        A decomposition of `A`. If `return_type` is not None, the decomposition
         is of this type.
 
     Raises
@@ -156,4 +160,4 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         If `A` is not a finte matrix and `check_finite` is True.
     """
 
-    return _decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
+    return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)

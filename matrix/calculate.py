@@ -14,7 +14,7 @@ import matrix.permute
 import matrix.util
 
 
-def decompose(A, permutation_method=None, check_finite=True, return_type=None):
+def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
     """
     Computes a decomposition of a matrix.
 
@@ -31,23 +31,27 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_PERMUTATION_METHODS`.
         optional, default: no permutation
-    check_finite : bool
-        Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination)
-        if the inputs do contain infinities or NaNs.
-        Disabling gives a performance gain.
-        optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
         It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.
         If return_type is None the type of the returned decomposition is
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
 
     Returns
     -------
     matrix.decompositions.DecompositionBase
-        A decompostion of `A` of type `return_type`.
+        A decomposition of `A` of type `return_type`.
 
     Raises
     ------
@@ -60,9 +64,9 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
     """
 
     if matrix.sparse.util.is_sparse(A):
-        return matrix.sparse.calculate.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
+        return matrix.sparse.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
     else:
-        return matrix.dense.calculate.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
+        return matrix.dense.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
 
 
 def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_value=None, permutation_method=None, check_finite=True, return_type=None, callback=None):
@@ -84,6 +88,9 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         `min_diag_value <= t[i] <= max_diag_value` must hold.
         `t` and `A` must have the same length.
         optional, default : The diagonal of `A` is used as `t`.
+    min_abs_value : float
+        Absolute values below `min_abs_value` are considered as zero.
+        optional, default : The resolution of the underlying data type is used.
     min_diag_value : float
         Each component of the diagonal of the matrix `D` in an returned `LDL` decomposition
         is forced to be greater or equal to `min_diag_value`.
@@ -92,9 +99,6 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         Each component of the diagonal of the matrix `D` in an returned `LDL` decomposition
         is forced to be lower or equal to `max_diag_value`.
         optional, default : No maximal value is forced.
-    min_abs_value : float
-        Absolute values below `min_abs_value` are considered as zero.
-        optional, default : The resolution of the underlying data type is used.
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
@@ -102,16 +106,16 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_PERMUTATION_METHODS`.
         optional, default: No permutation is done.
+    return_type : str
+        The type of the decomposition that should be calculated.
+        It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.
+        optional, default : The type of the decomposition is chosen by the function itself.
     check_finite : bool
         Whether to check that the input matrix contains only finite numbers.
         Disabling may result in problems (crashes, non-termination)
         if the inputs do contain infinities or NaNs.
         Disabling gives a performance gain.
         optional, default: True
-    return_type : str
-        The type of the decomposition that should be calculated.
-        It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.
-        optional, default : The type of the decomposition is chosen by the function itself.
     callback : callable
         In each iteration `callback(i, r)` is called where `i` is the index of
         the row and column where components of `A` are reduced by the factor `r`.
@@ -120,7 +124,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     Returns
     -------
     matrix.decompositions.DecompositionBase
-        An approximative decompostion of `A` of type `return_type`.
+        An approximative decomposition of `A` of type `return_type`.
 
     Raises
     ------

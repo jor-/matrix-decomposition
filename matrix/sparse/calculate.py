@@ -13,7 +13,7 @@ import matrix.permute
 import matrix.util
 
 
-def _decompose(A, permutation_method=None, check_finite=True, return_type=None, use_long=False):
+def _decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, use_long=False):
     """
     Computes a decomposition of a sparse matrix.
 
@@ -28,18 +28,22 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         it is decomposed. It has to be a value in
         :const:`matrix.sparse.constants.PERMUTATION_METHODS`.
         optional, default: no permutation
-    check_finite : bool
-        Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination)
-        if the inputs do contain infinities or NaNs.
-        Disabling gives a performance gain.
-        optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
         It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.
         If return_type is None the type of the returned decomposition is
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
     use_long: bool
         Specifies if the long type (64 bit) or the int type (32 bit)
         should be used for the indices of the sparse matrices.
@@ -49,7 +53,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     Returns
     -------
     matrix.decompositions.DecompositionBase
-        A decompostion of `A` of type `return_type`.
+        A decomposition of `A` of type `return_type`.
 
     Raises
     ------
@@ -92,9 +96,11 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         raise ValueError('Unkown decomposition type {}. Only values in {} are supported.'.format(return_type, supported_return_type))
 
     # convert matrix A
-    A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True)
+    A_old = A
+    A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True, overwrite_A=overwrite_A)
+    overwrite_A = overwrite_A or A_old is not A
     if use_long:
-        A = matrix.sparse.util.convert_index_dtype(A, np.int64)
+        A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=overwrite_A)
     matrix.sparse.util.check_finite(A, check_finite)
 
     # calculate decomposition
@@ -128,7 +134,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
     return decomposition.as_type(return_type)
 
 
-def decompose(A, permutation_method=None, check_finite=True, return_type=None):
+def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
     """
     Computes a decomposition of a sparse matrix.
 
@@ -143,23 +149,27 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
         it is decomposed. It has to be a value in
         :const:`matrix.sparse.constants.PERMUTATION_METHODS`.
         optional, default: no permutation
-    check_finite : bool
-        Whether to check that the input matrix contains only finite numbers.
-        Disabling may result in problems (crashes, non-termination)
-        if the inputs do contain infinities or NaNs.
-        Disabling gives a performance gain.
-        optional, default: True
     return_type : str
         The type of the decomposition that should be calculated.
         It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.
         If return_type is None the type of the returned decomposition is
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
 
     Returns
     -------
     matrix.decompositions.DecompositionBase
-        A decompostion of `A`. If `return_type` is not None, the decomposition
+        A decomposition of `A`. If `return_type` is not None, the decomposition
         is of this type.
 
     Raises
@@ -173,7 +183,7 @@ def decompose(A, permutation_method=None, check_finite=True, return_type=None):
     """
 
     try:
-        return _decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type, use_long=False)
+        return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, use_long=False)
     except matrix.errors.MatrixNoDecompositionPossibleTooManyEntriesError as e:
         warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
-        return _decompose(A, permutation_method=permutation_method, check_finite=False, return_type=return_type, use_long=True)
+        return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=False, overwrite_A=overwrite_A, use_long=True)
