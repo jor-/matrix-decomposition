@@ -1,3 +1,4 @@
+import os.path
 import tempfile
 import warnings
 
@@ -6,6 +7,7 @@ import scipy.sparse
 import pytest
 
 import matrix
+import matrix.calculate
 import matrix.constants
 import matrix.decompositions
 import matrix.permute
@@ -298,6 +300,31 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
             assert np.all(decomposition.d >= min_diag_value)
         if max_diag_value is not None:
             assert np.all(decomposition.d <= max_diag_value)
+
+    # calculate reduction factors
+    if overwrite_A:
+        A_copied = A.copy()
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        reduction_factors_file = os.path.join(tmp_dir, 'reduction_factors_file.npy')
+        decomposition = matrix.calculate.approximate_with_reduction_factor_file(A_copied, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type, reduction_factors_file=reduction_factors_file, overwrite_A=overwrite_A)
+        reduction_factors = np.load(reduction_factors_file)
+
+    # check overwrite_A
+    if not overwrite_A:
+        assert matrix.util.equal(A, A_copied)
+
+    # calculate approximation with reduction factors
+    if overwrite_A:
+        A_copied = A.copy()
+
+    A_approximated = matrix.calculate.approximate_apply_reduction_factors(A_copied, reduction_factors, t=t, min_abs_value=min_abs_value, overwrite_A=overwrite_A)
+
+    # check overwrite_A
+    if not overwrite_A:
+        assert matrix.util.equal(A, A_copied)
+
+    assert matrix.util.almost_equal(decomposition.composed_matrix, A_approximated)
 
 
 # *** save and load *** #
