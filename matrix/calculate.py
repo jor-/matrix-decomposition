@@ -308,9 +308,15 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             else:
                 A_ii = A[i, i]
 
+            if np.iscomplexobj(A_ii):
+                if np.isreal(A_ii):
+                    A_ii = A_ii.real
+                else:
+                    raise ValueError('Matrix A is not Hermitian. A[{i}, {i}] = {A_ii} is complex.'.format(i=i, A_ii=A_ii))
+
             # get and check t[i]
             if t is None:
-                t_i = A[i, i]
+                t_i = A_ii
             else:
                 t_i = t[i]
             if t_i < min_diag_value:
@@ -344,6 +350,10 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
 
             # calculate reduction factor
             d_i_unmodified = A_ii - np.sum(L_row_i_until_column_i * L_row_i_until_column_i.conj() * d_until_i)
+            if np.iscomplexobj(d_i_unmodified):
+                assert np.isreal(d_i_unmodified)
+                d_i_unmodified = d_i_unmodified.real
+            assert not np.iscomplexobj(d_i_unmodified)
 
             if d_i_unmodified < min_diag_value:
                 reduction_factor = ((t_i - min_diag_value) / (t_i - d_i_unmodified))**(0.5)
@@ -358,6 +368,8 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
                     reduction_factor = max_reduction_factor
             else:
                 assert False
+
+            assert np.isreal(reduction_factor)
             assert 0 <= reduction_factor <= 1
 
             if reduction_factor > max_reduction_factor:
@@ -378,6 +390,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
                 callback(i, reduction_factor)
 
     # return
+    assert np.all(np.isreal(d))
     assert np.all(d >= min_diag_value)
     assert np.all(d <= max_diag_value)
 

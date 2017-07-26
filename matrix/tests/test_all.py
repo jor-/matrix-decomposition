@@ -202,10 +202,16 @@ def test_decompose(n, dense, complex_values, permutation_method, check_finite, r
     A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
     if not overwrite_A:
         A_copied = A.copy()
+    # decompose
     decomposition = matrix.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+    # check if decomposition correct
     assert matrix.util.almost_equal(decomposition.composed_matrix, A)
+    # check if A overwritten
     if not overwrite_A:
         assert matrix.util.equal(A, A_copied)
+    # check if real valued d in LDL decomposition
+    decomposition = decomposition.as_type(matrix.LDL_DECOMPOSITION_TYPE)
+    assert np.all(np.isreal(decomposition.d))
 
 
 # *** positive definite *** #
@@ -287,6 +293,7 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
     # check d values
     if min_diag_value is not None or max_diag_value is not None:
         decomposition = decomposition.as_type(matrix.LDL_DECOMPOSITION_TYPE)
+        assert np.all(np.isreal(decomposition.d))
         if min_diag_value is not None:
             assert np.all(decomposition.d >= min_diag_value)
         if max_diag_value is not None:
