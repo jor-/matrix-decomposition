@@ -69,7 +69,61 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
         return matrix.dense.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
 
 
-def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_value=None, permutation_method=None, check_finite=True, return_type=None, callback=None):
+def _approximate_init(A, t=None, min_abs_value=None, copy=True):
+    # convert input matrix A to needed type
+    is_sparse = matrix.sparse.util.is_sparse(A)
+    if not is_sparse:
+        A_passed = A
+        A = np.asarray(A)
+        copied = A is not A_passed
+    A_dtype = np.result_type(A.dtype, np.float)
+    if is_sparse:
+        A = A.astype(A_dtype)
+    else:
+        A = A.astype(A_dtype, copy=not copied and copy)
+
+    # check input matrix A
+    matrix.util.check_square_matrix(A)
+
+    # check target vector t
+    n = A.shape[0]
+    if t is not None:
+        t = np.asanyarray(t)
+        if t.ndim != 1:
+            raise ValueError('t has to be a one-dimensional array.')
+        if len(t) != n:
+            raise ValueError('The length of t {} must have the same length as the dimensions of A {}.'.format(len(t), n))
+        if np.iscomplexobj(t):
+            if np.all(np.isreal(t)):
+                t = t.real
+            else:
+                raise ValueError('t must have real values but its dtype is {}.'.format(t.dtype))
+
+    # determine max_reduction_factor
+    dtype_resolution = np.finfo(A.dtype).resolution
+
+    # check min_abs_value
+    if min_abs_value is None:
+        min_abs_value = dtype_resolution
+    else:
+        if min_abs_value < 0:
+            raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
+        if min_abs_value < dtype_resolution:
+            warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
+            min_abs_value = dtype_resolution
+
+    # apply min_abs_value
+    if min_abs_value > 0:
+        if is_sparse:
+            A.data[np.abs(A.data) < min_abs_value] = 0
+            A.eliminate_zeros()
+        else:
+            A[np.abs(A) < min_abs_value] = 0
+
+    return A, t, min_abs_value
+
+
+def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, callback=None):
     """
     Computes an approximative decomposition of a matrix.
 
@@ -116,6 +170,10 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         if the inputs do contain infinities or NaNs.
         Disabling gives a performance gain.
         optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
     callback : callable
         In each iteration `callback(i, r)` is called where `i` is the index of
         the row and column where components of `A` are reduced by the factor `r`.
@@ -134,51 +192,16 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
         If `A` is not a finte matrix and `check_finite` is True.
     """
 
-    # convert input matrix A to needed type
+    # init
+    A, t, min_abs_value = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
     is_sparse = matrix.sparse.util.is_sparse(A)
-    if not is_sparse:
-        A = np.asarray(A)
-    A_dtype = np.result_type(A.dtype, np.float)
-    if is_sparse:
-        A = A.astype(A_dtype)
-    else:
-        A = A.astype(A_dtype, copy=False)
-
-    # check input matrix A
-    matrix.util.check_square_matrix(A)
-    matrix.util.check_finite(A, check_finite=check_finite)
-
-    # check target vector t
     n = A.shape[0]
-    if t is not None:
-        t = np.asanyarray(t)
-        if t.ndim != 1:
-            raise ValueError('t has to be a one-dimensional array.')
-        if len(t) != n:
-            raise ValueError('The length of t {} must have the same length as the dimensions of A {}.'.format(len(t), n))
+    matrix.util.check_finite(A, check_finite=check_finite)
 
     # determine max_reduction_factor
     dtype_resolution = np.finfo(A.dtype).resolution
     max_reduction_factor = 1 - dtype_resolution * 10**2
     min_diag_value_LL = dtype_resolution * 10**2
-
-    # check min_abs_value
-    if min_abs_value is None:
-        min_abs_value = dtype_resolution
-    else:
-        if min_abs_value < 0:
-            raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
-        if min_abs_value < dtype_resolution:
-            warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
-            min_abs_value = dtype_resolution
-
-    # apply min_abs_value
-    if min_abs_value > 0:
-        if is_sparse:
-            A.data[np.abs(A.data) < min_abs_value] = 0
-            A.eliminate_zeros()
-        else:
-            A[np.abs(A) < min_abs_value] = 0
 
     # check min_diag_value and max_diag_value
     if min_diag_value is None:
@@ -202,7 +225,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
     # check return type
     supported_return_types = matrix.constants.DECOMPOSITION_TYPES
-    if return_type not in supported_return_types:
+    if return_type is not None and return_type not in supported_return_types:
         raise ValueError('Unkown return type {}. Only values in {} are supported.'.format(return_type, supported_return_types))
 
     # check permutation method
@@ -227,8 +250,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
     # convert input matrix
     if is_sparse:
-        A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True)
-    assert A.dtype == A_dtype
+        A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True, overwrite_A=True)
 
     # calculate approximation of A
     finished = False
@@ -236,12 +258,12 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
         # try to compute decomposition
         try:
-            decomposition = decompose(A, permutation_method=decomposition_permutation_method, check_finite=False)
+            decomposition = decompose(A, permutation_method=decomposition_permutation_method, check_finite=False, overwrite_A=False)
         except matrix.errors.MatrixNoDecompositionPossibleTooManyEntriesError as e:
             if is_sparse and (A.indices.dtype != np.int64 or A.indptr != np.int64):
                 warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
-                A = matrix.sparse.util.convert_index_dtype(A, np.int64)
-                return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, check_finite=False, return_type=return_type, callback=callback)
+                A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=True)
+                return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=decomposition_permutation_method, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
             else:
                 raise
         except matrix.errors.MatrixNoDecompositionPossibleWithProblematicSubdecompositionError as e:
@@ -344,50 +366,12 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
 
             # apply reduction factor
             if t is None:
-                A_ii_new = A_ii    # reduces rounding errors
-            else:
-                A_ii_new = (1 - reduction_factor**2) * t_i + reduction_factor**2 * A_ii
-
+                t_i = None
             if is_sparse:
-                # set column
-                A.data[A_i_start_index:A_i_stop_index] *= reduction_factor
-
-                # apply min_abs_value in column
-                set_to_zero_indices = np.where(np.abs(A.data[A_i_start_index:A_i_stop_index]) < min_abs_value)[0]
-                set_to_zero_indices += A_i_start_index
-                A.data[set_to_zero_indices] = 0
-                del set_to_zero_indices
-
-                # set row
-                A_i_data = A.data[A_i_start_index:A_i_stop_index]
-                A_i_rows = A.indices[A_i_start_index:A_i_stop_index]
-                for j, A_ji in zip(A_i_rows, A_i_data):
-                    if i != j:
-                        A[i, j] = A_ji
-                del A_i_data, A_i_rows
-
-                # set diagonal entry
-                if A_ii_index is not None:
-                    A.data[A_ii_index] = A_ii_new
-                elif A_ii_new != 0:
-                    with warnings.catch_warnings():
-                        warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
-                        A[i, i] = A_ii_new
-
-                # eliminate zeros
+                A = _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=t_i, min_abs_value=min_abs_value, is_sparse=True, A_ii=A_ii, A_i_start_index=A_i_start_index, A_i_stop_index=A_i_stop_index, A_ii_index=A_ii_index)
                 A.eliminate_zeros()
             else:
-                # set column
-                A[:, i] *= reduction_factor
-
-                # apply min_abs_value in column
-                A[np.abs(A[:, i]) < min_abs_value, i] = 0
-
-                # set row
-                A[i, :] = A[:, i].T
-
-                # set diagonal entry
-                A[i, i] = A_ii_new
+                A = _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=t_i, min_abs_value=min_abs_value, is_sparse=False, A_ii=A_ii)
 
             # call callback
             if callback is not None:
@@ -397,8 +381,72 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     assert np.all(d >= min_diag_value)
     assert np.all(d <= max_diag_value)
 
-    decomposition = decomposition.as_type(return_type)
+    if return_type is not None:
+        decomposition = decomposition.as_type(return_type)
     return decomposition
+
+
+def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_abs_value=None, is_sparse=None, A_ii=None, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None):
+    # init not passed inputs
+    if min_abs_value is None:
+        min_abs_value = 0
+    if is_sparse is None:
+        is_sparse = matrix.sparse.util.is_sparse(A)
+
+    if is_sparse:
+        A_i_start_index, A_i_stop_index, A_ii_index, A_ii = matrix.sparse.util.compressed_matrix_indices(A, i, A_i_start_index=A_i_start_index, A_i_stop_index=A_i_stop_index, A_ii_index=A_ii_index, A_ii=A_ii)
+    else:
+        if A_ii is None:
+            A_ii = A[i, i]
+
+    # apply reduction factor
+    if t_i is None:
+        A_ii_new = A_ii    # reduces rounding errors
+    else:
+        A_ii_new = (1 - reduction_factor**2) * t_i + reduction_factor**2 * A_ii
+
+    if is_sparse:
+        # set column (or row)
+        A.data[A_i_start_index:A_i_stop_index] *= reduction_factor
+
+        # apply min_abs_value in column
+        if min_abs_value > 0:
+            set_to_zero_indices = np.where(np.abs(A.data[A_i_start_index:A_i_stop_index]) < min_abs_value)[0]
+            set_to_zero_indices += A_i_start_index
+            A.data[set_to_zero_indices] = 0
+            del set_to_zero_indices
+
+        # set row (or column)
+        A_i_data = A.data[A_i_start_index:A_i_stop_index]
+        A_i_rows = A.indices[A_i_start_index:A_i_stop_index]
+        for j, A_ji in zip(A_i_rows, A_i_data.conj()):
+            if i != j:
+                A[i, j] = A_ji
+        del A_i_data, A_i_rows
+
+        # set diagonal entry
+        if A_ii_index is not None:
+            A.data[A_ii_index] = A_ii_new
+        elif A_ii_new != 0:
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+                A[i, i] = A_ii_new
+
+    else:
+        # set column
+        A[:, i] *= reduction_factor
+
+        # apply min_abs_value in column
+        if min_abs_value > 0:
+            A[np.abs(A[:, i]) < min_abs_value, i] = 0
+
+        # set row
+        A[i, :] = A[:, i].conj().T
+
+        # set diagonal entry
+        A[i, i] = A_ii_new
+
+    return A
 
 
 def is_positive_semi_definite(A, check_finite=True):

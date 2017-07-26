@@ -127,3 +127,28 @@ def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, c
         set_diagonal(A, 1)
     b = b.astype(np.result_type(A.data, b, np.float), copy=not overwrite_b)  # this has to be done due to a bug in scipy (see pull reqeust #7449)
     return scipy.sparse.linalg.spsolve_triangular(A, b, lower=lower, overwrite_A=True, overwrite_b=overwrite_b)
+
+
+def compressed_matrix_indices(A, i, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None, A_ii=None):
+    if A_i_start_index is None:
+        A_i_start_index = A.indptr[i]
+    if A_i_stop_index is None:
+        A_i_stop_index = A.indptr[i + 1]
+    assert A_i_stop_index >= A_i_start_index
+
+    if A_ii_index is None:
+        A_ii_index_mask = np.where(A.indices[A_i_start_index:A_i_stop_index] == i)[0]
+        if len(A_ii_index_mask) == 1:
+            A_ii_index = A_i_start_index + A_ii_index_mask[0]
+            assert A_i_start_index <= A_ii_index <= A_i_stop_index
+        else:
+            assert len(A_ii_index_mask) == 0
+            A_ii_index = None
+
+    if A_ii is None:
+        if A_ii_index is not None:
+            A_ii = A.data[A_ii_index]
+        else:
+            A_ii = 0
+
+    return A_i_start_index, A_i_stop_index, A_ii_index, A_ii

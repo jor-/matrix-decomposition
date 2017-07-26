@@ -233,7 +233,7 @@ def test_positive_definite(n, dense, complex_values):
 # *** approximate *** #
 
 test_approximate_setups = [
-    (n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value)
+    (n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value, overwrite_A)
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
@@ -244,11 +244,13 @@ test_approximate_setups = [
     for min_diag_value in (None, 10**-4)
     for max_diag_value_shift in (None, 1 + np.random.rand(1) * 10)
     for t in (None, random_vector(n) + 10**-4)
+    for overwrite_A in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value', test_approximate_setups)
-def test_approximate(n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value):
+@pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value, overwrite_A', test_approximate_setups)
+def test_approximate(n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value, overwrite_A):
+    # init values
     if t is None:
         if min_diag_value is None:
             A_min_diag_value = 10**-6
@@ -260,22 +262,35 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
 
     A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, min_diag_value=A_min_diag_value)
 
+    if t is None:
+        t_used = A.diagonal()
+    else:
+        t_used = t
     if max_diag_value_shift is not None:
-        if t is None:
-            max_diag_value = A.diagonal().max()
-        else:
-            max_diag_value = t.max()
+        max_diag_value = t_used.max()
         max_diag_value = max_diag_value + max_diag_value_shift
     else:
         max_diag_value = None
 
-    decomposition = matrix.approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
+    # calculate approximated decomposition
+    if overwrite_A:
+        A_copied = A.copy()
+    else:
+        A_copied = A
+
+    decomposition = matrix.approximate(A_copied, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+
+    # check overwrite_A
+    if not overwrite_A:
+        assert matrix.util.equal(A, A_copied)
+
+    # check d values
     if min_diag_value is not None or max_diag_value is not None:
         decomposition = decomposition.as_type(matrix.LDL_DECOMPOSITION_TYPE)
         if min_diag_value is not None:
-            assert decomposition.d.min() >= min_diag_value
+            assert np.all(decomposition.d >= min_diag_value)
         if max_diag_value is not None:
-            assert decomposition.d.max() <= max_diag_value
+            assert np.all(decomposition.d <= max_diag_value)
 
 
 # *** save and load *** #
