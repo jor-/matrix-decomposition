@@ -719,6 +719,8 @@ class LDL_Decomposition(DecompositionBase):
     def d(self, d):
         if d is not None:
             d = matrix.util.as_vector(d)
+            if np.iscomplexobj(d) and np.all(np.isreal(d)):
+                d = d.real
             self._d = d
         else:
             try:
@@ -919,6 +921,8 @@ class LDL_DecompositionCompressed(DecompositionBase):
         if not self.is_sparse():
             LD = np.asarray(LD)
         d = LD.diagonal()
+        if np.iscomplexobj(d) and np.all(np.isreal(d)):
+            d = d.real
         return d
 
     @property
@@ -1070,6 +1074,8 @@ class LL_Decomposition(DecompositionBase):
         if not self.is_sparse():
             L = np.asarray(L)
         d = L.diagonal()
+        if np.iscomplexobj(d) and np.all(np.isreal(d)):
+            d = d.real
         return d
 
     def as_LDL_Decomposition(self):
