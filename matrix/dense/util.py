@@ -8,6 +8,10 @@ def equal(A, B):
     return A.shape == B.shape and not np.any(A != B)
 
 
+def almost_equal(A, B):
+    return A.shape == B.shape and np.all(np.isclose(A, B))
+
+
 def is_finite(A):
     return np.all(np.isfinite(A))
 

@@ -199,17 +199,8 @@ test_decompose_setups = [
 @pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type', test_decompose_setups)
 def test_decompose(n, dense, complex_values, permutation_method, check_finite, return_type):
     A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
-    if dense:
-        A_dense = A
-    else:
-        A_dense = A.todense()
-    decomposition = matrix.decompose(A, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type)
-    A_composed = decomposition.composed_matrix
-    if dense:
-        A_composed_dense = A_composed
-    else:
-        A_composed_dense = A_composed.todense()
-    np.testing.assert_array_almost_equal(A_dense, A_composed_dense)
+    decomposition = matrix.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite)
+    assert matrix.util.almost_equal(decomposition.composed_matrix, A)
 
 
 # *** positive definite *** #

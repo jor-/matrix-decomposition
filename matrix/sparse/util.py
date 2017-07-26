@@ -14,7 +14,14 @@ def is_sparse(A):
 
 
 def equal(A, B):
-    return A.shape == B.shape and (A != B).nnz == 0
+    return A.shape == B.shape and A.nnz == B.nnz and (A != B).nnz == 0
+
+
+def almost_equal(A, B):
+    if A.shape != B.shape:
+        return False
+    D = A - B
+    return np.all(np.isclose(D.data, 0))
 
 
 def is_finite(A):
