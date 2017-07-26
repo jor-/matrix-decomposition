@@ -1106,9 +1106,9 @@ class LL_Decomposition(DecompositionBase):
                 L[i, i] = 1
 
         # compute new d
-        d = d**2
+        d = d * d.conj()
 
-        # construct new decompostion
+        # construct new decomposition
         return LDL_Decomposition(L, d, p=p)
 
     def as_type(self, type_str, copy=False):
