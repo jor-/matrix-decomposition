@@ -1,3 +1,4 @@
+import os
 import warnings
 
 import numpy as np
@@ -460,6 +461,180 @@ def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_ab
         A[i, i] = A_ii_new
 
     return A
+
+
+def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_value=None, overwrite_A=False):
+    """
+    Computes an approximative of `A` using the passed reduction factors.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be approximated.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    t : numpy.ndarray
+        The targed vector used for the approximation. For each i in range(M)
+        `min_diag_value <= t[i] <= max_diag_value` must hold.
+        `t` and `A` must have the same length.
+        optional, default : The diagonal of `A` is used as `t`.
+    min_abs_value : float
+        Absolute values below `min_abs_value` are considered as zero.
+        optional, default : The resolution of the underlying data type is used.
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
+
+    Returns
+    -------
+    numpy.ndarray or scipy.sparse.spmatrix
+        An approximative of `A` using the passed reduction factors.
+    """
+
+    # init
+    A, t, min_abs_value = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
+    is_sparse = matrix.sparse.util.is_sparse(A)
+
+    # convert input matrix
+    if is_sparse:
+        A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True, overwrite_A=True)
+
+    # apply reduction factors
+    for i, r in enumerate(reduction_factors):
+        if r != 1:
+            if t is not None:
+                t_i = t[i]
+            else:
+                t_i = None
+            A = _approximate_apply_reduction_factor(A, i, r, t_i=t_i, min_abs_value=min_abs_value, is_sparse=is_sparse)
+
+    # return matrix
+    if is_sparse:
+        A.eliminate_zeros()
+    return A
+
+
+def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, reduction_factors_file=None):
+    """
+    Computes an approximative decomposition of a matrix.
+
+    If `A` is decomposable in a decomposition of type `return_type`, this decomposition is returned.
+    Otherwise a decomposition of type `return_type` is retuned which represents an approximation
+    of `A`.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be approximated by a decomposition.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    t : numpy.ndarray
+        The targed vector used for the approximation. For each i in range(M)
+        `min_diag_value <= t[i] <= max_diag_value` must hold.
+        `t` and `A` must have the same length.
+        optional, default : The diagonal of `A` is used as `t`.
+    min_abs_value : float
+        Absolute values below `min_abs_value` are considered as zero.
+        optional, default : The resolution of the underlying data type is used.
+    min_diag_value : float
+        Each component of the diagonal of the matrix `D` in an returned `LDL` decomposition
+        is forced to be greater or equal to `min_diag_value`.
+        optional, default : 0.
+    max_diag_value : float
+        Each component of the diagonal of the matrix `D` in an returned `LDL` decomposition
+        is forced to be lower or equal to `max_diag_value`.
+        optional, default : No maximal value is forced.
+    permutation_method : str
+        The symmetric permutation method that is applied to the matrix before
+        it is decomposed. It has to be a value in
+        :const:`matrix.PERMUTATION_METHODS`.
+        If `A` is sparse, it can also be a value in
+        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
+        optional, default: No permutation is done.
+    return_type : str
+        The type of the decomposition that should be calculated.
+        It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.
+        optional, default : The type of the decomposition is chosen by the function itself.
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
+    reduction_factors_file : str
+        A file where the reduction_factors used to compute the approximation of `A` are stored.
+        If this file already exists the previoisly stored values are used.
+        This allows the calculation of the approximation to be interrupted and resumed.
+
+    Returns
+    -------
+    matrix.decompositions.DecompositionBase
+        An approximative decomposition of `A` of type `return_type`.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
+    """
+
+    # callback function
+    def approximate_callback_save_reduction_factors(reduction_factors_file, n):
+        """ Returns a callback function for :const:`matrix.approximate` which saves each iteration in a :mod:`numpy` file.
+
+        Parameters
+        ----------
+        reduction_factors_file : str
+            The file where the reduction factors are saved.
+        n : int
+            The dimension of the squared matrix that is approximated.
+
+        Returns
+        -------
+        callable
+            A callback function for :func:`matrix.approximate` which saves each iteration in a :mod:`numpy` file.
+        """
+
+        try:
+            reduction_factors = np.load(reduction_factors_file, mmap_mode='r+')
+        except FileNotFoundError:
+            reduction_factors = np.ones(n, dtype=np.float)
+            os.makedirs(os.path.dirname(reduction_factors_file), exist_ok=True)
+            np.save(reduction_factors_file, reduction_factors)
+            reduction_factors = np.load(reduction_factors_file, mmap_mode='r+')
+        else:
+            if reduction_factors.shape != (n,):
+                raise ValueError('The reduction factors file contains an array with shape {} but the expected shape is {}'.format(reduction_factors.shape, (n,)))
+
+        def callback_function(i, reduction_factor):
+            reduction_factors[i] = reduction_factors[i] * reduction_factor
+            reduction_factors.flush()
+
+        return callback_function
+
+    # apply previous reduction factors
+    if reduction_factors_file is not None:
+        try:
+            reduction_factors = np.load(reduction_factors_file)
+        except FileNotFoundError:
+            pass
+        else:
+            A = approximate_apply_reduction_factors(A, reduction_factors, t=t, min_abs_value=min_abs_value, overwrite_A=overwrite_A)
+            overwrite_A = False
+
+        n = A.shape[0]
+        callback = approximate_callback_save_reduction_factors(reduction_factors_file, n)
+    else:
+        callback = None
+
+    # run approximation
+    return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, callback=callback)
 
 
 def is_positive_semi_definite(A, check_finite=True):
