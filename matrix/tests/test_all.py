@@ -276,22 +276,27 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
 # *** save and load *** #
 
 test_save_and_load_setups = [
-    (n, dense, complex_values, type_str, filename_prefix)
+    (n, dense, complex_values, type_str)
     for n in (100,)
     for dense in (True, False)
     for complex_values in (True, False)
     for type_str in matrix.constants.DECOMPOSITION_TYPES
-    for filename_prefix in (None, 'TEST')
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values, type_str, filename_prefix', test_save_and_load_setups)
-def test_save_and_load(n, dense, complex_values, type_str, filename_prefix):
+@pytest.mark.parametrize('n, dense, complex_values, type_str', test_save_and_load_setups)
+def test_save_and_load(n, dense, complex_values, type_str):
     decomposition = random_decomposition(type_str, n, dense=dense, complex_values=complex_values)
+    # test own IO methods
     decomposition_other = type(decomposition)()
     with tempfile.TemporaryDirectory() as tmp_dir:
-        decomposition.save(tmp_dir, filename_prefix=filename_prefix)
-        decomposition_other.load(tmp_dir, filename_prefix=filename_prefix)
+        decomposition.save(tmp_dir)
+        decomposition_other.load(tmp_dir)
+    assert decomposition == decomposition_other
+    # test general IO methods
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        matrix.decompositions.save(tmp_dir, decomposition)
+        decomposition_other = matrix.decompositions.load(tmp_dir)
     assert decomposition == decomposition_other
 
 
