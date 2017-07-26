@@ -109,7 +109,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
 
     # return decomposition
     assert exit_code == 0
-    return decomposition.to(return_type)
+    return decomposition.as_type(return_type)
 
 
 def decompose(A, permutation_method=None, check_finite=True, return_type=None):

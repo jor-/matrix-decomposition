@@ -247,7 +247,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
             bad_index = n
 
         # get diagonal values of current (sub-)decomposition
-        decomposition = decomposition.to_any(matrix.constants.LDL_DECOMPOSITION_TYPE, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE)
+        decomposition = decomposition.as_any_type(matrix.constants.LDL_DECOMPOSITION_TYPE, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE)
         decomposition._apply_previous_permutation(p_first)
         d = decomposition.d
 
@@ -393,7 +393,7 @@ def approximate(A, t=None, min_diag_value=None, max_diag_value=None, min_abs_val
     assert np.all(d >= min_diag_value)
     assert np.all(d <= max_diag_value)
 
-    decomposition = decomposition.to(return_type)
+    decomposition = decomposition.as_type(return_type)
     return decomposition
 
 

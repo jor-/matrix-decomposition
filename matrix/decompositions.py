@@ -227,7 +227,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             except AttributeError:
                 return False
 
-    def to(self, type_str, copy=False):
+    def as_type(self, type_str, copy=False):
         """ Convert decomposition to passed type.
 
         Parameters
@@ -255,7 +255,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             raise matrix.errors.MatrixDecompositionNoConversionImplementedError(
                 original_decomposition=self, desired_type_str=type_str)
 
-    def to_any(self, *type_strs, copy=False):
+    def as_any_type(self, *type_strs, copy=False):
         """ Convert decomposition to any of the passed types.
 
         Parameters
@@ -280,7 +280,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             else:
                 return self
         else:
-            return self.to(type_strs[0])
+            return self.as_type(type_strs[0])
 
     # *** features of decomposition *** #
 
@@ -704,7 +704,7 @@ class LDL_Decomposition(DecompositionBase):
 
     # *** convert type *** #
 
-    def to_LL_Decomposition(self):
+    def as_LL_Decomposition(self):
         L = self.L
         d = self.d
         p = self.p
@@ -723,20 +723,20 @@ class LDL_Decomposition(DecompositionBase):
         D = scipy.sparse.diags(d)
         L = L @ D
 
-        # construct new decompostion
+        # construct new decomposition
         return LL_Decomposition(L, p=p)
 
-    def to_LDL_DecompositionCompressed(self):
+    def as_LDL_DecompositionCompressed(self):
         return LDL_DecompositionCompressed(self.LD, p=self.p)
 
-    def to(self, type_str, copy=False):
+    def as_type(self, type_str, copy=False):
         try:
-            return super().to(type_str, copy=copy)
+            return super().as_type(type_str, copy=copy)
         except matrix.errors.MatrixDecompositionNoConversionImplementedError:
             if type_str == matrix.constants.LL_DECOMPOSITION_TYPE:
-                return self.to_LL_Decomposition()
+                return self.as_LL_Decomposition()
             elif type_str == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
-                return self.to_LDL_DecompositionCompressed()
+                return self.as_LDL_DecompositionCompressed()
             else:
                 raise
 
@@ -849,7 +849,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     @property
     def composed_matrix(self):
-        return self.to_LDL_Decomposition().composed_matrix
+        return self.as_LDL_Decomposition().composed_matrix
 
     # *** decomposition specific properties *** #
 
@@ -902,17 +902,17 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     # *** convert type *** #
 
-    def to_LDL_Decomposition(self):
+    def as_LDL_Decomposition(self):
         return LDL_Decomposition(self.L, self.d, p=self.p)
 
-    def to(self, type_str, copy=False):
+    def as_type(self, type_str, copy=False):
         try:
-            return super().to(type_str, copy=copy)
+            return super().as_type(type_str, copy=copy)
         except matrix.errors.MatrixDecompositionNoConversionImplementedError:
             if type_str == matrix.constants.LDL_DECOMPOSITION_TYPE:
-                return self.to_LDL_Decomposition()
+                return self.as_LDL_Decomposition()
             elif type_str == matrix.constants.LL_DECOMPOSITION_TYPE:
-                return self.to_LDL_Decomposition().to_LL_Decomposition()
+                return self.as_LDL_Decomposition().as_LL_Decomposition()
             else:
                 raise
 
@@ -946,16 +946,16 @@ class LDL_DecompositionCompressed(DecompositionBase):
     # *** multiply *** #
 
     def matrix_right_side_multiplication(self, x):
-        return self.to_LDL_Decomposition().matrix_right_side_multiplication(x)
+        return self.as_LDL_Decomposition().matrix_right_side_multiplication(x)
 
     def matrix_both_sides_multiplication(self, x, y=None):
-        return self.to_LDL_Decomposition().matrix_both_sides_multiplication(x, y=y)
+        return self.as_LDL_Decomposition().matrix_both_sides_multiplication(x, y=y)
 
     def inverse_matrix_right_side_multiplication(self, x):
-        return self.to_LDL_Decomposition().inverse_matrix_right_side_multiplication(x)
+        return self.as_LDL_Decomposition().inverse_matrix_right_side_multiplication(x)
 
     def inverse_matrix_both_sides_multiplication(self, x, y=None):
-        return self.to_LDL_Decomposition().inverse_matrix_both_sides_multiplication(x, y=y)
+        return self.as_LDL_Decomposition().inverse_matrix_both_sides_multiplication(x, y=y)
 
 
 class LL_Decomposition(DecompositionBase):
@@ -1031,7 +1031,7 @@ class LL_Decomposition(DecompositionBase):
         d = L.diagonal()
         return d
 
-    def to_LDL_Decomposition(self):
+    def as_LDL_Decomposition(self):
         L = self.L
         p = self.p
 
@@ -1070,14 +1070,14 @@ class LL_Decomposition(DecompositionBase):
         # construct new decompostion
         return LDL_Decomposition(L, d, p=p)
 
-    def to(self, type_str, copy=False):
+    def as_type(self, type_str, copy=False):
         try:
-            return super().to(type_str, copy=copy)
+            return super().as_type(type_str, copy=copy)
         except matrix.errors.MatrixDecompositionNoConversionImplementedError:
             if type_str == matrix.constants.LDL_DECOMPOSITION_TYPE:
-                return self.to_LDL_Decomposition()
+                return self.as_LDL_Decomposition()
             elif type_str == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
-                return self.to_LDL_Decomposition().to_LDL_DecompositionCompressed()
+                return self.as_LDL_Decomposition().as_LDL_DecompositionCompressed()
             else:
                 raise
 

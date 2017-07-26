@@ -125,7 +125,7 @@ def _decompose(A, permutation_method=None, check_finite=True, return_type=None, 
         raise matrix.errors.MatrixNoLDLDecompositionPossibleError(A, problematic_leading_principal_submatrix_index=bad_index, subdecomposition=decomposition) from cholmod_exception
 
     # return
-    return decomposition.to(return_type)
+    return decomposition.as_type(return_type)
 
 
 def decompose(A, permutation_method=None, check_finite=True, return_type=None):
