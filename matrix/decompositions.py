@@ -18,7 +18,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     This class is a base class for matrix decompositions.
     """
 
-    _decomposition_type = matrix.constants.BASE_DECOMPOSITION_TYPE
+    type_str = matrix.constants.BASE_DECOMPOSITION_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
     def __init__(self, p=None):
@@ -36,8 +36,8 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     # *** str *** #
 
     def __str__(self):
-        return '{decomposition_type} decomposition of matrix with shape ({n}, {n})'.format(
-            decomposition_type=self.decomposition_type, n=self.n)
+        return '{type_str} decomposition of matrix with shape ({n}, {n})'.format(
+            type_str=self.type_str, n=self.n)
 
     # *** permutation *** #
 
@@ -181,17 +181,12 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """:class:`numpy.matrix` or :class:`scipy.sparse.spmatrix`: The composed matrix represented by this decomposition."""
         raise NotImplementedError
 
-    @property
-    def decomposition_type(self):
-        """:class:`str`: The type of this decompositon."""
-        return self._decomposition_type
-
     # *** compare methods *** #
 
     def __eq__(self, other):
         if not isinstance(other, DecompositionBase):
             return False
-        if not self.decomposition_type == other.decomposition_type:
+        if not self.type_str == other.type_str:
             return False
         if self.is_permuted and other.is_permuted:
             return np.all(self.p == other.p)
@@ -210,12 +205,12 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
         return copy.deepcopy(self)
 
-    def is_type(self, decomposition_type):
+    def is_type(self, type_str):
         """ Whether this is a decomposition of the passed type.
 
         Parameters
         ----------
-        decomposition_type : str
+        type_str : str
             The decomposition type according to which is checked.
 
         Returns
@@ -224,20 +219,20 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Whether this is a decomposition of the passed type.
         """
 
-        if decomposition_type is None:
+        if type_str is None:
             return True
         else:
             try:
-                return self._decomposition_type == decomposition_type
+                return self.type_str == type_str
             except AttributeError:
                 return False
 
-    def to(self, decomposition_type, copy=False):
+    def to(self, type_str, copy=False):
         """ Convert decomposition to passed type.
 
         Parameters
         ----------
-        decomposition_type : str
+        type_str : str
             The decomposition type to which this decomposition is converted.
         copy : bool
             Whether the data of this decomposition should always be copied or only if needed.
@@ -245,27 +240,27 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         Returns
         -------
         matrix.decompositions.DecompositionBase
-            If the type of this decomposition is not `decomposition_type`, a decompostion of type
-            `decomposition_type` is returned which represents the same decomposed matrix as this
+            If the type of this decomposition is not `type_str`, a decomposition of type
+            `type_str` is returned which represents the same decomposed matrix as this
             decomposition. Otherwise this decomposition or a copy of it is returned, depending on
             `copy`.
         """
 
-        if self.is_type(decomposition_type):
+        if self.is_type(type_str):
             if copy:
                 return self.copy()
             else:
                 return self
         else:
             raise matrix.errors.MatrixDecompositionNoConversionImplementedError(
-                original_decomposition=self, desired_decomposition_type=decomposition_type)
+                original_decomposition=self, desired_type_str=type_str)
 
-    def to_any(self, *decomposition_types, copy=False):
+    def to_any(self, *type_strs, copy=False):
         """ Convert decomposition to any of the passed types.
 
         Parameters
         ----------
-        *decomposition_types : str
+        *type_strs : str
             The decomposition types to any of them this this decomposition is converted.
         copy : bool
             Whether the data of this decomposition should always be copied or only if needed.
@@ -273,19 +268,19 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         Returns
         -------
         matrix.decompositions.DecompositionBase
-            If the type of this decomposition is not in `decomposition_types`, a decompostion of
-            type `decomposition_type[0]` is returned which represents the same decomposed matrix
+            If the type of this decomposition is not in `type_strs`, a decomposition of
+            type `type_str[0]` is returned which represents the same decomposed matrix
             as this decomposition. Otherwise this decomposition or a copy of it is returned,
             depending on `copy`.
         """
 
-        if len(decomposition_types) == 0 or any(map(self.is_type, decomposition_types)):
+        if len(type_strs) == 0 or any(map(self.is_type, type_strs)):
             if copy:
                 return self.copy()
             else:
                 return self
         else:
-            return self.to(decomposition_types[0])
+            return self.to(type_strs[0])
 
     # *** features of decomposition *** #
 
@@ -401,7 +396,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         else:
             file_extension = matrix.constants.DENSE_FILE_EXTENSION
         filename = matrix.constants.DECOMPOSITION_ATTRIBUTE_FILENAME.format(
-            decomposition_type=self.decomposition_type,
+            decomposition_type=self.type_str,
             attribute_name=attribute_name,
             file_extension=file_extension)
         if filename_prefix is not None:
@@ -617,7 +612,7 @@ class LDL_Decomposition(DecompositionBase):
     Only the diagonal values of `D` are stored.
     """
 
-    _decomposition_type = matrix.constants.LDL_DECOMPOSITION_TYPE
+    type_str = matrix.constants.LDL_DECOMPOSITION_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
     def __init__(self, L=None, d=None, p=None):
@@ -734,13 +729,13 @@ class LDL_Decomposition(DecompositionBase):
     def to_LDL_DecompositionCompressed(self):
         return LDL_DecompositionCompressed(self.LD, p=self.p)
 
-    def to(self, decomposition_type, copy=False):
+    def to(self, type_str, copy=False):
         try:
-            return super().to(decomposition_type, copy=copy)
+            return super().to(type_str, copy=copy)
         except matrix.errors.MatrixDecompositionNoConversionImplementedError:
-            if decomposition_type == matrix.constants.LL_DECOMPOSITION_TYPE:
+            if type_str == matrix.constants.LL_DECOMPOSITION_TYPE:
                 return self.to_LL_Decomposition()
-            elif decomposition_type == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
+            elif type_str == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
                 return self.to_LDL_DecompositionCompressed()
             else:
                 raise
@@ -828,7 +823,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     and whose off-diagonal values are those of `L`.
     """
 
-    _decomposition_type = matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE
+    type_str = matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
     def __init__(self, LD=None, p=None):
@@ -910,13 +905,13 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def to_LDL_Decomposition(self):
         return LDL_Decomposition(self.L, self.d, p=self.p)
 
-    def to(self, decomposition_type, copy=False):
+    def to(self, type_str, copy=False):
         try:
-            return super().to(decomposition_type, copy=copy)
+            return super().to(type_str, copy=copy)
         except matrix.errors.MatrixDecompositionNoConversionImplementedError:
-            if decomposition_type == matrix.constants.LDL_DECOMPOSITION_TYPE:
+            if type_str == matrix.constants.LDL_DECOMPOSITION_TYPE:
                 return self.to_LDL_Decomposition()
-            elif decomposition_type == matrix.constants.LL_DECOMPOSITION_TYPE:
+            elif type_str == matrix.constants.LL_DECOMPOSITION_TYPE:
                 return self.to_LDL_Decomposition().to_LL_Decomposition()
             else:
                 raise
@@ -970,7 +965,7 @@ class LL_Decomposition(DecompositionBase):
     This decomposition is also called Cholesky decomposition.
     """
 
-    _decomposition_type = matrix.constants.LL_DECOMPOSITION_TYPE
+    type_str = matrix.constants.LL_DECOMPOSITION_TYPE
     """ :class:`str`: The type of this decomposition represented as string. """
 
     def __init__(self, L=None, p=None):
@@ -1075,13 +1070,13 @@ class LL_Decomposition(DecompositionBase):
         # construct new decompostion
         return LDL_Decomposition(L, d, p=p)
 
-    def to(self, decomposition_type, copy=False):
+    def to(self, type_str, copy=False):
         try:
-            return super().to(decomposition_type, copy=copy)
+            return super().to(type_str, copy=copy)
         except matrix.errors.MatrixDecompositionNoConversionImplementedError:
-            if decomposition_type == matrix.constants.LDL_DECOMPOSITION_TYPE:
+            if type_str == matrix.constants.LDL_DECOMPOSITION_TYPE:
                 return self.to_LDL_Decomposition()
-            elif decomposition_type == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
+            elif type_str == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
                 return self.to_LDL_Decomposition().to_LDL_DecompositionCompressed()
             else:
                 raise

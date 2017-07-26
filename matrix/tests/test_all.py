@@ -100,13 +100,13 @@ def random_permutation_vector(n):
     return p
 
 
-def random_decomposition(decomposition_type, n, dense=True, complex_values=False, finite=True, invertible=None):
+def random_decomposition(type_str, n, dense=True, complex_values=False, finite=True, invertible=None):
     # make random parts of decomposition
     LD = random_lower_triangle_matrix(n, dense=dense, complex_values=complex_values, real_values_diagonal=True, finite=finite, invertible=invertible)
     p = random_permutation_vector(n)
     # make decomposition of correct type
     decomposition = matrix.decompositions.LDL_DecompositionCompressed(LD, p)
-    decomposition = decomposition.to(decomposition_type)
+    decomposition = decomposition.to(type_str)
     return decomposition
 
 
@@ -136,20 +136,20 @@ def test_permute(n, dense, complex_values):
 # *** equal *** #
 
 test_equal_setups = [
-    (n, dense, complex_values, decomposition_type)
+    (n, dense, complex_values, type_str)
     for n in (100,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for type_str in matrix.constants.DECOMPOSITION_TYPES
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values, decomposition_type', test_equal_setups)
-def test_equal(n, dense, complex_values, decomposition_type):
-    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values)
-    for (n_other, dense_other, complex_values_other, decomposition_type_other) in test_equal_setups:
-        decomposition_other = random_decomposition(decomposition_type_other, n_other, dense=dense_other, complex_values=complex_values_other)
-        equal = n == n_other and dense == dense_other and complex_values == complex_values_other and decomposition_type == decomposition_type_other
+@pytest.mark.parametrize('n, dense, complex_values, type_str', test_equal_setups)
+def test_equal(n, dense, complex_values, type_str):
+    decomposition = random_decomposition(type_str, n, dense=dense, complex_values=complex_values)
+    for (n_other, dense_other, complex_values_other, type_str_other) in test_equal_setups:
+        decomposition_other = random_decomposition(type_str_other, n_other, dense=dense_other, complex_values=complex_values_other)
+        equal = n == n_other and dense == dense_other and complex_values == complex_values_other and type_str == type_str_other
         equal_calculated = decomposition == decomposition_other
         assert equal == equal_calculated
 
@@ -157,21 +157,21 @@ def test_equal(n, dense, complex_values, decomposition_type):
 # *** convert *** #
 
 test_convert_setups = [
-    (n, dense, complex_values, decomposition_type, copy)
+    (n, dense, complex_values, type_str, copy)
     for n in (100,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for decomposition_type in matrix.constants.DECOMPOSITION_TYPES
+    for type_str in matrix.constants.DECOMPOSITION_TYPES
     for copy in (True, False)
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values, decomposition_type, copy', test_convert_setups)
-def test_convert(n, dense, complex_values, decomposition_type, copy):
-    decomposition = random_decomposition(decomposition_type, n, dense=dense, complex_values=complex_values)
-    for convert_decomposition_type in matrix.constants.DECOMPOSITION_TYPES:
-        converted_decomposition = decomposition.to(convert_decomposition_type, copy=copy)
-        equal = decomposition_type == convert_decomposition_type
+@pytest.mark.parametrize('n, dense, complex_values, type_str, copy', test_convert_setups)
+def test_convert(n, dense, complex_values, type_str, copy):
+    decomposition = random_decomposition(type_str, n, dense=dense, complex_values=complex_values)
+    for convert_type_str in matrix.constants.DECOMPOSITION_TYPES:
+        converted_decomposition = decomposition.to(convert_type_str, copy=copy)
+        equal = type_str == convert_type_str
         equal_calculated = decomposition == converted_decomposition
         assert equal == equal_calculated
 

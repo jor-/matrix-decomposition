@@ -144,12 +144,12 @@ class MatrixNoLLDecompositionPossibleError(MatrixNoDecompositionPossibleWithProb
 class MatrixDecompositionNoConversionImplementedError(MatrixError):
     """ A decomposition conversion is not implemented for this type. """
 
-    def __init__(self, original_decomposition=None, desired_decomposition_type=None):
+    def __init__(self, original_decomposition=None, desired_type_str=None):
         message = 'Decomposition'
         if original_decomposition is not None:
             message += ' {}'.format(type(original_decomposition).__name__)
         message += ' can not be converted'
-        if desired_decomposition_type is not None:
-            message += ' to decomposition {}'.format(desired_decomposition_type)
+        if desired_type_str is not None:
+            message += ' to decomposition {}'.format(desired_type_str)
         message += '.'
         super().__init__(message=message)
