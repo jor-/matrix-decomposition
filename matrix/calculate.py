@@ -86,6 +86,9 @@ def _approximate_init(A, t=None, min_abs_value=None, copy=True):
     # check input matrix A
     matrix.util.check_square_matrix(A)
 
+    # apply min_abs_value to A
+    A = matrix.util.set_nearly_zero_to_zero(A, min_abs_value=min_abs_value)
+
     # check target vector t
     n = A.shape[0]
     if t is not None:
@@ -100,28 +103,7 @@ def _approximate_init(A, t=None, min_abs_value=None, copy=True):
             else:
                 raise ValueError('t must have real values but its dtype is {}.'.format(t.dtype))
 
-    # determine max_reduction_factor
-    dtype_resolution = np.finfo(A.dtype).resolution
-
-    # check min_abs_value
-    if min_abs_value is None:
-        min_abs_value = dtype_resolution
-    else:
-        if min_abs_value < 0:
-            raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
-        if min_abs_value < dtype_resolution:
-            warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
-            min_abs_value = dtype_resolution
-
-    # apply min_abs_value
-    if min_abs_value > 0:
-        if is_sparse:
-            A.data[np.abs(A.data) < min_abs_value] = 0
-            A.eliminate_zeros()
-        else:
-            A[np.abs(A) < min_abs_value] = 0
-
-    return A, t, min_abs_value
+    return A, t
 
 
 def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, callback=None):
@@ -194,7 +176,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     """
 
     # init
-    A, t, min_abs_value = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
+    A, t = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
     is_sparse = matrix.sparse.util.is_sparse(A)
     n = A.shape[0]
     matrix.util.check_finite(A, check_finite=check_finite)
@@ -403,7 +385,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
 def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_abs_value=None, is_sparse=None, A_ii=None, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None):
     # init not passed inputs
     if min_abs_value is None:
-        min_abs_value = 0
+        min_abs_value = np.finfo(A.dtype).resolution
     if is_sparse is None:
         is_sparse = matrix.sparse.util.is_sparse(A)
 
@@ -493,7 +475,7 @@ def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_va
     """
 
     # init
-    A, t, min_abs_value = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
+    A, t = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
     is_sparse = matrix.sparse.util.is_sparse(A)
 
     # convert input matrix
@@ -637,6 +619,81 @@ def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_di
     return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, callback=callback)
 
 
+def approximate_positive_definite(A, positive_definiteness_parameter=None, min_abs_value=None, check_finite=True, overwrite_A=False):
+    """
+    Computes a positive definite approximation a matrix.
+
+    If `A` is decomposable in a decomposition of type `return_type`, this decomposition is returned.
+    Otherwise a decomposition of type `return_type` is retuned which represents an approximation
+    of `A`.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be approximated by a decomposition.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    positive_definiteness_parameter : float
+        A positive parameter which controls how far the eigenvalues
+        of the approximationa are away from zero.
+        optional, default : The square of the resolution of the underlying data type is used.
+    min_abs_value : float
+        Absolute values below `min_abs_value` are considered as zero.
+        optional, default : The resolution of the underlying data type is used.
+    check_finite : bool
+        Whether to check that the input matrix contains only finite numbers.
+        Disabling may result in problems (crashes, non-termination)
+        if the inputs do contain infinities or NaNs.
+        Disabling gives a performance gain.
+        optional, default: True
+    overwrite_A : bool
+        Whether it is allowed to overwrite A.
+        Enabling may result in performance gain.
+        optional, default: False
+
+    Returns
+    -------
+    matrix.decompositions.DecompositionBase
+        An approximative decomposition of `A` of type `return_type`.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixNotFiniteError
+        If `A` is not a finte matrix and `check_finite` is True.
+    """
+
+    # init min_diag_value
+    dtype_resolution = np.finfo(A.dtype).resolution
+    if positive_definiteness_parameter is None:
+        positive_definiteness_parameter = dtype_resolution**(0.5)
+    elif positive_definiteness_parameter < dtype_resolution:
+        raise ValueError('positive_definiteness_parameter has to be at least {} but it is {}.'.format(dtype_resolution, positive_definiteness_parameter))
+    if min_abs_value is not None and positive_definiteness_parameter < min_abs_value:
+        min_diag_value = min_abs_value
+    else:
+        min_diag_value = positive_definiteness_parameter
+
+    # init t
+    t = A.diagonal()
+    if np.iscomplexobj(t):
+        if np.all(np.isreal(t)):
+            t = t.real
+        else:
+            raise ValueError('A is not Hermitian. Some diagonal values are complex.')
+    if np.any(t < min_diag_value):
+        if not t.flags.writeable:
+            t = t.copy()
+        t[t < min_diag_value] = min_diag_value
+
+    # calculate approximation
+    approximated_decomposition = approximate(A, t=t, min_abs_value=min_abs_value, min_diag_value=min_diag_value, permutation_method=matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite, overwrite_A=overwrite_A)
+    A_approximated = approximated_decomposition.composed_matrix
+    A_approximated = matrix.util.set_nearly_zero_to_zero(A_approximated, min_abs_value=min_abs_value)
+    return A_approximated
+
+
 def is_positive_semi_definite(A, check_finite=True):
     """
     Returns whether the passed matrix is positive semi-definite.
@@ -738,7 +795,7 @@ def is_invertible(A, check_finite=True):
     """
 
     try:
-        decomposition = decompose(A, check_finite=check_finite)
+        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
     except matrix.errors.MatrixNotSquareError:
         return False
     else:

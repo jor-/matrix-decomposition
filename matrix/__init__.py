@@ -5,7 +5,7 @@ import matrix.decompositions
 import matrix.errors
 
 # *** functions *** #
-from matrix.calculate import decompose, approximate, approximate_with_reduction_factor_file, is_positive_semi_definite, is_positive_definite, is_invertible, solve
+from matrix.calculate import decompose, approximate, approximate_positive_definite, approximate_with_reduction_factor_file, is_positive_semi_definite, is_positive_definite, is_invertible, solve
 
 # *** constants *** #
 

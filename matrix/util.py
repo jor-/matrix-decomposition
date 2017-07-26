@@ -86,3 +86,28 @@ def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, c
             A, b,
             lower=lower, unit_diagonal=unit_diagonal,
             overwrite_b=overwrite_b, check_finite=check_finite)
+
+
+def set_nearly_zero_to_zero(A, min_abs_value=None):
+    # determine dtype resolution
+    dtype_resolution = np.finfo(A.dtype).resolution
+
+    # check min_abs_value
+    if min_abs_value is None:
+        min_abs_value = dtype_resolution
+    else:
+        if min_abs_value < 0:
+            raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
+        if min_abs_value < dtype_resolution:
+            warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
+            min_abs_value = dtype_resolution
+
+    # apply min_abs_value
+    if min_abs_value > 0:
+        if scipy.sparse.issparse(A):
+            A.data[np.abs(A.data) < min_abs_value] = 0
+            A.eliminate_zeros()
+        else:
+            A[np.abs(A) < min_abs_value] = 0
+
+    return A
