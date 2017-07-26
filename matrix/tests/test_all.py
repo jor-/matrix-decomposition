@@ -327,6 +327,36 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
     assert matrix.util.almost_equal(decomposition.composed_matrix, A_approximated)
 
 
+test_approximate_positive_definite_setups = [
+    (n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A)
+    for n in (10,)
+    for dense in (True, False)
+    for positive_definiteness_parameter in (None, 10**-4)
+    for complex_values in (True, False)
+    for check_finite in (True, False)
+    for min_abs_value in (10**-7,)
+    for overwrite_A in (True, False)
+]
+
+
+@pytest.mark.parametrize('n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A', test_approximate_positive_definite_setups)
+def test_approximate_positive_definite(n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A):
+    # init
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values)
+    if overwrite_A:
+        A_copied = A.copy()
+    else:
+        A_copied = A
+
+    # calculate positive definite approximation
+    A_positive_definite = matrix.approximate_positive_definite(A_copied, positive_definiteness_parameter=positive_definiteness_parameter, min_abs_value=min_abs_value, check_finite=check_finite, overwrite_A=overwrite_A)
+    assert matrix.is_positive_definite(A_positive_definite, check_finite=True)
+
+    # check overwrite_A
+    if not overwrite_A:
+        assert matrix.util.equal(A, A_copied)
+
+
 # *** save and load *** #
 
 test_save_and_load_setups = [
