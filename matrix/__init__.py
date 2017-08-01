@@ -19,3 +19,7 @@ PERMUTATION_METHODS = matrix.constants.PERMUTATION_METHODS
 """ Supported permutation methods for dense and sparse matrices. """
 SPARSE_PERMUTATION_METHODS = matrix.constants.SPARSE_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
+
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
