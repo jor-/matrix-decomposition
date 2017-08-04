@@ -1,6 +1,8 @@
 import abc
 import copy
 import os
+import tarfile
+import tempfile
 import warnings
 
 import numpy as np
@@ -402,7 +404,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             filename = filename + filename_suffix
         return filename
 
-    def _attribute_file(self, directory_name, attribute_name, is_sparse):
+    def _attribute_filename(self, attribute_name, is_sparse):
         if is_sparse:
             file_extension = matrix.constants.DECOMPOSITION_ATTRIBUTE_SPARSE_FILE_EXTENSION
         else:
@@ -410,38 +412,25 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         filename = matrix.constants.DECOMPOSITION_ATTRIBUTE_FILENAME.format(
             attribute_name=attribute_name,
             file_extension=file_extension)
-        file = os.path.join(directory_name, filename)
-        return file
+        return filename
 
     # *** save *** #
 
     def _save_type(self, dirname):
-        # make dir
-        dirname = self._check_decomposition_filename(dirname)
         os.makedirs(dirname, exist_ok=True)
-        # save type file
         type_file = os.path.join(dirname, matrix.constants.DECOMPOSITION_TYPE_FILENAME)
         with open(type_file, 'w') as f:
             f.write(self.type_str)
 
-    def _save_attribute(self, directory_name, attribute_name):
-        os.makedirs(directory_name, exist_ok=True)
+    def _save_attribute(self, dirname, attribute_name):
         value = getattr(self, attribute_name)
         is_sparse = scipy.sparse.issparse(value)
-        file = self._attribute_file(directory_name, attribute_name, is_sparse)
+        filename = self._attribute_filename(attribute_name, is_sparse)
+        file = os.path.join(dirname, filename)
         if is_sparse:
             scipy.sparse.save_npz(file, value)
         else:
-            np.save(file, value)
-
-    def _save_attributes(self, directory_name, *attribute_names):
-        for attribute_name in attribute_names:
-            self._save_attribute(directory_name, attribute_name)
-
-    def _save(self, filename, *attribute_names):
-        dirname = self._check_decomposition_filename(filename)
-        self._save_type(dirname)
-        self._save_attributes(dirname, *attribute_names)
+            np.savez_compressed(file, **{attribute_name: value})
 
     def save(self, filename):
         """ Saves this decomposition.
@@ -452,53 +441,79 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Where this decomposition should be saved.
         """
 
-        return self._save(filename, *self._attribute_names)
+        # check filename
+        filename = DecompositionBase._check_decomposition_filename(filename)
+
+        # create directory for file
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+        # save
+        with tempfile.TemporaryDirectory() as untared_dir:
+            # save all files to temporary directory
+            self._save_type(untared_dir)
+            for attribute_name in self._attribute_names:
+                self._save_attribute(untared_dir, attribute_name)
+
+            # make temporary directory to tar file
+            with tarfile.open(filename, mode='w') as tarfile_object:
+                for file in os.listdir(untared_dir):
+                    tarfile_object.add(os.path.join(untared_dir, file), arcname=file)
 
     # *** load *** #
 
     @staticmethod
-    def _load_type(dirname):
-        # get dir
-        dirname = DecompositionBase._check_decomposition_filename(dirname)
-        # get format
-        type_file = os.path.join(dirname, matrix.constants.DECOMPOSITION_TYPE_FILENAME)
+    def _load_from_tar_file(filename, tar_attribute_name, file_load_function):
         try:
-            with open(type_file, 'r') as f:
-                return f.read()
-        except FileNotFoundError as e:
-            raise FileNotFoundError('No valid decomposition saved in {}.'.format(dirname)) from e
+            with tarfile.open(filename, mode='r') as tar_file_object:
+                with tar_file_object.extractfile(tar_attribute_name) as attribut_file_object:
+                    return file_load_function(attribut_file_object)
+        except (OSError, KeyError) as e:
+            raise matrix.errors.MatrixDecompositionInvalidFile(filename) from e
 
-    def _load_attribute(self, directory_name, attribute_name, is_sparse=None):
-        is_sparse_undetermined = is_sparse is None
-        if is_sparse_undetermined:
-            is_sparse = False
-        file = self._attribute_file(directory_name, attribute_name, is_sparse)
+    @staticmethod
+    def _load_type(filename):
+        # check filename
+        filename = DecompositionBase._check_decomposition_filename(filename)
+
+        # define loader
+        def file_load_function(buffered_reader):
+            return buffered_reader.read().decode()
+
+        # load
+        return DecompositionBase._load_from_tar_file(
+            filename,
+            matrix.constants.DECOMPOSITION_TYPE_FILENAME,
+            file_load_function)
+
+    def _load_attribute(self, filename, attribute_name):
+        # check filename
+        filename = DecompositionBase._check_decomposition_filename(filename)
+
+        # define loaders
+        def file_load_function_sparse(buffered_reader):
+            return scipy.sparse.load_npz(buffered_reader)
+
+        def file_load_function_nonsparse(buffered_reader):
+            with np.load(buffered_reader, allow_pickle=False) as npz_file_object:
+                keys = npz_file_object.keys()
+                if len(keys) != 1 or keys[0] != attribute_name:
+                    raise matrix.errors.MatrixDecompositionInvalidFile(filename)
+                array = npz_file_object[attribute_name]
+                return array
+
+        # load
         try:
-            if is_sparse:
-                value = scipy.sparse.load_npz(file)
-            else:
-                value = np.load(file)
-        except FileNotFoundError:
-            if is_sparse_undetermined:
-                self._load_attribute(directory_name, attribute_name, is_sparse=not is_sparse)
-            else:
-                raise
-        else:
-            setattr(self, attribute_name, value)
+            attribute = DecompositionBase._load_from_tar_file(
+                filename,
+                self._attribute_filename(attribute_name, is_sparse=True),
+                file_load_function_sparse)
+        except matrix.errors.MatrixDecompositionInvalidFile:
+            attribute = DecompositionBase._load_from_tar_file(
+                filename,
+                self._attribute_filename(attribute_name, is_sparse=False),
+                file_load_function_nonsparse)
 
-    def _load_attributes(self, directory_name, *attribute_names):
-        for attribute_name in attribute_names:
-            self._load_attribute(directory_name, attribute_name)
-
-    def _load(self, filename, *attribute_names):
-        # get dir
-        dirname = self._check_decomposition_filename(filename)
-        # check format
-        type_str = self._load_type(dirname)
-        if type_str != self.type_str:
-            raise ValueError('Decomposition saved in {} is of type {}.'.format(filename, type_str))
-        # load attributes
-        self._load_attributes(dirname, *attribute_names)
+        setattr(self, attribute_name, attribute)
 
     def load(self, filename):
         """ Loads a decomposition of this type.
@@ -514,7 +529,17 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             If the files are not found in the passed directory.
         """
 
-        return self._load(filename, *self._attribute_names)
+        # check filename
+        filename = DecompositionBase._check_decomposition_filename(filename)
+
+        # check type
+        type_str = self._load_type(filename)
+        if type_str != self.type_str:
+            raise ValueError('Decomposition saved in {} is of type {}.'.format(filename, type_str))
+
+        # load attributes
+        for attribute_name in self._attribute_names:
+            self._load_attribute(filename, attribute_name)
 
     # *** multiply *** #
 
@@ -1233,4 +1258,4 @@ def load(filename):
             decomposition = decomposition_class()
             decomposition.load(filename)
             return decomposition
-    raise ValueError('Unknonwn decomposition type {} saved in {}.'.format(type_str, filename))
+    raise matrix.errors.MatrixDecompositionInvalidFile(filename)

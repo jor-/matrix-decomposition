@@ -80,6 +80,19 @@ class MatrixDecompositionSingularError(MatrixError):
         super().__init__(message=message)
 
 
+class MatrixDecompositionInvalidFile(MatrixError, OSError):
+    """ A decomposition indicated that a decomposition should be loaded from an invalid file. """
+
+    def __init__(self, filename=None):
+        # compose message
+        message = 'File '
+        if filename is not None:
+            self.filename = filename
+            message += str(filename) + ' '
+        message += 'is not a valid decomposition file.'
+        super().__init__(message=message)
+
+
 # *** decomposition not calculable exceptions *** #
 
 class MatrixNoDecompositionPossibleError(MatrixError):

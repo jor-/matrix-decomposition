@@ -374,13 +374,15 @@ def test_save_and_load(n, dense, complex_values, type_str):
     # test own IO methods
     decomposition_other = type(decomposition)()
     with tempfile.TemporaryDirectory() as tmp_dir:
-        decomposition.save(tmp_dir)
-        decomposition_other.load(tmp_dir)
+        file = os.path.join(tmp_dir, 'decomposition')
+        decomposition.save(file)
+        decomposition_other.load(file)
     assert decomposition == decomposition_other
     # test general IO methods
     with tempfile.TemporaryDirectory() as tmp_dir:
-        matrix.decompositions.save(tmp_dir, decomposition)
-        decomposition_other = matrix.decompositions.load(tmp_dir)
+        file = os.path.join(tmp_dir, 'decomposition')
+        matrix.decompositions.save(file, decomposition)
+        decomposition_other = matrix.decompositions.load(file)
     assert decomposition == decomposition_other
 
 
