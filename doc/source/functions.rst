@@ -22,6 +22,10 @@ approximate a matrix by a decomposition
 
 .. autofunction:: matrix.approximate
 
+.. autofunction:: matrix.approximate_positive_definite
+
+.. autofunction:: matrix.approximate_with_reduction_factor_file
+
 
 examine a matrix
 ----------------
