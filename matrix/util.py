@@ -60,7 +60,7 @@ def almost_equal(A, B):
 
 def check_square_matrix(A):
     if len(A.shape) != 2 or A.shape[0] != A.shape[1]:
-        raise matrix.errors.MatrixNotSquareError(matrix=A)
+        raise matrix.errors.MatrixNotSquareError(A)
 
 
 def is_finite(A):

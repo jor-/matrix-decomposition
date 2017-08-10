@@ -254,8 +254,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             else:
                 return self
         else:
-            raise matrix.errors.MatrixDecompositionNoConversionImplementedError(
-                original_decomposition=self, desired_type_str=type_str)
+            raise matrix.errors.NoDecompositionConversionImplementedError(self, type_str)
 
     def as_any_type(self, *type_strs, copy=False):
         """ Convert decomposition to any of the passed types.
@@ -346,12 +345,12 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         Raises
         -------
-        matrix.errors.MatrixDecompositionNotFiniteError
+        matrix.errors.DecompositionNotFiniteError
             If this is a decomposition representing a non-finite matrix.
         """
 
         if check_finite and not self.is_finite():
-            raise matrix.errors.MatrixDecompositionNotFiniteError(decomposition=self)
+            raise matrix.errors.DecompositionNotFiniteError(self)
 
     @abc.abstractmethod
     def is_singular(self):
@@ -383,12 +382,12 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         Raises
         -------
-        matrix.errors.MatrixDecompositionSingularError
+        matrix.errors.DecompositionSingularError
             If this is a decomposition representing a singular matrix.
         """
 
         if self.is_singular():
-            raise matrix.errors.MatrixDecompositionSingularError(decomposition=self)
+            raise matrix.errors.DecompositionSingularError(self)
 
     # *** save and load *** #
 
@@ -468,7 +467,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
                 with tar_file_object.extractfile(tar_attribute_name) as attribut_file_object:
                     return file_load_function(attribut_file_object)
         except (OSError, KeyError) as e:
-            raise matrix.errors.MatrixDecompositionInvalidFile(filename) from e
+            raise matrix.errors.DecompositionInvalidFile(filename) from e
 
     @staticmethod
     def _load_type(filename):
@@ -497,7 +496,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             with np.load(buffered_reader, allow_pickle=False) as npz_file_object:
                 keys = npz_file_object.keys()
                 if len(keys) != 1 or keys[0] != attribute_name:
-                    raise matrix.errors.MatrixDecompositionInvalidFile(filename)
+                    raise matrix.errors.DecompositionInvalidFile(filename)
                 array = npz_file_object[attribute_name]
                 return array
 
@@ -507,7 +506,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
                 filename,
                 self._attribute_filename(attribute_name, is_sparse=True),
                 file_load_function_sparse)
-        except matrix.errors.MatrixDecompositionInvalidFile:
+        except matrix.errors.DecompositionInvalidFile:
             attribute = DecompositionBase._load_from_tar_file(
                 filename,
                 self._attribute_filename(attribute_name, is_sparse=False),
@@ -610,7 +609,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         Raises
         ------
-        matrix.errors.MatrixDecompositionSingularError
+        matrix.errors.DecompositionSingularError
             If this is a decomposition representing a singular matrix.
         """
         raise NotImplementedError
@@ -636,7 +635,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         Raises
         ------
-        matrix.errors.MatrixDecompositionSingularError
+        matrix.errors.DecompositionSingularError
             If this is a decomposition representing a singular matrix.
         """
 
@@ -668,7 +667,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         Raises
         ------
-        matrix.errors.MatrixDecompositionSingularError
+        matrix.errors.DecompositionSingularError
             If this is a decomposition representing a singular matrix.
         """
 
@@ -785,8 +784,8 @@ class LDL_Decomposition(DecompositionBase):
         for i, d_i in enumerate(d):
             if d_i < 0:
                 p_i = p[i]
-                raise matrix.errors.MatrixNoLLDecompositionPossibleError(
-                    problematic_leading_principal_submatrix_index=p_i)
+                raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
+                    self, matrix.constants.LL_DECOMPOSITION_TYPE, p_i)
 
         # compute new d
         d = np.sqrt(d)
@@ -804,7 +803,7 @@ class LDL_Decomposition(DecompositionBase):
     def as_type(self, type_str, copy=False):
         try:
             return super().as_type(type_str, copy=copy)
-        except matrix.errors.MatrixDecompositionNoConversionImplementedError:
+        except matrix.errors.NoDecompositionConversionImplementedError:
             if type_str == matrix.constants.LL_DECOMPOSITION_TYPE:
                 return self.as_LL_Decomposition()
             elif type_str == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
@@ -980,7 +979,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def as_type(self, type_str, copy=False):
         try:
             return super().as_type(type_str, copy=copy)
-        except matrix.errors.MatrixDecompositionNoConversionImplementedError:
+        except matrix.errors.NoDecompositionConversionImplementedError:
             if type_str == matrix.constants.LDL_DECOMPOSITION_TYPE:
                 return self.as_LDL_Decomposition()
             elif type_str == matrix.constants.LL_DECOMPOSITION_TYPE:
@@ -1122,8 +1121,8 @@ class LL_Decomposition(DecompositionBase):
                 for j in range(i + 1, n):
                     if not np.isclose(L[j, i], 0):
                         p_i = i[i]
-                        raise matrix.errors.MatrixNoLLDecompositionPossibleError(
-                            problematic_leading_principal_submatrix_index=p_i)
+                        raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
+                            self, matrix.constants.LDL_DECOMPOSITION_TYPE, p_i)
 
         # compute new L
         D_inverse = scipy.sparse.diags(d_inverse)
@@ -1145,7 +1144,7 @@ class LL_Decomposition(DecompositionBase):
     def as_type(self, type_str, copy=False):
         try:
             return super().as_type(type_str, copy=copy)
-        except matrix.errors.MatrixDecompositionNoConversionImplementedError:
+        except matrix.errors.NoDecompositionConversionImplementedError:
             if type_str == matrix.constants.LDL_DECOMPOSITION_TYPE:
                 return self.as_LDL_Decomposition()
             elif type_str == matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE:
@@ -1258,4 +1257,4 @@ def load(filename):
             decomposition = decomposition_class()
             decomposition.load(filename)
             return decomposition
-    raise matrix.errors.MatrixDecompositionInvalidFile(filename)
+    raise matrix.errors.DecompositionInvalidFile(filename)

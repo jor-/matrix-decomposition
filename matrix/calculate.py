@@ -56,7 +56,7 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
 
     Raises
     ------
-    matrix.errors.MatrixNoDecompositionPossibleError
+    matrix.errors.NoDecompositionPossibleError
         If the decomposition of `A` is not possible.
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
@@ -242,14 +242,14 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
         # try to compute decomposition
         try:
             decomposition = decompose(A, permutation_method=decomposition_permutation_method, check_finite=False, overwrite_A=False)
-        except matrix.errors.MatrixNoDecompositionPossibleTooManyEntriesError as e:
+        except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
             if is_sparse and (A.indices.dtype != np.int64 or A.indptr != np.int64):
                 warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
                 A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=True)
                 return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=decomposition_permutation_method, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
             else:
                 raise
-        except matrix.errors.MatrixNoDecompositionPossibleWithProblematicSubdecompositionError as e:
+        except matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError as e:
             decomposition = e.subdecomposition
             bad_index = e.problematic_leading_principal_submatrix_index
         else:
@@ -724,7 +724,7 @@ def is_positive_semi_definite(A, check_finite=True):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
-    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
+    except (matrix.errors.NoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_positive_semi_definite()
@@ -760,7 +760,7 @@ def is_positive_definite(A, check_finite=True):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
-    except (matrix.errors.MatrixNoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
+    except (matrix.errors.NoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_positive_definite()
@@ -845,5 +845,5 @@ def solve(A, b, overwrite_b=False, check_finite=True):
     decomposition = decompose(A, check_finite=check_finite)
     try:
         return decomposition.solve(b, overwrite_b=overwrite_b, check_finite=False)
-    except matrix.errors.MatrixDecompositionSingularError as e:
-        raise matrix.errors.MatrixSingularError from e
+    except matrix.errors.DecompositionSingularError as e:
+        raise matrix.errors.MatrixSingularError(A) from e

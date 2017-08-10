@@ -57,7 +57,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
 
     Raises
     ------
-    matrix.errors.MatrixNoDecompositionPossibleError
+    matrix.errors.NoDecompositionPossibleError
         If the decomposition of `A` is not possible.
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
@@ -108,7 +108,8 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
         try:
             f = sksparse.cholmod.cholesky(A, ordering_method=permutation_method, use_long=use_long)
         except sksparse.cholmod.CholmodTooLargeError as cholmod_exception:
-            raise matrix.errors.MatrixNoDecompositionPossibleTooManyEntriesError(matrix_index_type=A.indices.dtype) from cholmod_exception
+            raise matrix.errors.NoDecompositionPossibleTooManyEntriesError(
+                A, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE) from cholmod_exception
     except sksparse.cholmod.CholmodNotPositiveDefiniteError as e:
         cholmod_exception = e
         f = cholmod_exception.factor
@@ -128,7 +129,8 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     if cholmod_exception is not None:
         bad_index = cholmod_exception.column
         decomposition.LD[bad_index, bad_index] = np.nan
-        raise matrix.errors.MatrixNoLDLDecompositionPossibleError(A, problematic_leading_principal_submatrix_index=bad_index, subdecomposition=decomposition) from cholmod_exception
+        raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
+            A, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE, bad_index, decomposition) from cholmod_exception
 
     # return
     return decomposition.as_type(return_type)
@@ -174,7 +176,7 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
 
     Raises
     ------
-    matrix.errors.MatrixNoDecompositionPossibleError
+    matrix.errors.NoDecompositionPossibleError
         If the decomposition of `A` is not possible.
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
@@ -184,6 +186,6 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
 
     try:
         return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, use_long=False)
-    except matrix.errors.MatrixNoDecompositionPossibleTooManyEntriesError as e:
+    except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
         warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
         return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=False, overwrite_A=overwrite_A, use_long=True)

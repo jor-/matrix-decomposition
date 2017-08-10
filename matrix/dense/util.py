@@ -18,7 +18,7 @@ def is_finite(A):
 
 def check_finite(A, check_finite=True):
     if check_finite and not is_finite(A):
-        raise matrix.errors.MatrixNotFiniteError(matrix=A)
+        raise matrix.errors.MatrixNotFiniteError(A)
 
 
 def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):

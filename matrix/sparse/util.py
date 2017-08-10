@@ -30,7 +30,7 @@ def is_finite(A):
 
 def check_finite(A, check_finite=True):
     if check_finite and not is_finite(A):
-        raise matrix.errors.MatrixNotFiniteError(matrix=A)
+        raise matrix.errors.MatrixNotFiniteError(A)
 
 
 def convert_to_csc_or_csr(A, matrix_format, warn_if_wrong_format=True, sort_indices=False, eliminate_zeros=False, overwrite_A=False, copy=False):

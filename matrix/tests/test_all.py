@@ -405,7 +405,7 @@ def test_is_finite(n, dense, complex_values, type_str, finite):
     # test
     assert decomposition.is_finite() == finite
     if not finite:
-        with np.testing.assert_raises(matrix.errors.MatrixDecompositionNotFiniteError):
+        with np.testing.assert_raises(matrix.errors.DecompositionNotFiniteError):
             decomposition.check_finite()
     else:
         decomposition.check_finite()
@@ -430,7 +430,7 @@ def test_is_invertible(n, dense, complex_values, type_str, invertible):
     # test
     assert decomposition.is_invertible() == invertible
     if not invertible:
-        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+        with np.testing.assert_raises(matrix.errors.DecompositionSingularError):
             decomposition.check_invertible()
     else:
         decomposition.check_invertible()
@@ -474,9 +474,9 @@ def test_multiply(n, dense, complex_values, type_str, invertible, x, y):
         res = decomposition.inverse_matrix_both_sides_multiplication(x, y)
         np.testing.assert_array_almost_equal(res, y_H @ B @ x)
     else:
-        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+        with np.testing.assert_raises(matrix.errors.DecompositionSingularError):
             decomposition.inverse_matrix_right_side_multiplication(x)
-        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+        with np.testing.assert_raises(matrix.errors.DecompositionSingularError):
             decomposition.inverse_matrix_both_sides_multiplication(x, y)
 
 
@@ -505,5 +505,5 @@ def test_solve(n, dense, complex_values, type_str, invertible, b):
         y = A @ x
         assert np.all(np.isclose(b, y))
     else:
-        with np.testing.assert_raises(matrix.errors.MatrixDecompositionSingularError):
+        with np.testing.assert_raises(matrix.errors.DecompositionSingularError):
             decomposition.solve(b)

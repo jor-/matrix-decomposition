@@ -56,7 +56,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
 
     Raises
     ------
-    matrix.errors.MatrixNoDecompositionPossibleError
+    matrix.errors.NoDecompositionPossibleError
         If the decomposition of `A` is not possible.
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
@@ -102,8 +102,8 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     if exit_code > 0:
         bad_index = exit_code - 1
         decomposition.L[bad_index, bad_index] = np.nan
-        raise matrix.errors.MatrixNoLLDecompositionPossibleError(
-            A, problematic_leading_principal_submatrix_index=bad_index, subdecomposition=decomposition)
+        raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
+            A, matrix.constants.LL_DECOMPOSITION_TYPE, bad_index, decomposition)
     if exit_code < 0:
         raise ValueError('The {}-th argument of the internal potrf function is invalid.'.format(-exit_code))
 
@@ -152,7 +152,7 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
 
     Raises
     ------
-    matrix.errors.MatrixNoDecompositionPossibleError
+    matrix.errors.NoDecompositionPossibleError
         If the decomposition of `A` is not possible.
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
