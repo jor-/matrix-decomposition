@@ -30,31 +30,17 @@ with open(readme_file, mode='r', encoding='utf-8') as f:
 
 # Setup
 setuptools.setup(
-    # Name
+    # general informations
     name='matrix-decomposition',
-
-    # Description
     description='decompose (factorize) dense and sparse matrices and solve associated systems of linear equations',
     long_description=long_description,
-
-    # Keywords
     keywords='decomposition factorization decompose factorize dense sparse matrix matrices Cholesky positive definite systems of linear equations',
 
-    # Homepage
     url='https://github.com/jor-/matrix_decomposition',
-
-    # Author
     author='Joscha Reimer',
     author_email='jor@informatik.uni-kiel.de',
-
-    # Version
-    version=versioneer_extended.get_version(),
-    cmdclass=versioneer_extended.get_cmdclass(),
-
-    # License
     license='AGPLv3+',
 
-    # Classifiers
     classifiers=[
         # Development Status
         'Development Status :: 3 - Alpha',
@@ -69,10 +55,14 @@ setuptools.setup(
         'Programming Language :: Python',
     ],
 
-    # Packages to install
+    # version
+    version=versioneer_extended.get_version(),
+    cmdclass=versioneer_extended.get_cmdclass(),
+
+    # packages to install
     packages=setuptools.find_packages(),
 
-    # Dependencies
+    # dependencies
     setup_requires=[
         'setuptools>=0.8',
         'pip>=1.4',
