@@ -659,8 +659,8 @@ def approximate_positive_definite(A, positive_definiteness_parameter=None, min_a
         The matrix must be a squared matrix.
     positive_definiteness_parameter : float
         A positive parameter which controls how far the eigenvalues
-        of the approximationa are away from zero.
-        optional, default : The square of the resolution of the underlying data type is used.
+        of the approximation are away from zero.
+        optional, default : The fourth root of the resolution of the underlying data type is used.
     min_abs_value : float
         Absolute values below `min_abs_value` are considered as zero.
         optional, default : The resolution of the underlying data type is used.
@@ -690,14 +690,11 @@ def approximate_positive_definite(A, positive_definiteness_parameter=None, min_a
 
     # init min_diag_value
     dtype_resolution = np.finfo(A.dtype).resolution
+    if min_abs_value is None:
+        min_abs_value = dtype_resolution
     if positive_definiteness_parameter is None:
-        positive_definiteness_parameter = dtype_resolution**(0.5)
-    elif positive_definiteness_parameter < dtype_resolution:
-        raise ValueError('positive_definiteness_parameter has to be at least {} but it is {}.'.format(dtype_resolution, positive_definiteness_parameter))
-    if min_abs_value is not None and positive_definiteness_parameter < min_abs_value:
-        min_diag_value = min_abs_value
-    else:
-        min_diag_value = positive_definiteness_parameter
+        positive_definiteness_parameter = dtype_resolution**(0.25)
+    min_diag_value = max(min_abs_value, positive_definiteness_parameter)
 
     # init t
     t = A.diagonal()
@@ -712,8 +709,9 @@ def approximate_positive_definite(A, positive_definiteness_parameter=None, min_a
         t[t < min_diag_value] = min_diag_value
 
     # calculate approximation
-    approximated_decomposition = approximate(A, t=t, min_abs_value=min_abs_value, min_diag_value=min_diag_value, permutation_method=matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite, overwrite_A=overwrite_A)
+    approximated_decomposition = approximate(A, t=t, min_abs_value=min_abs_value, min_diag_value=min_diag_value, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite, overwrite_A=overwrite_A)
     A_approximated = approximated_decomposition.composed_matrix
+    A_approximated = matrix.util.set_diagonal_nearly_real_to_real(A_approximated, min_abs_value=min_abs_value)
     A_approximated = matrix.util.set_nearly_zero_to_zero(A_approximated, min_abs_value=min_abs_value)
     return A_approximated
 
@@ -748,7 +746,10 @@ def is_positive_semi_definite(A, check_finite=True):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
-    except (matrix.errors.NoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
+    except (matrix.errors.NoDecompositionPossibleError,
+            matrix.errors.MatrixComplexDiagonalValueError,
+            matrix.errors.MatrixNotFiniteError,
+            matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_positive_semi_definite()
@@ -784,7 +785,10 @@ def is_positive_definite(A, check_finite=True):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
-    except (matrix.errors.NoDecompositionPossibleError, matrix.errors.MatrixNotSquareError):
+    except (matrix.errors.NoDecompositionPossibleError,
+            matrix.errors.MatrixComplexDiagonalValueError,
+            matrix.errors.MatrixNotFiniteError,
+            matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_positive_definite()
@@ -820,7 +824,8 @@ def is_invertible(A, check_finite=True):
 
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
-    except matrix.errors.MatrixNotSquareError:
+    except (matrix.errors.MatrixNotFiniteError,
+            matrix.errors.MatrixNotSquareError):
         return False
     else:
         return decomposition.is_invertible()

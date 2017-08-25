@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import scipy.sparse
 
@@ -109,5 +111,32 @@ def set_nearly_zero_to_zero(A, min_abs_value=None):
             A.eliminate_zeros()
         else:
             A[np.abs(A) < min_abs_value] = 0
+
+    return A
+
+
+def set_diagonal_nearly_real_to_real(A, min_abs_value=None):
+    # check if complex dtype
+    dtype = A.dtype
+    if np.iscomplexobj(np.array([], dtype=dtype)):
+
+        # determine min_abs_value
+        dtype_resolution = np.finfo(dtype).resolution
+        if min_abs_value is None:
+            min_abs_value = dtype_resolution
+        else:
+            if min_abs_value < 0:
+                raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
+            if min_abs_value < dtype_resolution:
+                warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
+                min_abs_value = dtype_resolution
+
+        # apply min_abs_value
+        if min_abs_value > 0:
+            for i in range(A.shape[0]):
+                A_ii = A[i, i]
+                if np.iscomplex(A_ii) and np.abs(A_ii.imag) < min_abs_value:
+                    A_ii = A_ii.real
+                    A[i, i] = A_ii
 
     return A

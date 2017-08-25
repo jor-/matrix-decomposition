@@ -27,7 +27,7 @@ def permutation_vector(A, method=None):
                 if np.all(np.isreal(d)):
                     d = d.real
                 else:
-                    raise ValueError('Complex diagonal values can not be ordered. Consider using orderings with absolute values.')
+                    raise matrix.errors.MatrixComplexDiagonalValueError(A)
         if method in (matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = -d
         p = np.argsort(d)

@@ -44,7 +44,15 @@ class MatrixSingularError(MatrixError):
     """ A matrix is singular although an invertible matrix is required. """
 
     def __init__(self, matrix):
-        message = 'Matrix with shape {}  is singular.'.format(matrix.shape)
+        message = 'Matrix with shape {} is singular.'.format(matrix.shape)
+        super().__init__(matrix, message=message)
+
+
+class MatrixComplexDiagonalValueError(MatrixError):
+    """ A matrix has complex diagonal values although real diagonal values are required. """
+
+    def __init__(self, matrix):
+        message = 'Matrix with shape {} has complex diagonal values.'.format(matrix.shape)
         super().__init__(matrix, message=message)
 
 
