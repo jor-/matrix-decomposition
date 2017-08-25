@@ -53,6 +53,7 @@ def random_hermitian_matrix(n, dense=True, complex_values=False, positive_semi_d
             warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
             for i in range(n):
                 A[i, i] += min_diag_value
+    assert np.all(np.isreal(A.diagonal()))
     return A
 
 
