@@ -22,6 +22,12 @@ def permutation_vector(A, method=None):
             d = d.A1
         if method in (matrix.constants.INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = np.abs(d)
+        if method in (matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD):
+            if np.iscomplexobj(d):
+                if np.all(np.isreal(d)):
+                    d = d.real
+                else:
+                    raise ValueError('Complex diagonal values can not be ordered. Consider using orderings with absolute values.')
         if method in (matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = -d
         p = np.argsort(d)
@@ -33,6 +39,15 @@ def invert_permutation_vector(p):
     for i, p_i in enumerate(p):
         p_inverse[p_i] = i
     return p_inverse
+
+
+def concatenate_permutation_vectors(p_previous, p_next):
+    if p_previous is None:
+        return p_next
+    elif p_next is None:
+        return p_previous
+    else:
+        return p_previous[p_next]
 
 
 def symmetric(A, p):

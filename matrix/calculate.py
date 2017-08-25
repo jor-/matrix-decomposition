@@ -101,7 +101,7 @@ def _approximate_init(A, t=None, min_abs_value=None, copy=True):
             if np.all(np.isreal(t)):
                 t = t.real
             else:
-                raise ValueError('t must have real values but its dtype is {}.'.format(t.dtype))
+                raise ValueError('t must have real values but they are complex.')
 
     return A, t
 
@@ -221,14 +221,14 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     if permutation_method not in supported_permutation_methods:
         raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, supported_permutation_methods))
 
-    # apply permutation
+    # prepare permutation
+    p_previous = None
     if permutation_method in matrix.constants.PERMUTATION_METHODS:
-        p_first = matrix.permute.permutation_vector(A)
-        A = matrix.permute.symmetric(A, p_first)
-        decomposition_permutation_method = None
+        permutation_method_previous = permutation_method
+        permutation_method_decomposite = None
     else:
-        p_first = None
-        decomposition_permutation_method = permutation_method
+        permutation_method_previous = None
+        permutation_method_decomposite = permutation_method
         assert is_sparse and permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
 
     # convert input matrix
@@ -238,15 +238,23 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     # calculate approximation of A
     finished = False
     while not finished:
+        # apply permutation previous to decomposition
+        if permutation_method_previous is not None:
+            p_previous_next = matrix.permute.permutation_vector(A, method=permutation_method_previous)
+            p_previous = matrix.permute.concatenate_permutation_vectors(p_previous, p_previous_next)
+            A = matrix.permute.symmetric(A, p_previous_next)
+            if is_sparse:
+                A = A.tocsc(copy=False)
+            del p_previous_next
 
         # try to compute decomposition
         try:
-            decomposition = decompose(A, permutation_method=decomposition_permutation_method, check_finite=False, overwrite_A=False)
+            decomposition = decompose(A, permutation_method=permutation_method_decomposite, check_finite=False, overwrite_A=False)
         except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
             if is_sparse and (A.indices.dtype != np.int64 or A.indptr != np.int64):
                 warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
                 A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=True)
-                return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=decomposition_permutation_method, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
+                return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method_decomposite, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
             else:
                 raise
         except matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError as e:
@@ -257,7 +265,6 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
 
         # get diagonal values of current (sub-)decomposition
         decomposition = decomposition.as_any_type(matrix.constants.LDL_DECOMPOSITION_TYPE, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE)
-        decomposition._apply_previous_permutation(p_first)
         d = decomposition.d
 
         # get lowest index where decomposition is not possible
@@ -265,7 +272,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
         bad_indices = np.where(bad_indices_mask)[0]
         if len(bad_indices) > 0:
             bad_index = np.min(bad_indices)
-        del bad_indices
+        del bad_indices_mask, bad_indices
 
         # if not all diagonal entries okay, reduce
         finished = bad_index >= n
@@ -273,6 +280,10 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             # apply permutation
             i_permuted = bad_index
             i = decomposition.p[i_permuted]
+            if p_previous is not None:
+                i_unpermuted = p_previous[i]
+            else:
+                i_unpermuted = i
 
             # get A[i,i]
             if is_sparse:
@@ -301,11 +312,11 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             if t is None:
                 t_i = A_ii
             else:
-                t_i = t[i]
+                t_i = t[i_unpermuted]
             if t_i < min_diag_value:
-                raise ValueError('Each entry in the target vector t has to be greater or equal to min_diag_value {}. But its {}-th diagonal entry is {}.'.format(min_diag_value, i, t_i))
+                raise ValueError('Each entry in the target vector t has to be greater or equal to min_diag_value {}. But its {}-th entry is {}.'.format(min_diag_value, i_unpermuted, t_i))
             if t_i > max_diag_value:
-                raise ValueError('Each entry in the target vector t has to be lower or equal to max_diag_value {}. But its {}-th diagonal entry is {}.'.format(max_diag_value, i, t_i))
+                raise ValueError('Each entry in the target vector t has to be lower or equal to max_diag_value {}. But its {}-th entry is {}.'.format(max_diag_value, i_unpermuted, t_i))
 
             # get L or LD
             if decomposition.is_type(matrix.constants.LDL_DECOMPOSITION_TYPE):
@@ -370,12 +381,19 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
 
             # call callback
             if callback is not None:
-                callback(i, reduction_factor)
+                callback(i_unpermuted, reduction_factor)
+
+            # do not permute A again because diagonal values of A did not changed
+            if t is None:
+                permutation_method_previous = None
+
+    # apply previous permutation
+    decomposition._apply_previous_permutation(p_previous)
 
     # return
-    assert np.all(np.isreal(d))
-    assert np.all(d >= min_diag_value)
-    assert np.all(d <= max_diag_value)
+    assert np.all(np.isreal(decomposition.d))
+    assert np.all(decomposition.d >= min_diag_value)
+    assert np.all(decomposition.d <= max_diag_value)
 
     if return_type is not None:
         decomposition = decomposition.as_type(return_type)
@@ -394,12 +412,18 @@ def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_ab
     else:
         if A_ii is None:
             A_ii = A[i, i]
+            if np.iscomplexobj(A_ii):
+                if np.isreal(A_ii):
+                    A_ii = A_ii.real
+                else:
+                    raise ValueError('Matrix A is not Hermitian. A[{i}, {i}] = {A_ii} is complex.'.format(i=i, A_ii=A_ii))
 
     # apply reduction factor
     if t_i is None:
         A_ii_new = A_ii    # reduces rounding errors
     else:
         A_ii_new = (1 - reduction_factor**2) * t_i + reduction_factor**2 * A_ii
+    assert np.isreal(A_ii_new)
 
     if is_sparse:
         # set column (or row)
@@ -415,9 +439,9 @@ def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_ab
         # set row (or column)
         A_i_data = A.data[A_i_start_index:A_i_stop_index]
         A_i_rows = A.indices[A_i_start_index:A_i_stop_index]
-        for j, A_ji in zip(A_i_rows, A_i_data.conj()):
+        for j, A_ij in zip(A_i_rows, A_i_data.conj()):
             if i != j:
-                A[i, j] = A_ji
+                A[i, j] = A_ij
         del A_i_data, A_i_rows
 
         # set diagonal entry

@@ -85,39 +85,35 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         return matrix.permute.invert_permutation_vector(self.p)
 
-    def _apply_previous_permutation(self, p_first):
+    def _apply_previous_permutation(self, p_previous):
         """ Applies a previous permutation to the current permutation.
 
         Parameters
         ----------
-        p_first : numpy.ndarray
+        p_previous : numpy.ndarray
             The previous permutation vector.
         """
 
-        if p_first is not None:
-            try:
-                p_after = self._p
-            except AttributeError:
-                self._p = p_first
-            else:
-                self._p = p_after[p_first]
+        try:
+            p_next = self._p
+        except AttributeError:
+            p_next = None
+        self._p = matrix.permute.concatenate_permutation_vectors(p_previous, p_next)
 
-    def _apply_succeeding_permutation(self, p_after):
+    def _apply_succeeding_permutation(self, p_next):
         """ Applies a succeeding permutation to the current permutation.
 
         Parameters
         ----------
-        p_after : numpy.ndarray
+        p_next : numpy.ndarray
             The succeeding permutation vector.
         """
 
-        if p_after is not None:
-            try:
-                p_first = self._p
-            except AttributeError:
-                self._p = p_after
-            else:
-                self._p = p_after[p_first]
+        try:
+            p_previous = self._p
+        except AttributeError:
+            p_previous = None
+        self._p = matrix.permute.concatenate_permutation_vectors(p_previous, p_next)
 
     @property
     def P(self):
