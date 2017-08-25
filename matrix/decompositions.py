@@ -812,18 +812,19 @@ class LDL_Decomposition(DecompositionBase):
     def is_sparse(self):
         return scipy.sparse.issparse(self.L)
 
+    def is_finite(self):
+        return matrix.util.is_finite(self.L) and matrix.util.is_finite(self.d)
+
     def is_positive_semi_definite(self):
         return np.all(self.d >= 0)
 
     def is_positive_definite(self):
         eps = np.finfo(self.d.dtype).resolution
-        return np.all(self.d > eps)
-
-    def is_finite(self):
-        return matrix.util.is_finite(self.L) and matrix.util.is_finite(self.d)
+        return np.all(self.d >= eps)
 
     def is_singular(self):
-        return np.any(self.d == 0)
+        eps = np.finfo(self.d.dtype).resolution
+        return np.any(np.abs(self.d) < eps)
 
     # *** save and load *** #
 
@@ -988,19 +989,19 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def is_sparse(self):
         return scipy.sparse.issparse(self.LD)
 
+    def is_finite(self):
+        return matrix.util.is_finite(self.LD)
+
     def is_positive_semi_definite(self):
         return np.all(self.d >= 0)
 
     def is_positive_definite(self):
-        d = self.d
         eps = np.finfo(self.d.dtype).resolution
-        return np.all(d > eps)
-
-    def is_finite(self):
-        return matrix.util.is_finite(self.LD)
+        return np.all(self.d >= eps)
 
     def is_singular(self):
-        return np.any(self.d == 0)
+        eps = np.finfo(self.d.dtype).resolution
+        return np.any(np.abs(self.d) < eps)
 
     # *** save and load *** #
 
@@ -1153,19 +1154,19 @@ class LL_Decomposition(DecompositionBase):
     def is_sparse(self):
         return scipy.sparse.issparse(self.L)
 
+    def is_finite(self):
+        return matrix.util.is_finite(self.L)
+
     def is_positive_semi_definite(self):
         return True
 
     def is_positive_definite(self):
-        d = self._d
-        eps = np.finfo(d.dtype).resolution
-        return np.all(d > eps)
-
-    def is_finite(self):
-        return matrix.util.is_finite(self.L)
+        eps = np.finfo(self._d.dtype).resolution
+        return np.all(self._d >= eps)
 
     def is_singular(self):
-        return np.any(self._d == 0)
+        eps = np.finfo(self._d.dtype).resolution
+        return np.any(np.abs(self._d) < eps)
 
     # *** save and load *** #
 
