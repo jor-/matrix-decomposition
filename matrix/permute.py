@@ -1,10 +1,9 @@
 import numpy as np
 
+import matrix.constants
 import matrix.dense.permute
 import matrix.sparse.permute
 import matrix.sparse.util
-
-import matrix.constants
 
 
 def permutation_vector(A, method=None):
@@ -67,6 +66,7 @@ def symmetric(A, p):
         For the returned matrix `B` holds for all i, j in range(m):
         B[i,j] == A[p[i],p[j]]
     """
+
     if p is not None:
         if matrix.sparse.util.is_sparse(A):
             return matrix.sparse.permute.symmetric(A, p)

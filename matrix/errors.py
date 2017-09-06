@@ -1,5 +1,6 @@
-# *** base exceptions *** #
 
+
+# *** base exceptions *** #
 
 class BaseError(Exception):
     """ This is the base exception for all exceptions in this package. """

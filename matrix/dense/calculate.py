@@ -2,14 +2,13 @@ import numpy as np
 import scipy.linalg.lapack
 import scipy.linalg.misc
 
-import matrix.dense.constants
-import matrix.dense.permute
-import matrix.dense.util
-
 import matrix.decompositions
 import matrix.errors
 import matrix.permute
 import matrix.util
+import matrix.dense.constants
+import matrix.dense.permute
+import matrix.dense.util
 
 
 def _decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, clean=True):
@@ -61,7 +60,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
     # convert matrix to array
@@ -157,7 +156,7 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
     return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)

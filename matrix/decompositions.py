@@ -8,6 +8,7 @@ import warnings
 import numpy as np
 import scipy.sparse
 
+import matrix
 import matrix.constants
 import matrix.errors
 import matrix.permute
@@ -201,6 +202,10 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         matrix.decompositions.DecompositionBase
             A copy of this decomposition.
         """
+
+        # debug info
+        matrix.logging.debug('Copying {}.'.format(self))
+        # make copy
         return copy.deepcopy(self)
 
     def is_type(self, type_str):
@@ -244,12 +249,17 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             `copy`.
         """
 
+        # debug info
+        matrix.logging.debug('Converting {} to type {type_str} with copy={copy}.'.format(self, type_str=type_str, copy=copy))
+
+        # convert
         if self.is_type(type_str):
             if copy:
                 return self.copy()
             else:
                 return self
         else:
+            matrix.logging.debug('Converting {} to type {type_str}.'.format(self, type_str=type_str))
             raise matrix.errors.NoDecompositionConversionImplementedError(self, type_str)
 
     def as_any_type(self, *type_strs, copy=False):
@@ -271,6 +281,10 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             depending on `copy`.
         """
 
+        # debug info
+        matrix.logging.debug('Converting {} to any type of {type_strs} with copy={copy}.'.format(self, type_strs=type_strs, copy=copy))
+
+        # convert
         if len(type_strs) == 0 or any(map(self.is_type, type_strs)):
             if copy:
                 return self.copy()
@@ -436,6 +450,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Where this decomposition should be saved.
         """
 
+        # debug info
+        matrix.logging.debug('Saving {} to {}.'.format(self, filename))
+
         # check filename
         filename = DecompositionBase._check_decomposition_filename(filename)
 
@@ -523,6 +540,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         FileNotFoundError
             If the files are not found in the passed directory.
         """
+
+        # debug info
+        matrix.logging.debug('Loading decomposition of type {} from {}.'.format(self.type_str, filename))
 
         # check filename
         filename = DecompositionBase._check_decomposition_filename(filename)
@@ -667,6 +687,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             If this is a decomposition representing a singular matrix.
         """
 
+        # debug info
+        matrix.logging.debug('Solving lineaar system with  {}.'.format(self))
+        # solve
         return self.inverse_matrix_right_side_multiplication(b)
 
 
@@ -1235,6 +1258,9 @@ def save(filename, decomposition):
         The decomposition that should be saved.
     """
 
+    # debug info
+    matrix.logging.debug('Saving decomposition to {}.'.format(filename))
+    # save
     decomposition.save(filename)
 
 
@@ -1247,6 +1273,9 @@ def load(filename):
         Where the decomposition is saved.
     """
 
+    # debug info
+    matrix.logging.debug('Loading decomposition from {}.'.format(filename))
+    # load
     type_str = DecompositionBase._load_type(filename)
     decomposition_classes = (LDL_Decomposition, LDL_DecompositionCompressed, LL_Decomposition, DecompositionBase)
     for decomposition_class in decomposition_classes:

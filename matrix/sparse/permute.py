@@ -1,7 +1,6 @@
-import warnings
-
 import scipy.sparse
 
+import matrix
 import matrix.permute
 
 
@@ -24,7 +23,7 @@ def rows(A, p, inplace=False, warn_if_wrong_format=True):
     if p is not None:
         if not scipy.sparse.isspmatrix_csc(A):
             if warn_if_wrong_format:
-                warnings.warn('CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                matrix.logger.warning('CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
             A = scipy.sparse.csc_matrix(A)
         elif not inplace:
             A = A.copy()
@@ -36,7 +35,7 @@ def colums(A, p, inplace=False, warn_if_wrong_format=True):
     if p is not None:
         if not scipy.sparse.isspmatrix_csr(A):
             if warn_if_wrong_format:
-                warnings.warn('CSR matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                matrix.logger.warning('CSR matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
             A = scipy.sparse.csr_matrix(A)
         elif not inplace:
             A = A.copy()
@@ -77,7 +76,7 @@ def symmetric(A, p, inplace=False, warn_if_wrong_format=True):
             A = colums(A, p, inplace=True, warn_if_wrong_format=False)
         else:
             if warn_if_wrong_format and not scipy.sparse.isspmatrix_csr(A):
-                warnings.warn('CSC or CSR matrix format is required. Converting to needed matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                matrix.logger.warning('CSC or CSR matrix format is required. Converting to needed matrix format.', scipy.sparse.SparseEfficiencyWarning)
             A = colums(A, p, inplace=inplace, warn_if_wrong_format=False)
             A = rows(A, p, inplace=True, warn_if_wrong_format=False)
     return A

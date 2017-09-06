@@ -4,15 +4,14 @@ import warnings
 import numpy as np
 import scipy.sparse
 
-import matrix.dense.calculate
-
-import matrix.sparse.calculate
-import matrix.sparse.util
-
+import matrix
 import matrix.constants
 import matrix.errors
 import matrix.permute
 import matrix.util
+import matrix.dense.calculate
+import matrix.sparse.calculate
+import matrix.sparse.util
 
 
 def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
@@ -61,13 +60,25 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
+    # debug logging
+    matrix.logger.debug('Decomposing matrix with permutation_method={permutation_method}, return_type={return_type}, check_finite={check_finite}, overwrite_A={overwrite_A}.'.format(
+        permutation_method=permutation_method,
+        return_type=return_type,
+        check_finite=check_finite,
+        overwrite_A=overwrite_A))
+
+    # decompose
     if matrix.sparse.util.is_sparse(A):
-        return matrix.sparse.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+        decomposition = matrix.sparse.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
     else:
-        return matrix.dense.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+        decomposition = matrix.dense.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+
+    # return
+    matrix.logger.debug('Decomposing matrix finished.')
+    return decomposition
 
 
 def _approximate_init(A, t=None, min_abs_value=None, copy=True):
@@ -94,14 +105,20 @@ def _approximate_init(A, t=None, min_abs_value=None, copy=True):
     if t is not None:
         t = np.asanyarray(t)
         if t.ndim != 1:
-            raise ValueError('t has to be a one-dimensional array.')
+            error = ValueError('t has to be a one-dimensional array.')
+            matrix.logger.error(error)
+            raise error
         if len(t) != n:
-            raise ValueError('The length of t {} must have the same length as the dimensions of A {}.'.format(len(t), n))
+            error = ValueError('The length of t {} must have the same length as the dimensions of A {}.'.format(len(t), n))
+            matrix.logger.error(error)
+            raise error
         if np.iscomplexobj(t):
             if np.all(np.isreal(t)):
                 t = t.real
             else:
-                raise ValueError('t must have real values but they are complex.')
+                error = ValueError('t must have real values but they are complex.')
+                matrix.logger.error(error)
+                raise error
 
     return A, t
 
@@ -172,8 +189,18 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
+
+    # debug logging
+    matrix.logger.debug('Approximating decomposition of a matrix with min_abs_value={min_abs_value}, min_diag_value={min_diag_value}, max_diag_value={max_diag_value}, permutation_method={permutation_method}, return_type={return_type}, check_finite={check_finite}, overwrite_A={overwrite_A}.'.format(
+        min_abs_value=min_abs_value,
+        min_diag_value=min_diag_value,
+        max_diag_value=max_diag_value,
+        permutation_method=permutation_method,
+        return_type=return_type,
+        check_finite=check_finite,
+        overwrite_A=overwrite_A))
 
     # init
     A, t = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
@@ -192,24 +219,32 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     else:
         if return_type == matrix.constants.LL_DECOMPOSITION_TYPE:
             if min_diag_value < 0:
-                raise ValueError('If return type is {}, min_diag_value {} has to be greater or equal zero .'.format(return_type, min_diag_value))
+                error = ValueError('If return type is {}, min_diag_value {} has to be greater or equal zero .'.format(return_type, min_diag_value))
+                matrix.logger.error(error)
+                raise error
             elif min_diag_value < min_diag_value_LL:
-                warnings.warn('Setting min_diag_value to resolution {} of matrix data type {}.'.format(min_diag_value, A.dtype))
+                matrix.logger.warning('Setting min_diag_value to resolution {} of matrix data type {}.'.format(min_diag_value, A.dtype))
         else:
             if min_diag_value <= 0:
-                raise ValueError('Only min_diag_values greater zero are supported.')
+                error = ValueError('Only min_diag_values greater zero are supported.')
+                matrix.logger.error(error)
+                raise error
             elif min_diag_value < min_diag_value_LL:
-                warnings.warn('Setting min_diag_value to resolution {} of matrix data type {}.'.format(min_diag_value, A.dtype))
+                matrix.logger.warning('Setting min_diag_value to resolution {} of matrix data type {}.'.format(min_diag_value, A.dtype))
 
     if max_diag_value is None:
         max_diag_value = np.inf
     if min_diag_value > max_diag_value:
-        raise ValueError('min_diag_value {} has to be lower or equal to max_diag_value {}.'.format(min_diag_value, max_diag_value))
+        error = ValueError('min_diag_value {} has to be lower or equal to max_diag_value {}.'.format(min_diag_value, max_diag_value))
+        matrix.logger.error(error)
+        raise error
 
     # check return type
     supported_return_types = matrix.constants.DECOMPOSITION_TYPES
     if return_type is not None and return_type not in supported_return_types:
-        raise ValueError('Unkown return type {}. Only values in {} are supported.'.format(return_type, supported_return_types))
+        error = ValueError('Unkown return type {}. Only values in {} are supported.'.format(return_type, supported_return_types))
+        matrix.logger.error(error)
+        raise error
 
     # check permutation method
     if permutation_method is not None:
@@ -219,7 +254,9 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     else:
         supported_permutation_methods = matrix.dense.constants.PERMUTATION_METHODS
     if permutation_method not in supported_permutation_methods:
-        raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, supported_permutation_methods))
+        error = ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, supported_permutation_methods))
+        matrix.logger.error(error)
+        raise error
 
     # prepare permutation
     p_previous = None
@@ -250,12 +287,13 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
         # try to compute decomposition
         try:
             decomposition = decompose(A, permutation_method=permutation_method_decomposite, check_finite=False, overwrite_A=False)
-        except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
+        except matrix.errors.NoDecompositionPossibleTooManyEntriesError as error:
             if is_sparse and (A.indices.dtype != np.int64 or A.indptr != np.int64):
-                warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
+                matrix.logger.warning('Problem to large for index type {}, index type is switched to long.'.format(error.matrix_index_type))
                 A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=True)
                 return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method_decomposite, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
             else:
+                matrix.logger.error(error)
                 raise
         except matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError as e:
             decomposition = e.subdecomposition
@@ -285,6 +323,10 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             else:
                 i_unpermuted = i
 
+            # debug information
+            matrix.logger.debug('Row and column {i_permuted} of permuted matrix ({i_unpermuted} unpermuted) must be approximated.'.format(
+                i_permuted=i_permuted, i_unpermuted=i_unpermuted))
+
             # get A[i,i]
             if is_sparse:
                 A_i_start_index = A.indptr[i]
@@ -306,7 +348,9 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
                 if np.isreal(A_ii):
                     A_ii = A_ii.real
                 else:
-                    raise ValueError('Matrix A is not Hermitian. A[{i}, {i}] = {A_ii} is complex.'.format(i=i, A_ii=A_ii))
+                    error = ValueError('Matrix A is not Hermitian. A[{i}, {i}] = {A_ii} is complex.'.format(i=i, A_ii=A_ii))
+                    matrix.logger.error(error)
+                    raise error
 
             # get and check t[i]
             if t is None:
@@ -314,9 +358,13 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             else:
                 t_i = t[i_unpermuted]
             if t_i < min_diag_value:
-                raise ValueError('Each entry in the target vector t has to be greater or equal to min_diag_value {}. But its {}-th entry is {}.'.format(min_diag_value, i_unpermuted, t_i))
+                error = ValueError('Each entry in the target vector t has to be greater or equal to min_diag_value {}. But its {}-th entry is {}.'.format(min_diag_value, i_unpermuted, t_i))
+                matrix.logger.error(error)
+                raise error
             if t_i > max_diag_value:
-                raise ValueError('Each entry in the target vector t has to be lower or equal to max_diag_value {}. But its {}-th entry is {}.'.format(max_diag_value, i_unpermuted, t_i))
+                error = ValueError('Each entry in the target vector t has to be lower or equal to max_diag_value {}. But its {}-th entry is {}.'.format(max_diag_value, i_unpermuted, t_i))
+                matrix.logger.error(error)
+                raise error
 
             # get L or LD
             if decomposition.is_type(matrix.constants.LDL_DECOMPOSITION_TYPE):
@@ -397,74 +445,84 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
 
     if return_type is not None:
         decomposition = decomposition.as_type(return_type)
+
+    matrix.logger.debug('Approximating decomposition of a matrix finished.')
     return decomposition
 
 
 def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_abs_value=None, is_sparse=None, A_ii=None, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None):
-    # init not passed inputs
-    if min_abs_value is None:
-        min_abs_value = np.finfo(A.dtype).resolution
-    if is_sparse is None:
-        is_sparse = matrix.sparse.util.is_sparse(A)
+    # debug information
+    matrix.logger.debug('Row and column {i} matrix are reduced with factor {reduction_factor}.'.format(
+        i=i, reduction_factor=reduction_factor))
 
-    if is_sparse:
-        A_i_start_index, A_i_stop_index, A_ii_index, A_ii = matrix.sparse.util.compressed_matrix_indices(A, i, A_i_start_index=A_i_start_index, A_i_stop_index=A_i_stop_index, A_ii_index=A_ii_index, A_ii=A_ii)
-    else:
-        if A_ii is None:
-            A_ii = A[i, i]
-            if np.iscomplexobj(A_ii):
-                if np.isreal(A_ii):
-                    A_ii = A_ii.real
-                else:
-                    raise ValueError('Matrix A is not Hermitian. A[{i}, {i}] = {A_ii} is complex.'.format(i=i, A_ii=A_ii))
+    # reduce
+    if reduction_factor != 1:
+        # init not passed inputs
+        if min_abs_value is None:
+            min_abs_value = np.finfo(A.dtype).resolution
+        if is_sparse is None:
+            is_sparse = matrix.sparse.util.is_sparse(A)
 
-    # apply reduction factor
-    if t_i is None:
-        A_ii_new = A_ii    # reduces rounding errors
-    else:
-        A_ii_new = (1 - reduction_factor**2) * t_i + reduction_factor**2 * A_ii
-    assert np.isreal(A_ii_new)
+        if is_sparse:
+            A_i_start_index, A_i_stop_index, A_ii_index, A_ii = matrix.sparse.util.compressed_matrix_indices(A, i, A_i_start_index=A_i_start_index, A_i_stop_index=A_i_stop_index, A_ii_index=A_ii_index, A_ii=A_ii)
+        else:
+            if A_ii is None:
+                A_ii = A[i, i]
+                if np.iscomplexobj(A_ii):
+                    if np.isreal(A_ii):
+                        A_ii = A_ii.real
+                    else:
+                        error = ValueError('Matrix A is not Hermitian. A[{i}, {i}] = {A_ii} is complex.'.format(i=i, A_ii=A_ii))
+                        matrix.logger.error(error)
+                        raise error
 
-    if is_sparse:
-        # set column (or row)
-        A.data[A_i_start_index:A_i_stop_index] *= reduction_factor
+        # apply reduction factor
+        if t_i is None:
+            A_ii_new = A_ii    # reduces rounding errors
+        else:
+            A_ii_new = (1 - reduction_factor**2) * t_i + reduction_factor**2 * A_ii
+        assert np.isreal(A_ii_new)
 
-        # apply min_abs_value in column
-        if min_abs_value > 0:
-            set_to_zero_indices = np.where(np.abs(A.data[A_i_start_index:A_i_stop_index]) < min_abs_value)[0]
-            set_to_zero_indices += A_i_start_index
-            A.data[set_to_zero_indices] = 0
-            del set_to_zero_indices
+        if is_sparse:
+            # set column (or row)
+            A.data[A_i_start_index:A_i_stop_index] *= reduction_factor
 
-        # set row (or column)
-        A_i_data = A.data[A_i_start_index:A_i_stop_index]
-        A_i_rows = A.indices[A_i_start_index:A_i_stop_index]
-        for j, A_ij in zip(A_i_rows, A_i_data.conj()):
-            if i != j:
-                A[i, j] = A_ij
-        del A_i_data, A_i_rows
+            # apply min_abs_value in column
+            if min_abs_value > 0:
+                set_to_zero_indices = np.where(np.abs(A.data[A_i_start_index:A_i_stop_index]) < min_abs_value)[0]
+                set_to_zero_indices += A_i_start_index
+                A.data[set_to_zero_indices] = 0
+                del set_to_zero_indices
 
-        # set diagonal entry
-        if A_ii_index is not None:
-            A.data[A_ii_index] = A_ii_new
-        elif A_ii_new != 0:
-            with warnings.catch_warnings():
-                warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
-                A[i, i] = A_ii_new
+            # set row (or column)
+            A_i_data = A.data[A_i_start_index:A_i_stop_index]
+            A_i_rows = A.indices[A_i_start_index:A_i_stop_index]
+            for j, A_ij in zip(A_i_rows, A_i_data.conj()):
+                if i != j:
+                    A[i, j] = A_ij
+            del A_i_data, A_i_rows
 
-    else:
-        # set column
-        A[:, i] *= reduction_factor
+            # set diagonal entry
+            if A_ii_index is not None:
+                A.data[A_ii_index] = A_ii_new
+            elif A_ii_new != 0:
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+                    A[i, i] = A_ii_new
 
-        # apply min_abs_value in column
-        if min_abs_value > 0:
-            A[np.abs(A[:, i]) < min_abs_value, i] = 0
+        else:
+            # set column
+            A[:, i] *= reduction_factor
 
-        # set row
-        A[i, :] = A[:, i].conj().T
+            # apply min_abs_value in column
+            if min_abs_value > 0:
+                A[np.abs(A[:, i]) < min_abs_value, i] = 0
 
-        # set diagonal entry
-        A[i, i] = A_ii_new
+            # set row
+            A[i, :] = A[:, i].conj().T
+
+            # set diagonal entry
+            A[i, i] = A_ii_new
 
     return A
 
@@ -498,6 +556,11 @@ def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_va
         An approximative of `A` using the passed reduction factors.
     """
 
+    # debug logging
+    matrix.logger.debug('Applying reduction factors to a matrix with min_abs_value={min_abs_value}, overwrite_A={overwrite_A}.'.format(
+        min_abs_value=min_abs_value,
+        overwrite_A=overwrite_A))
+
     # init
     A, t = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
     is_sparse = matrix.sparse.util.is_sparse(A)
@@ -518,6 +581,8 @@ def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_va
     # return matrix
     if is_sparse:
         A.eliminate_zeros()
+
+    matrix.logger.debug('Applying reduction factors finished.')
     return A
 
 
@@ -587,8 +652,19 @@ def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_di
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
+
+    # debug logging
+    matrix.logger.debug('Approximating decomposition of a matrix with min_abs_value={min_abs_value}, min_diag_value={min_diag_value}, max_diag_value={max_diag_value}, permutation_method={permutation_method}, return_type={return_type}, check_finite={check_finite}, overwrite_A={overwrite_A}, reduction_factors_file={reduction_factors_file}.'.format(
+        min_abs_value=min_abs_value,
+        min_diag_value=min_diag_value,
+        max_diag_value=max_diag_value,
+        permutation_method=permutation_method,
+        return_type=return_type,
+        check_finite=check_finite,
+        overwrite_A=overwrite_A,
+        reduction_factors_file=reduction_factors_file))
 
     # callback function
     def approximate_callback_save_reduction_factors(reduction_factors_file, n):
@@ -616,7 +692,9 @@ def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_di
             reduction_factors = np.load(reduction_factors_file, mmap_mode='r+')
         else:
             if reduction_factors.shape != (n,):
-                raise ValueError('The reduction factors file contains an array with shape {} but the expected shape is {}'.format(reduction_factors.shape, (n,)))
+                error = ValueError('The reduction factors file contains an array with shape {} but the expected shape is {}'.format(reduction_factors.shape, (n,)))
+                matrix.logger.error(error)
+                raise error
 
         def callback_function(i, reduction_factor):
             reduction_factors[i] = reduction_factors[i] * reduction_factor
@@ -685,8 +763,14 @@ def approximate_positive_definite(A, positive_definiteness_parameter=None, min_a
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
+
+    # debug logging
+    matrix.logger.debug('Approximating matrix as positive definite matrix with min_abs_value={min_abs_value}, check_finite={check_finite}, overwrite_A={overwrite_A}.'.format(
+        min_abs_value=min_abs_value,
+        check_finite=check_finite,
+        overwrite_A=overwrite_A))
 
     # init min_diag_value
     dtype_resolution = np.finfo(A.dtype).resolution
@@ -702,7 +786,9 @@ def approximate_positive_definite(A, positive_definiteness_parameter=None, min_a
         if np.all(np.isreal(t)):
             t = t.real
         else:
-            raise ValueError('A is not Hermitian. Some diagonal values are complex.')
+            error = ValueError('A is not Hermitian. Some diagonal values are complex.')
+            matrix.logger.error(error)
+            raise error
     if np.any(t < min_diag_value):
         if not t.flags.writeable:
             t = t.copy()
@@ -741,9 +827,14 @@ def is_positive_semi_definite(A, check_finite=True):
     Raises
     ------
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
+    # debug logging
+    matrix.logger.debug('Checking whether matrix is positive semi-definite with check_finite={check_finite}.'.format(
+        check_finite=check_finite))
+
+    # try to decompose and check decomposition
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
@@ -780,9 +871,14 @@ def is_positive_definite(A, check_finite=True):
     Raises
     ------
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
+    # debug logging
+    matrix.logger.debug('Checking whether matrix is positive definite with check_finite={check_finite}.'.format(
+        check_finite=check_finite))
+
+    # try to decompose and check decomposition
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
@@ -819,9 +915,14 @@ def is_invertible(A, check_finite=True):
     Raises
     ------
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
+    # debug logging
+    matrix.logger.debug('Checking whether matrix isinvertable with check_finite={check_finite}.'.format(
+        check_finite=check_finite))
+
+    # try to decompose and check decomposition
     try:
         decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
     except (matrix.errors.MatrixNotFiniteError,
@@ -866,13 +967,21 @@ def solve(A, b, overwrite_b=False, check_finite=True):
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     matrix.errors.MatrixSingularError
         If `A` is singular.
     """
 
+    # debug logging
+    matrix.logger.debug('Solving linear system with overwrite_b={overwrite_b} check_finite={check_finite}.'.format(
+        overwrite_b=overwrite_b,
+        check_finite=check_finite))
+
+    # try to decompose and solve with decomposition
     decomposition = decompose(A, check_finite=check_finite)
     try:
         return decomposition.solve(b, overwrite_b=overwrite_b, check_finite=False)
-    except matrix.errors.DecompositionSingularError as e:
-        raise matrix.errors.MatrixSingularError(A) from e
+    except matrix.errors.DecompositionSingularError as base_error:
+        error = matrix.errors.MatrixSingularError(A)
+        matrix.logger.error(error)
+        raise error from base_error

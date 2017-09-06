@@ -4,6 +4,7 @@ import numpy as np
 import scipy.sparse
 import scipy.sparse.linalg
 
+import matrix
 import matrix.errors
 import matrix.dense.util
 import matrix.sparse.util
@@ -44,7 +45,7 @@ def convert_to_csc_or_csr(A, matrix_format, warn_if_wrong_format=True, sort_indi
     copied = False
     if not scipy.sparse.isspmatrix_csc(A):
         if warn_if_wrong_format:
-            warnings.warn('{} matrix format is required. Converting to CSC matrix format.'.format(matrix_format), scipy.sparse.SparseEfficiencyWarning)
+            matrix.logger.warning('{} matrix format is required. Converting to CSC matrix format.'.format(matrix_format), scipy.sparse.SparseEfficiencyWarning)
         if matrix_format == 'CSC':
             A = scipy.sparse.csc_matrix(A)
         else:

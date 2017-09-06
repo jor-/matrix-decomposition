@@ -4,8 +4,11 @@ import matrix.constants
 import matrix.decompositions
 import matrix.errors
 
+
 # *** functions *** #
+
 from matrix.calculate import decompose, approximate, approximate_positive_definite, approximate_with_reduction_factor_file, is_positive_semi_definite, is_positive_definite, is_invertible, solve
+
 
 # *** constants *** #
 
@@ -20,6 +23,16 @@ PERMUTATION_METHODS = matrix.constants.PERMUTATION_METHODS
 SPARSE_PERMUTATION_METHODS = matrix.constants.SPARSE_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
 
+
+# *** version *** #
+
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
+
+
+# *** logging *** #
+
+import logging
+
+logger = logging.getLogger(__name__)

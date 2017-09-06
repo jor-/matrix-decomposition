@@ -1,16 +1,14 @@
-import warnings
-
 import numpy as np
 
-import matrix.sparse.constants
-import matrix.sparse.permute
-import matrix.sparse.util
-
+import matrix
 import matrix.constants
 import matrix.decompositions
 import matrix.errors
 import matrix.permute
 import matrix.util
+import matrix.sparse.constants
+import matrix.sparse.permute
+import matrix.sparse.util
 
 
 def _decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, use_long=False):
@@ -62,7 +60,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
     try:
         import sksparse.cholmod
@@ -181,11 +179,11 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     matrix.errors.MatrixNotSquareError
         If `A` is not a square matrix.
     matrix.errors.MatrixNotFiniteError
-        If `A` is not a finte matrix and `check_finite` is True.
+        If `A` is not a finite matrix and `check_finite` is True.
     """
 
     try:
         return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, use_long=False)
     except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
-        warnings.warn('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
+        matrix.logger.warning('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
         return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=False, overwrite_A=overwrite_A, use_long=True)

@@ -1,12 +1,10 @@
-import warnings
-
 import numpy as np
 import scipy.sparse
 
+import matrix
+import matrix.errors
 import matrix.dense.util
 import matrix.sparse.util
-
-import matrix.errors
 
 
 def as_matrix_or_array(A, check_ndim_values=None):
@@ -101,7 +99,7 @@ def set_nearly_zero_to_zero(A, min_abs_value=None):
         if min_abs_value < 0:
             raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
         if min_abs_value < dtype_resolution:
-            warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
+            matrix.logger.warning('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
             min_abs_value = dtype_resolution
 
     # apply min_abs_value
@@ -128,7 +126,7 @@ def set_diagonal_nearly_real_to_real(A, min_abs_value=None):
             if min_abs_value < 0:
                 raise ValueError('min_abs_value {} has to be greater or equal zero.'.format(min_abs_value))
             if min_abs_value < dtype_resolution:
-                warnings.warn('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
+                matrix.logger.warning('Setting min_abs_value to resolution {} of matrix data type {}.'.format(dtype_resolution, A.dtype))
                 min_abs_value = dtype_resolution
 
         # apply min_abs_value
