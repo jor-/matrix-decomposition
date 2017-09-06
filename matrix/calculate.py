@@ -81,7 +81,7 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     return decomposition
 
 
-def _approximate_init(A, t=None, min_abs_value=None, copy=True):
+def _approximate_decomposition_init(A, t=None, min_abs_value=None, copy=True):
     # convert input matrix A to needed type
     is_sparse = matrix.sparse.util.is_sparse(A)
     if not is_sparse:
@@ -123,7 +123,7 @@ def _approximate_init(A, t=None, min_abs_value=None, copy=True):
     return A, t
 
 
-def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, callback=None):
+def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, callback=None):
     """
     Computes an approximative decomposition of a matrix.
 
@@ -203,7 +203,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
         overwrite_A=overwrite_A))
 
     # init
-    A, t = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
+    A, t = _approximate_decomposition_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
     is_sparse = matrix.sparse.util.is_sparse(A)
     n = A.shape[0]
     matrix.util.check_finite(A, check_finite=check_finite)
@@ -291,7 +291,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             if is_sparse and (A.indices.dtype != np.int64 or A.indptr != np.int64):
                 matrix.logger.warning('Problem to large for index type {}, index type is switched to long.'.format(error.matrix_index_type))
                 A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=True)
-                return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method_decomposite, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
+                return approximate_decomposition(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method_decomposite, return_type=return_type, overwrite_A=overwrite_A, check_finite=False, callback=callback)
             else:
                 matrix.logger.error(error)
                 raise
@@ -422,10 +422,10 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
             if t is None:
                 t_i = None
             if is_sparse:
-                A = _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=t_i, min_abs_value=min_abs_value, is_sparse=True, A_ii=A_ii, A_i_start_index=A_i_start_index, A_i_stop_index=A_i_stop_index, A_ii_index=A_ii_index)
+                A = _approximate_decomposition_apply_reduction_factor(A, i, reduction_factor, t_i=t_i, min_abs_value=min_abs_value, is_sparse=True, A_ii=A_ii, A_i_start_index=A_i_start_index, A_i_stop_index=A_i_stop_index, A_ii_index=A_ii_index)
                 A.eliminate_zeros()
             else:
-                A = _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=t_i, min_abs_value=min_abs_value, is_sparse=False, A_ii=A_ii)
+                A = _approximate_decomposition_apply_reduction_factor(A, i, reduction_factor, t_i=t_i, min_abs_value=min_abs_value, is_sparse=False, A_ii=A_ii)
 
             # call callback
             if callback is not None:
@@ -450,7 +450,7 @@ def approximate(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_val
     return decomposition
 
 
-def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_abs_value=None, is_sparse=None, A_ii=None, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None):
+def _approximate_decomposition_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_abs_value=None, is_sparse=None, A_ii=None, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None):
     # debug information
     matrix.logger.debug('Row and column {i} matrix are reduced with factor {reduction_factor}.'.format(
         i=i, reduction_factor=reduction_factor))
@@ -527,7 +527,7 @@ def _approximate_apply_reduction_factor(A, i, reduction_factor, t_i=None, min_ab
     return A
 
 
-def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_value=None, overwrite_A=False):
+def approximate_decomposition_apply_reduction_factors(A, reduction_factors, t=None, min_abs_value=None, overwrite_A=False):
     """
     Computes an approximative of `A` using the passed reduction factors.
 
@@ -562,7 +562,7 @@ def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_va
         overwrite_A=overwrite_A))
 
     # init
-    A, t = _approximate_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
+    A, t = _approximate_decomposition_init(A, t=t, min_abs_value=min_abs_value, copy=not overwrite_A)
     is_sparse = matrix.sparse.util.is_sparse(A)
 
     # convert input matrix
@@ -576,7 +576,7 @@ def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_va
                 t_i = t[i]
             else:
                 t_i = None
-            A = _approximate_apply_reduction_factor(A, i, r, t_i=t_i, min_abs_value=min_abs_value, is_sparse=is_sparse)
+            A = _approximate_decomposition_apply_reduction_factor(A, i, r, t_i=t_i, min_abs_value=min_abs_value, is_sparse=is_sparse)
 
     # return matrix
     if is_sparse:
@@ -586,7 +586,7 @@ def approximate_apply_reduction_factors(A, reduction_factors, t=None, min_abs_va
     return A
 
 
-def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, reduction_factors_file=None):
+def approximate_decomposition_with_reduction_factor_file(A, t=None, min_abs_value=None, min_diag_value=None, max_diag_value=None, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, reduction_factors_file=None):
     """
     Computes an approximative decomposition of a matrix.
 
@@ -709,7 +709,7 @@ def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_di
         except FileNotFoundError:
             pass
         else:
-            A = approximate_apply_reduction_factors(A, reduction_factors, t=t, min_abs_value=min_abs_value, overwrite_A=overwrite_A)
+            A = approximate_decomposition_apply_reduction_factors(A, reduction_factors, t=t, min_abs_value=min_abs_value, overwrite_A=overwrite_A)
             overwrite_A = False
 
         n = A.shape[0]
@@ -718,10 +718,10 @@ def approximate_with_reduction_factor_file(A, t=None, min_abs_value=None, min_di
         callback = None
 
     # run approximation
-    return approximate(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, callback=callback)
+    return approximate_decomposition(A, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, callback=callback)
 
 
-def approximate_positive_definite(A, positive_definiteness_parameter=None, min_abs_value=None, check_finite=True, overwrite_A=False):
+def approximate_positive_definite_matrix(A, positive_definiteness_parameter=None, min_abs_value=None, check_finite=True, overwrite_A=False):
     """
     Computes a positive definite approximation a matrix.
 
@@ -795,7 +795,7 @@ def approximate_positive_definite(A, positive_definiteness_parameter=None, min_a
         t[t < min_diag_value] = min_diag_value
 
     # calculate approximation
-    approximated_decomposition = approximate(A, t=t, min_abs_value=min_abs_value, min_diag_value=min_diag_value, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite, overwrite_A=overwrite_A)
+    approximated_decomposition = approximate_decomposition(A, t=t, min_abs_value=min_abs_value, min_diag_value=min_diag_value, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite, overwrite_A=overwrite_A)
     A_approximated = approximated_decomposition.composed_matrix
     A_approximated = matrix.util.set_diagonal_nearly_real_to_real(A_approximated, min_abs_value=min_abs_value)
     A_approximated = matrix.util.set_nearly_zero_to_zero(A_approximated, min_abs_value=min_abs_value)

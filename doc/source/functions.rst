@@ -17,14 +17,14 @@ decompose a matrix
 .. autodata:: matrix.DECOMPOSITION_TYPES
 
 
-approximate a matrix by a decomposition
----------------------------------------
+approximate a matrix
+--------------------
 
-.. autofunction:: matrix.approximate
+.. autofunction:: matrix.approximate_decomposition
 
-.. autofunction:: matrix.approximate_positive_definite
+.. autofunction:: matrix.approximate_decomposition_with_reduction_factor_file
 
-.. autofunction:: matrix.approximate_with_reduction_factor_file
+.. autofunction:: matrix.approximate_positive_definite_matrix
 
 
 examine a matrix

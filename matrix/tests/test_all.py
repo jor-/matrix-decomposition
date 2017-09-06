@@ -258,7 +258,7 @@ test_approximate_setups = [
 
 
 @pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value, overwrite_A', test_approximate_setups)
-def test_approximate(n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value, overwrite_A):
+def test_approximate_decomposition(n, dense, complex_values, permutation_method, check_finite, return_type, t, min_diag_value, max_diag_value_shift, min_abs_value, overwrite_A):
     # init values
     if t is None:
         if min_diag_value is None:
@@ -287,7 +287,7 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
     else:
         A_copied = A
 
-    decomposition = matrix.approximate(A_copied, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+    decomposition = matrix.approximate_decomposition(A_copied, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
 
     # check overwrite_A
     if not overwrite_A:
@@ -308,7 +308,7 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         reduction_factors_file = os.path.join(tmp_dir, 'reduction_factors_file.npy')
-        decomposition = matrix.calculate.approximate_with_reduction_factor_file(A_copied, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type, reduction_factors_file=reduction_factors_file, overwrite_A=overwrite_A)
+        decomposition = matrix.calculate.approximate_decomposition_with_reduction_factor_file(A_copied, t=t, min_diag_value=min_diag_value, max_diag_value=max_diag_value, min_abs_value=min_abs_value, permutation_method=permutation_method, check_finite=check_finite, return_type=return_type, reduction_factors_file=reduction_factors_file, overwrite_A=overwrite_A)
         reduction_factors = np.load(reduction_factors_file)
 
     # check overwrite_A
@@ -319,7 +319,7 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
     if overwrite_A:
         A_copied = A.copy()
 
-    A_approximated = matrix.calculate.approximate_apply_reduction_factors(A_copied, reduction_factors, t=t, min_abs_value=min_abs_value, overwrite_A=overwrite_A)
+    A_approximated = matrix.calculate.approximate_decomposition_apply_reduction_factors(A_copied, reduction_factors, t=t, min_abs_value=min_abs_value, overwrite_A=overwrite_A)
 
     # check overwrite_A
     if not overwrite_A:
@@ -328,7 +328,7 @@ def test_approximate(n, dense, complex_values, permutation_method, check_finite,
     assert matrix.util.almost_equal(decomposition.composed_matrix, A_approximated)
 
 
-test_approximate_positive_definite_setups = [
+test_approximate_positive_definite_matrix_setups = [
     (n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A)
     for n in (10,)
     for dense in (True, False)
@@ -340,8 +340,8 @@ test_approximate_positive_definite_setups = [
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A', test_approximate_positive_definite_setups)
-def test_approximate_positive_definite(n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A):
+@pytest.mark.parametrize('n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A', test_approximate_positive_definite_matrix_setups)
+def test_approximate_positive_definite_matrix(n, dense, complex_values, positive_definiteness_parameter, check_finite, min_abs_value, overwrite_A):
     # init
     A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values)
     if overwrite_A:
@@ -350,7 +350,7 @@ def test_approximate_positive_definite(n, dense, complex_values, positive_defini
         A_copied = A
 
     # calculate positive definite approximation
-    A_positive_definite = matrix.approximate_positive_definite(A_copied, positive_definiteness_parameter=positive_definiteness_parameter, min_abs_value=min_abs_value, check_finite=check_finite, overwrite_A=overwrite_A)
+    A_positive_definite = matrix.approximate_positive_definite_matrix(A_copied, positive_definiteness_parameter=positive_definiteness_parameter, min_abs_value=min_abs_value, check_finite=check_finite, overwrite_A=overwrite_A)
     assert matrix.is_positive_definite(A_positive_definite, check_finite=True)
 
     # check overwrite_A
