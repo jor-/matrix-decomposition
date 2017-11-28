@@ -86,6 +86,9 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
             A = A.tocsc()
         permutation_method = 'natural'
     else:
+        assert permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS
+        assert permutation_method.startswith(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
+        permutation_method = permutation_method[len(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX):]
         assert permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
 
     # check return type

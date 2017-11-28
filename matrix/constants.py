@@ -11,7 +11,6 @@ DECOMPOSITION_TYPES = (LDL_DECOMPOSITION_TYPE, LDL_DECOMPOSITION_COMPRESSED_TYPE
 # *** permutation methods *** #
 
 NO_PERMUTATION_METHODS = (None, '', 'none', 'natural')
-NO_PERMUTATION_METHOD = 'natural'
 DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD = 'decreasing_diagonal_values'
 INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD = 'increasing_diagonal_values'
 DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD = 'decreasing_absolute_diagonal_values'
@@ -25,7 +24,8 @@ UNIVERSAL_PERMUTATION_METHODS = (
 PERMUTATION_METHODS = NO_PERMUTATION_METHODS + UNIVERSAL_PERMUTATION_METHODS
 """ Supported permutation methods for dense and sparse matrices. """
 
-from matrix.sparse.constants import SPARSE_PERMUTATION_METHODS
+from matrix.sparse.constants import FILL_REDUCE_PERMUTATION_METHODS
+from matrix.sparse.constants import PERMUTATION_METHODS as SPARSE_PERMUTATION_METHODS
 
 # *** save and load *** #
 

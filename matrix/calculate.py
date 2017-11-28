@@ -266,7 +266,7 @@ def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None
     else:
         permutation_method_previous = None
         permutation_method_decomposite = permutation_method
-        assert is_sparse and permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
+        assert is_sparse and permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS
 
     # convert input matrix
     if is_sparse:
