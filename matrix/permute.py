@@ -7,6 +7,27 @@ import matrix.sparse.util
 
 
 def permutation_vector(A, permutation_method=None):
+    """
+    Computes a permutation vector for a permutation method.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        Matrix to be decomposed.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    permutation_method : str
+        The symmetric permutation method that is applied to the matrix before
+        it is decomposed. It has to be a value in
+        :const:`matrix.PERMUTATION_METHODS`.
+        optional, default: no permutation
+
+    Returns
+    -------
+    numpy.ndarray
+        The permutation vector.
+    """
+
     if permutation_method is not None:
         permutation_method = permutation_method.lower()
     supported_permutation_methods = matrix.constants.PERMUTATION_METHODS
