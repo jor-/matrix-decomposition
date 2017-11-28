@@ -50,7 +50,7 @@ install:
     - python3 setup.py install
 script:
     - if [ "${PY_TEST}" == "1" ]; then
-          pytest;
+          pytest -W default;
       fi
     - if [ "${SPHINX_TEST}" == "1" ]; then
           sphinx-build -nW -b html -d doc/build/doctrees/ doc/source/ doc/build/html/;
