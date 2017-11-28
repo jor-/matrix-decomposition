@@ -113,9 +113,9 @@ def random_decomposition(type_str, n, dense=True, complex_values=False, finite=T
     return decomposition
 
 
-# *** permute *** #
+# *** permute matrix *** #
 
-test_permute_setups = [
+test_permute_matrix_setups = [
     (n, dense, complex_values)
     for n in (100,)
     for dense in (True, False)
@@ -123,8 +123,8 @@ test_permute_setups = [
 ]
 
 
-@pytest.mark.parametrize('n, dense, complex_values', test_permute_setups)
-def test_permute(n, dense, complex_values):
+@pytest.mark.parametrize('n, dense, complex_values', test_permute_matrix_setups)
+def test_permute_matrix(n, dense, complex_values):
     p = random_permutation_vector(n)
     A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
     A_permuted = matrix.permute.symmetric(A, p)
