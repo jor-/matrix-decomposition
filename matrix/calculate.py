@@ -277,7 +277,7 @@ def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None
     while not finished:
         # apply permutation previous to decomposition
         if permutation_method_previous is not None:
-            p_previous_next = matrix.permute.permutation_vector(A, method=permutation_method_previous)
+            p_previous_next = matrix.permute.permutation_vector(A, permutation_method=permutation_method_previous)
             p_previous = matrix.permute.concatenate_permutation_vectors(p_previous, p_previous_next)
             A = matrix.permute.symmetric(A, p_previous_next)
             if is_sparse:

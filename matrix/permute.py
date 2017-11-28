@@ -6,28 +6,28 @@ import matrix.sparse.permute
 import matrix.sparse.util
 
 
-def permutation_vector(A, method=None):
-    if method is not None:
-        method = method.lower()
-    supported_methods = matrix.constants.PERMUTATION_METHODS
-    if method not in supported_methods:
-        raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(method, supported_methods))
+def permutation_vector(A, permutation_method=None):
+    if permutation_method is not None:
+        permutation_method = permutation_method.lower()
+    supported_permutation_methods = matrix.constants.PERMUTATION_METHODS
+    if permutation_method not in supported_permutation_methods:
+        raise ValueError('Permutation method {} is unknown. Only the following permutation_methods are supported {}.'.format(permutation_method, supported_permutation_methods))
 
-    if method in matrix.constants.NO_PERMUTATION_METHODS:
+    if permutation_method in matrix.constants.NO_PERMUTATION_METHODS:
         return None
     else:
         d = A.diagonal()
         if isinstance(d, np.matrix):
             d = d.A1
-        if method in (matrix.constants.INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
+        if permutation_method in (matrix.constants.INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = np.abs(d)
-        if method in (matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD):
+        if permutation_method in (matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD):
             if np.iscomplexobj(d):
                 if np.all(np.isreal(d)):
                     d = d.real
                 else:
                     raise matrix.errors.MatrixComplexDiagonalValueError(A)
-        if method in (matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
+        if permutation_method in (matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = -d
         p = np.argsort(d)
         return p
