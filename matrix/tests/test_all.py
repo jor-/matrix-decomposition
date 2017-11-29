@@ -155,6 +155,31 @@ def random_decomposition(type_str, n, dense=True, complex_values=False, finite=T
     return decomposition
 
 
+# *** permutation vector *** #
+
+test_permutation_vector_setups = [
+    (n, dense, permutation_method)
+    for n in (10,)
+    for dense in (True, False)
+    for permutation_method in matrix.PERMUTATION_METHODS + matrix.SPARSE_PERMUTATION_METHODS + ('DUMMY_METHOD', )
+]
+
+
+@pytest.mark.parametrize('n, dense, permutation_method', test_permutation_vector_setups)
+def test_permutation_vector(n, dense, permutation_method):
+    A = random_hermitian_matrix(n, dense=dense)
+    if permutation_method in matrix.constants.PERMUTATION_METHODS or (not dense and permutation_method in matrix.constants.SPARSE_PERMUTATION_METHODS):
+        p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
+        if p is None:
+            assert permutation_method in matrix.constants.NO_PERMUTATION_METHODS
+        else:
+            p.sort()
+            np.testing.assert_array_equal(p, np.arange(n))
+    else:
+        with np.testing.assert_raises(ValueError):
+            matrix.permute.permutation_vector(A, permutation_method=permutation_method)
+
+
 # *** permute matrix *** #
 
 test_permute_matrix_setups = [
