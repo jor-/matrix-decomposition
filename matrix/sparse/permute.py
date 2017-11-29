@@ -1,3 +1,4 @@
+import numpy as np
 import scipy.sparse
 
 import matrix
@@ -80,3 +81,63 @@ def symmetric(A, p, inplace=False, warn_if_wrong_format=True):
             A = colums(A, p, inplace=inplace, warn_if_wrong_format=False)
             A = rows(A, p, inplace=True, warn_if_wrong_format=False)
     return A
+
+
+def fill_reducing_permutation_vector(A, permutation_method=None, use_long=False):
+    """
+    Computes a permutation vector for a fill reducing permutation mwthod.
+
+    Parameters
+    ----------
+    A : scipy.sparse.spmatrix
+        Matrix that is supposed to be decomposed.
+        It is assumed, that A is Hermitian.
+        The matrix must be a squared matrix.
+    permutation_method : str
+        The symmetric permutation method that is applied to the matrix before
+        it is decomposed. It has to be a value in
+        :const:`matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS`.
+        optional, default: no permutation
+    use_long: bool
+        Specifies if the long type (64 bit) or the int type (32 bit)
+        should be used for the indices of the sparse matrices.
+        If use_long is None try to estimate if long type is needed.
+        optional, default: False
+
+    Returns
+    -------
+    numpy.ndarray
+        The permutation vector.
+    """
+
+    # check matrix A
+    matrix.util.check_square_matrix(A)
+
+    # if no permutation
+    if permutation_method is None:
+        return np.arange(A.shape[0])
+
+    # apply supported permutation method
+    elif permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS:
+
+        # convert permutation method for cholmod
+        assert permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS
+        assert permutation_method.startswith(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
+        permutation_method = permutation_method[len(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX):]
+        assert permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
+
+        # try to import cholmod
+        try:
+            import sksparse.cholmod
+        except ImportError as e:
+            raise Exception('scikit-sparse is not installed.') from e
+
+        # calculate permutation vector
+        f = sksparse.cholmod.analyze(A, mode='simplicial', ordering_method=permutation_method, use_long=use_long)
+        p = f.P()
+        assert np.all(np.sort(p) == np.arange(len(p)))
+        return p
+
+    # unsupported permutation method
+    else:
+        raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS))
