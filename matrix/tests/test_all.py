@@ -39,52 +39,83 @@ def random_matrix(n, m, dense=True, complex_values=False):
     return A
 
 
-def random_hermitian_matrix(n, dense=True, complex_values=False, positive_semi_definite=False, positive_definite=False, min_diag_value=None):
-    A = random_matrix(n, n, dense=dense, complex_values=complex_values)
-    A = A + A.transpose().conj()
-    if positive_semi_definite or positive_definite:
-        A = A @ A
-    if min_diag_value is not None or positive_definite:
-        if min_diag_value is None:
-            min_diag_value = 0
-        if positive_definite:
-            min_diag_value = max(min_diag_value, 1)
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
-            for i in range(n):
-                A[i, i] += min_diag_value
-    assert np.all(np.isreal(A.diagonal()))
-    return A
-
-
-def random_lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diagonal=False, finite=True, invertible=None):
+def random_lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diagonal=False, finite=True, positive_semi_definite=False, invertible=False):
     # create random triangle matrix
-    if complex_values and real_values_diagonal:
-        A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values)
-    else:
-        A = random_matrix(n, n, dense=dense, complex_values=complex_values)
+    A = random_matrix(n, n, dense=dense, complex_values=complex_values)
     if dense:
         A = np.tril(A)
     else:
         A = scipy.sparse.tril(A).tocsc()
-    # apply desired characteristics
+
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+
+        # apply real_values_diagonal and positive_semi_definite
+        if real_values_diagonal or positive_semi_definite:
+            for i in range(n):
+                A_ii = A[i, i]
+                if A_ii != 0:
+                    A[i, i] = A_ii.real
+        else:
+            for i in range(n):
+                A_ii = A[i, i]
+                if A_ii != 0:
+                    A[i, i] = A_ii * np.sign(np.random.random() - 0.5)
+
+        # apply invertible
+        if invertible:
+            A = A + scipy.sparse.eye(n)
+        else:
+            i = np.random.randint(n)
+            A[i, i] = 0
+
         # apply finite
         if not finite:
             i = np.random.randint(n)
             j = np.random.randint(i + 1)
             A[i, j] = np.nan
             A[i, i] = np.nan
-        # apply invertible
-        if invertible is not None:
-            if invertible:
-                for i in range(n):
-                    if np.isclose(A[i, i], 0, atol=10**-4):
-                        A[i, i] = A[i, i] + 1
-            else:
-                i = np.random.randint(n)
-                A[i, i] = 0
+
+    return A
+
+
+def random_hermitian_matrix(n, dense=True, complex_values=False, positive_semi_definite=False, invertible=False, min_diag_value=None):
+    # generate hermitian and maybe positive (semi-)definite matrix
+    A = random_matrix(n, n, dense=dense, complex_values=complex_values)
+    if positive_semi_definite or invertible:
+        d = np.random.rand(n)
+        if invertible:
+            d = d + 1
+        else:
+            d[np.random.randint(n)] = 0
+        if dense:
+            D = np.diag(d)
+            L = np.tril(A, -1)
+        else:
+            D = scipy.sparse.diags(d)
+            L = scipy.sparse.tril(A, -1).tocsc()
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+            for i in range(n):
+                L[i, i] = 1
+        A = L @ D @ L.transpose().conj()
+    else:
+        A = A + A.transpose().conj()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+        # set real diagonal values
+        if complex_values:
+            for i in range(n):
+                A[i, i] = A[i, i].real
+
+        # set min diag value
+        if min_diag_value is not None:
+            for i in range(n):
+                A[i, i] = max(min_diag_value, A[i, i])
+
+    # return
+    assert np.all(np.isreal(A.diagonal()))
     return A
 
 
@@ -103,13 +134,24 @@ def random_permutation_vector(n):
     return p
 
 
-def random_decomposition(type_str, n, dense=True, complex_values=False, finite=True, invertible=None):
+def random_decomposition(type_str, n, dense=True, complex_values=False, finite=True, positive_semi_definite=False, invertible=False):
     # make random parts of decomposition
-    LD = random_lower_triangle_matrix(n, dense=dense, complex_values=complex_values, real_values_diagonal=True, finite=finite, invertible=invertible)
+    L = random_lower_triangle_matrix(n, dense=dense, complex_values=complex_values, real_values_diagonal=True, finite=finite, positive_semi_definite=positive_semi_definite, invertible=invertible)
     p = random_permutation_vector(n)
     # make decomposition of correct type
-    decomposition = matrix.decompositions.LDL_DecompositionCompressed(LD, p)
-    decomposition = decomposition.as_type(type_str)
+    if type_str == 'LL':
+        decomposition = matrix.decompositions.LL_Decomposition(L, p)
+    elif type_str == 'LDL_compressed':
+        decomposition = matrix.decompositions.LDL_DecompositionCompressed(L, p)
+    elif type_str == 'LDL':
+        d = np.asarray(L.diagonal().real).flatten() * (np.random.rand(n) + 1)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
+            for i in range(n):
+                L[i, i] = 1
+        decomposition = matrix.decompositions.LDL_Decomposition(L, d, p)
+    else:
+        raise ValueError('Unknown decomposition type {}.'.format(type_str))
     return decomposition
 
 
@@ -126,7 +168,7 @@ test_permute_matrix_setups = [
 @pytest.mark.parametrize('n, dense, complex_values', test_permute_matrix_setups)
 def test_permute_matrix(n, dense, complex_values):
     p = random_permutation_vector(n)
-    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values)
     A_permuted = matrix.permute.symmetric(A, p)
     for i in range(n):
         for j in range(n):
@@ -171,7 +213,7 @@ test_convert_setups = [
 
 @pytest.mark.parametrize('n, dense, complex_values, type_str, copy', test_convert_setups)
 def test_convert(n, dense, complex_values, type_str, copy):
-    decomposition = random_decomposition(type_str, n, dense=dense, complex_values=complex_values)
+    decomposition = random_decomposition(type_str, n, dense=dense, complex_values=complex_values, positive_semi_definite=True, invertible=True)
     for convert_type_str in matrix.constants.DECOMPOSITION_TYPES:
         converted_decomposition = decomposition.as_type(convert_type_str, copy=copy)
         equal = type_str == convert_type_str
@@ -202,13 +244,13 @@ test_decompose_setups = [
 
 @pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A', test_decompose_setups)
 def test_decompose(n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A):
-    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True, invertible=True)
     if not overwrite_A:
         A_copied = A.copy()
     # decompose
     decomposition = matrix.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
     # check if decomposition correct
-    assert matrix.util.almost_equal(decomposition.composed_matrix, A)
+    assert matrix.util.almost_equal(decomposition.composed_matrix, A, atol=1e-06)
     # check if A overwritten
     if not overwrite_A:
         assert matrix.util.equal(A, A_copied)
@@ -229,10 +271,7 @@ test_positive_definite_setups = [
 
 @pytest.mark.parametrize('n, dense, complex_values', test_positive_definite_setups)
 def test_positive_definite(n, dense, complex_values):
-    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True)
-    assert matrix.is_positive_semi_definite(A)
-    assert not matrix.is_positive_semi_definite(-A)
-    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_definite=True)
+    A = random_hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True, invertible=True)
     assert matrix.is_positive_semi_definite(A)
     assert not matrix.is_positive_semi_definite(-A)
     assert matrix.is_positive_definite(A)
@@ -325,7 +364,8 @@ def test_approximate_decomposition(n, dense, complex_values, permutation_method,
     if not overwrite_A:
         assert matrix.util.equal(A, A_copied)
 
-    assert matrix.util.almost_equal(decomposition.composed_matrix, A_approximated)
+    # check approximation with reduction factors
+    assert matrix.util.almost_equal(decomposition.composed_matrix, A_approximated, atol=1e-06)
 
 
 test_approximate_positive_definite_matrix_setups = [
