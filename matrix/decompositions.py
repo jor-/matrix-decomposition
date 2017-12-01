@@ -746,6 +746,8 @@ class LDL_Decomposition(DecompositionBase):
     def L(self, L):
         if L is not None:
             L = matrix.util.as_matrix(L)
+            if np.any(L.diagonal() != 1):
+                raise ValueError('The diagonal values of the lower triangle matrix L must all be equal to 1.')
             self._L = L
         else:
             try:
