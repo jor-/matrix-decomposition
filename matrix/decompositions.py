@@ -1140,9 +1140,8 @@ class LL_Decomposition(DecompositionBase):
             for i in np.where(d_zero_mask)[0]:
                 for j in range(i + 1, n):
                     if not np.isclose(L[j, i], 0):
-                        p_i = i[i]
                         raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
-                            self, matrix.constants.LDL_DECOMPOSITION_TYPE, p_i)
+                            self, matrix.constants.LDL_DECOMPOSITION_TYPE, p[i])
 
         # compute new L
         D_inverse = scipy.sparse.diags(d_inverse)
