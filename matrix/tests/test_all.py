@@ -184,7 +184,7 @@ def test_permutation_vector(n, dense, permutation_method):
 
 test_permute_matrix_setups = [
     (n, dense, complex_values)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
 ]
@@ -207,7 +207,7 @@ def test_permute_matrix(n, dense, complex_values):
 
 test_equal_setups = [
     (n, dense, complex_values, type_str)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
     for type_str in matrix.constants.DECOMPOSITION_TYPES
@@ -228,7 +228,7 @@ def test_equal(n, dense, complex_values, type_str):
 
 test_convert_setups = [
     (n, dense, complex_values, type_str, copy)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
     for type_str in matrix.constants.DECOMPOSITION_TYPES
@@ -257,7 +257,7 @@ def supported_permutation_methods(dense):
 
 test_decompose_setups = [
     (n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
     for permutation_method in supported_permutation_methods(dense)
@@ -288,7 +288,7 @@ def test_decompose(n, dense, complex_values, permutation_method, check_finite, r
 
 test_positive_definite_setups = [
     (n, dense, complex_values)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
 ]
@@ -427,7 +427,7 @@ def test_approximate_positive_definite_matrix(n, dense, complex_values, positive
 
 test_save_and_load_setups = [
     (n, dense, complex_values, type_str)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
     for type_str in matrix.constants.DECOMPOSITION_TYPES
@@ -456,7 +456,7 @@ def test_save_and_load(n, dense, complex_values, type_str):
 
 test_is_finite_setups = [
     (n, dense, complex_values, type_str, finite)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
     for type_str in matrix.constants.DECOMPOSITION_TYPES
@@ -481,7 +481,7 @@ def test_is_finite(n, dense, complex_values, type_str, finite):
 
 test_is_invertible_setups = [
     (n, dense, complex_values, type_str, invertible)
-    for n in (100,)
+    for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
     for type_str in matrix.constants.DECOMPOSITION_TYPES
