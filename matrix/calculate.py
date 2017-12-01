@@ -795,7 +795,14 @@ def approximate_positive_definite_matrix(A, positive_definiteness_parameter=None
         t[t < min_diag_value] = min_diag_value
 
     # calculate approximation
-    approximated_decomposition = approximate_decomposition(A, t=t, min_abs_value=min_abs_value, min_diag_value=min_diag_value, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite, overwrite_A=overwrite_A)
+    approximated_decomposition = approximate_decomposition(A,
+                                                           t=t,
+                                                           min_abs_value=min_abs_value,
+                                                           min_diag_value=min_diag_value,
+                                                           permutation_method=None,
+                                                           check_finite=check_finite,
+                                                           overwrite_A=overwrite_A,
+                                                           return_type=matrix.constants.LL_DECOMPOSITION_TYPE)
     A_approximated = approximated_decomposition.composed_matrix
     A_approximated = matrix.util.set_diagonal_nearly_real_to_real(A_approximated, min_abs_value=min_abs_value)
     A_approximated = matrix.util.set_nearly_zero_to_zero(A_approximated, min_abs_value=min_abs_value)
@@ -836,7 +843,9 @@ def is_positive_semi_definite(A, check_finite=True):
 
     # try to decompose and check decomposition
     try:
-        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
+        decomposition = decompose(A,
+                                  permutation_method=None,
+                                  check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
             matrix.errors.MatrixComplexDiagonalValueError,
             matrix.errors.MatrixNotFiniteError,
@@ -880,7 +889,9 @@ def is_positive_definite(A, check_finite=True):
 
     # try to decompose and check decomposition
     try:
-        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
+        decomposition = decompose(A,
+                                  permutation_method=None,
+                                  check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
             matrix.errors.MatrixComplexDiagonalValueError,
             matrix.errors.MatrixNotFiniteError,
@@ -924,7 +935,9 @@ def is_invertible(A, check_finite=True):
 
     # try to decompose and check decomposition
     try:
-        decomposition = decompose(A, permutation_method=matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, check_finite=check_finite)
+        decomposition = decompose(A,
+                                  permutation_method=None,
+                                  check_finite=check_finite)
     except (matrix.errors.MatrixNotFiniteError,
             matrix.errors.MatrixNotSquareError):
         return False
