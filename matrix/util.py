@@ -9,7 +9,7 @@ import matrix.sparse.util
 
 def as_matrix_or_array(A, check_ndim_values=None):
     if not scipy.sparse.issparse(A):
-        A = np.asanyarray(A)
+        A = np.asarray(A)
     if check_ndim_values is not None and A.ndim not in check_ndim_values:
         raise ValueError('The number of dimensions of the input should be in '
                          '{} but it is {}.'.format(check_ndim_values, A.ndim))
