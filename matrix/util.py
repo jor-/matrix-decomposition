@@ -45,17 +45,18 @@ def equal(A, B):
         return matrix.dense.util.equal(A, B)
 
 
-def almost_equal(A, B):
+def almost_equal(A, B, rtol=1e-05, atol=1e-08):
     A_is_sparse = matrix.sparse.util.is_sparse(A)
     B_is_sparse = matrix.sparse.util.is_sparse(B)
     if A_is_sparse != B_is_sparse:
         return False
     if A_is_sparse:
         assert B_is_sparse
-        return matrix.sparse.util.almost_equal(A, B)
+        almost_equal = matrix.sparse.util.almost_equal
     else:
         assert not B_is_sparse
-        return matrix.dense.util.almost_equal(A, B)
+        almost_equal = matrix.dense.util.almost_equal
+    return almost_equal(A, B, rtol=rtol, atol=atol)
 
 
 def check_square_matrix(A):

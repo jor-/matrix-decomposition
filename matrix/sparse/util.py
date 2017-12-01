@@ -18,11 +18,11 @@ def equal(A, B):
     return A.shape == B.shape and A.nnz == B.nnz and (A != B).nnz == 0
 
 
-def almost_equal(A, B):
+def almost_equal(A, B, rtol=1e-05, atol=1e-08):
     if A.shape != B.shape:
         return False
     D = A - B
-    return np.all(np.isclose(D.data, 0))
+    return np.all(np.isclose(D.data, 0, rtol=rtol, atol=atol))
 
 
 def is_finite(A):
