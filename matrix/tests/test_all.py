@@ -60,27 +60,6 @@ def test_permute_matrix(n, dense, complex_values):
     np.testing.assert_array_equal(p_inverse[p], np.arange(n))
 
 
-# *** equal *** #
-
-test_equal_setups = [
-    (n, dense, complex_values, type_str)
-    for n in (10,)
-    for dense in (True, False)
-    for complex_values in (True, False)
-    for type_str in matrix.constants.DECOMPOSITION_TYPES
-]
-
-
-@pytest.mark.parametrize('n, dense, complex_values, type_str', test_equal_setups)
-def test_equal(n, dense, complex_values, type_str):
-    decomposition = matrix.tests.random.decomposition(n, type_str=type_str, dense=dense, complex_values=complex_values)
-    for (n_other, dense_other, complex_values_other, type_str_other) in test_equal_setups:
-        decomposition_other = matrix.tests.random.decomposition(n_other, type_str=type_str_other, dense=dense_other, complex_values=complex_values_other)
-        equal = n == n_other and dense == dense_other and complex_values == complex_values_other and type_str == type_str_other
-        equal_calculated = decomposition == decomposition_other
-        assert equal == equal_calculated
-
-
 # *** convert *** #
 
 test_convert_setups = [
