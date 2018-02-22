@@ -792,7 +792,7 @@ class LDL_Decomposition(DecompositionBase):
     def __eq__(self, other):
         if not super().__eq__(other):
             return False
-        return np.all(self.d == other.d) and matrix.util.equal(self.L, other.L)
+        return np.all(self.d == other.d) and matrix.util.is_equal(self.L, other.L)
 
     # *** convert type *** #
 
@@ -991,7 +991,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def __eq__(self, other):
         if not super().__eq__(other):
             return False
-        return matrix.util.equal(self.LD, other.LD)
+        return matrix.util.is_equal(self.LD, other.LD)
 
     # *** convert type *** #
 
@@ -1109,7 +1109,7 @@ class LL_Decomposition(DecompositionBase):
     def __eq__(self, other):
         if not super().__eq__(other):
             return False
-        return matrix.util.equal(self.L, other.L)
+        return matrix.util.is_equal(self.L, other.L)
 
     # *** convert type *** #
 

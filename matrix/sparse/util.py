@@ -14,11 +14,11 @@ def is_sparse(A):
     return scipy.sparse.issparse(A)
 
 
-def equal(A, B):
+def is_equal(A, B):
     return A.shape == B.shape and A.nnz == B.nnz and (A != B).nnz == 0
 
 
-def almost_equal(A, B, rtol=1e-05, atol=1e-08):
+def is_almost_equal(A, B, rtol=1e-05, atol=1e-08):
     if A.shape != B.shape:
         return False
     D = A - B

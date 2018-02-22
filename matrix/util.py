@@ -32,31 +32,31 @@ def as_vector(A):
     return A
 
 
-def equal(A, B):
+def is_equal(A, B):
     A_is_sparse = matrix.sparse.util.is_sparse(A)
     B_is_sparse = matrix.sparse.util.is_sparse(B)
     if A_is_sparse != B_is_sparse:
         return False
     if A_is_sparse:
         assert B_is_sparse
-        return matrix.sparse.util.equal(A, B)
+        return matrix.sparse.util.is_equal(A, B)
     else:
         assert not B_is_sparse
-        return matrix.dense.util.equal(A, B)
+        return matrix.dense.util.is_equal(A, B)
 
 
-def almost_equal(A, B, rtol=1e-05, atol=1e-08):
+def is_almost_equal(A, B, rtol=1e-05, atol=1e-08):
     A_is_sparse = matrix.sparse.util.is_sparse(A)
     B_is_sparse = matrix.sparse.util.is_sparse(B)
     if A_is_sparse != B_is_sparse:
         return False
     if A_is_sparse:
         assert B_is_sparse
-        almost_equal = matrix.sparse.util.almost_equal
+        is_almost_equal = matrix.sparse.util.is_almost_equal
     else:
         assert not B_is_sparse
-        almost_equal = matrix.dense.util.almost_equal
-    return almost_equal(A, B, rtol=rtol, atol=atol)
+        is_almost_equal = matrix.dense.util.is_almost_equal
+    return is_almost_equal(A, B, rtol=rtol, atol=atol)
 
 
 def check_square_matrix(A):

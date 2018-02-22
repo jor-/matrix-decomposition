@@ -132,10 +132,10 @@ def test_decompose(n, dense, complex_values, permutation_method, check_finite, r
     # decompose
     decomposition = matrix.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
     # check if decomposition correct
-    assert matrix.util.almost_equal(decomposition.composed_matrix, A, atol=1e-06)
+    assert matrix.util.is_almost_equal(decomposition.composed_matrix, A, atol=1e-06)
     # check if A overwritten
     if not overwrite_A:
-        assert matrix.util.equal(A, A_copied)
+        assert matrix.util.is_equal(A, A_copied)
     # check if real valued d in LDL decomposition
     decomposition = decomposition.as_type(matrix.LDL_DECOMPOSITION_TYPE)
     assert np.all(np.isreal(decomposition.d))
@@ -212,7 +212,7 @@ def test_approximate_decomposition(n, dense, complex_values, permutation_method,
 
     # check overwrite_A
     if not overwrite_A:
-        assert matrix.util.equal(A, A_copied)
+        assert matrix.util.is_equal(A, A_copied)
 
     # check d values
     if min_diag_value is not None or max_diag_value is not None:
@@ -234,7 +234,7 @@ def test_approximate_decomposition(n, dense, complex_values, permutation_method,
 
     # check overwrite_A
     if not overwrite_A:
-        assert matrix.util.equal(A, A_copied)
+        assert matrix.util.is_equal(A, A_copied)
 
     # calculate approximation with reduction factors
     if overwrite_A:
@@ -244,10 +244,10 @@ def test_approximate_decomposition(n, dense, complex_values, permutation_method,
 
     # check overwrite_A
     if not overwrite_A:
-        assert matrix.util.equal(A, A_copied)
+        assert matrix.util.is_equal(A, A_copied)
 
     # check approximation with reduction factors
-    assert matrix.util.almost_equal(decomposition.composed_matrix, A_approximated, atol=1e-06)
+    assert matrix.util.is_almost_equal(decomposition.composed_matrix, A_approximated, atol=1e-06)
 
 
 test_approximate_positive_definite_matrix_setups = [
@@ -277,7 +277,7 @@ def test_approximate_positive_definite_matrix(n, dense, complex_values, positive
 
     # check overwrite_A
     if not overwrite_A:
-        assert matrix.util.equal(A, A_copied)
+        assert matrix.util.is_equal(A, A_copied)
 
 
 # *** save and load *** #
