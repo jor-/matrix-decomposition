@@ -292,7 +292,6 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             else:
                 return self
         else:
-            matrix.logging.debug('Converting {} to type {type_str}.'.format(self, type_str=type_str))
             raise matrix.errors.NoDecompositionConversionImplementedError(self, type_str)
 
     def as_any_type(self, *type_strs, copy=False):
