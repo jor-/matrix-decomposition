@@ -2,6 +2,7 @@ import numpy as np
 import scipy.linalg.lapack
 import scipy.linalg.misc
 
+import matrix.constants
 import matrix.decompositions
 import matrix.errors
 import matrix.permute
@@ -11,7 +12,8 @@ import matrix.dense.permute
 import matrix.dense.util
 
 
-def _decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, clean=True):
+def _decompose(A, permutation_method=None, return_type=None,
+               check_finite=True, overwrite_A=False, clean=True):
     """
     Computes a decomposition of a dense matrix.
 
@@ -76,9 +78,13 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     # check and apply permutation_method
     if permutation_method is not None:
         permutation_method = permutation_method.lower()
+    else:
+        permutation_method = matrix.constants.NO_PERMUTATION_METHOD
     supported_permutation_methods = matrix.dense.constants.PERMUTATION_METHODS
     if permutation_method not in supported_permutation_methods:
-        raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, supported_permutation_methods))
+        raise ValueError(('Permutation method {} is unknown. '
+                          'Only the following methods are supported {}.'
+                          '').format(permutation_method, supported_permutation_methods))
 
     p = matrix.permute.permutation_vector(A, permutation_method)
     A = matrix.dense.permute.symmetric(A, p)
@@ -87,8 +93,8 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     # check return type
     supported_return_type = matrix.dense.constants.DECOMPOSITION_TYPES
     if return_type is not None and return_type not in supported_return_type:
-        raise ValueError('Unkown decomposition type {}. Only values in {} are supported.'.format(
-            return_type, supported_return_type))
+        raise ValueError(('Unkown decomposition type {}. Only values in {} are supported.'
+                          '').format(return_type, supported_return_type))
 
     # call lapack Cholesky function
     potrf = scipy.linalg.lapack.get_lapack_funcs('potrf', (A,))
@@ -104,7 +110,8 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
         raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
             A, matrix.constants.LL_DECOMPOSITION_TYPE, bad_index, decomposition)
     if exit_code < 0:
-        raise ValueError('The {}-th argument of the internal potrf function is invalid.'.format(-exit_code))
+        raise ValueError(('The {}-th argument of the internal potrf function is invalid.'
+                          '').format(-exit_code))
 
     # return decomposition
     assert exit_code == 0
@@ -159,4 +166,5 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
         If `A` is not a finite matrix and `check_finite` is True.
     """
 
-    return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+    return _decompose(A, permutation_method=permutation_method, return_type=return_type,
+                      check_finite=check_finite, overwrite_A=overwrite_A)

@@ -1,1 +1,2 @@
-from matrix.constants import PERMUTATION_METHODS, DECOMPOSITION_TYPES
+from matrix.constants import DECOMPOSITION_TYPES
+from matrix.constants import UNIVERSAL_PERMUTATION_METHODS as PERMUTATION_METHODS

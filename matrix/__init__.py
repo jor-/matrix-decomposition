@@ -18,9 +18,9 @@ DECOMPOSITION_TYPES = matrix.constants.DECOMPOSITION_TYPES
 """ Supported types of decompositions. """
 
 from matrix.constants import DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD, INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD
-PERMUTATION_METHODS = matrix.constants.PERMUTATION_METHODS
-""" Supported permutation methods for dense and sparse matrices. """
-SPARSE_PERMUTATION_METHODS = matrix.constants.SPARSE_PERMUTATION_METHODS
+UNIVERSAL_PERMUTATION_METHODS = matrix.constants.UNIVERSAL_PERMUTATION_METHODS
+""" Supported permutation methods for decompose dense and sparse matrices. """
+SPARSE_ONLY_PERMUTATION_METHODS = matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
 
 

@@ -12,54 +12,6 @@ import matrix.permute
 import matrix.tests.random
 
 
-# *** permutation vector *** #
-
-test_permutation_vector_setups = [
-    (n, dense, permutation_method)
-    for n in (10,)
-    for dense in (True, False)
-    for permutation_method in matrix.PERMUTATION_METHODS + matrix.SPARSE_PERMUTATION_METHODS + ('DUMMY_METHOD', )
-]
-
-
-@pytest.mark.parametrize('n, dense, permutation_method', test_permutation_vector_setups)
-def test_permutation_vector(n, dense, permutation_method):
-    A = matrix.tests.random.hermitian_matrix(n, dense=dense)
-    if permutation_method in matrix.constants.PERMUTATION_METHODS or (not dense and permutation_method in matrix.constants.SPARSE_PERMUTATION_METHODS):
-        p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
-        if p is None:
-            assert permutation_method in matrix.constants.NO_PERMUTATION_METHODS
-        else:
-            p.sort()
-            np.testing.assert_array_equal(p, np.arange(n))
-    else:
-        with np.testing.assert_raises(ValueError):
-            matrix.permute.permutation_vector(A, permutation_method=permutation_method)
-
-
-# *** permute matrix *** #
-
-test_permute_matrix_setups = [
-    (n, dense, complex_values)
-    for n in (10,)
-    for dense in (True, False)
-    for complex_values in (True, False)
-]
-
-
-@pytest.mark.parametrize('n, dense, complex_values', test_permute_matrix_setups)
-def test_permute_matrix(n, dense, complex_values):
-    p = matrix.tests.random.permutation_vector(n)
-    A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values)
-    A_permuted = matrix.permute.symmetric(A, p)
-    for i in range(n):
-        for j in range(n):
-            assert A[p[i], p[j]] == A_permuted[i, j]
-    p_inverse = matrix.permute.invert_permutation_vector(p)
-    np.testing.assert_array_equal(p[p_inverse], np.arange(n))
-    np.testing.assert_array_equal(p_inverse[p], np.arange(n))
-
-
 # *** convert *** #
 
 test_convert_setups = [
@@ -86,9 +38,9 @@ def test_convert(n, dense, complex_values, type_str, copy):
 
 def supported_permutation_methods(dense):
     if dense:
-        return matrix.PERMUTATION_METHODS
+        return matrix.UNIVERSAL_PERMUTATION_METHODS
     else:
-        return matrix.SPARSE_PERMUTATION_METHODS
+        return matrix.UNIVERSAL_PERMUTATION_METHODS + matrix.SPARSE_ONLY_PERMUTATION_METHODS
 
 
 test_decompose_setups = [

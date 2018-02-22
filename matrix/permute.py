@@ -20,9 +20,9 @@ def permutation_vector(A, permutation_method=None):
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
-        :const:`matrix.PERMUTATION_METHODS`.
+        :const:`matrix.UNIVERSAL_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
-        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
+        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         optional, default: no permutation
 
     Returns
@@ -31,39 +31,60 @@ def permutation_vector(A, permutation_method=None):
         The permutation vector.
     """
 
-    matrix.logger.debug('Calculating permutation vector with method {}.'.format(permutation_method))
+    matrix.logger.debug(('Calculating permutation vector with method {}.'
+                         '').format(permutation_method))
 
-    if permutation_method in matrix.constants.NO_PERMUTATION_METHODS:
-        return None
-    elif permutation_method in matrix.constants.PERMUTATION_METHODS:
+    DIAGONAL_VALUES_PERMUATION_METHODS = (
+        matrix.constants.INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD,
+        matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD,
+        matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD,
+        matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD)
+
+    if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
+        p = np.arange(A.shape[0])
+    elif permutation_method in DIAGONAL_VALUES_PERMUATION_METHODS:
         d = A.diagonal()
         if isinstance(d, np.matrix):
             d = d.A1
-        if permutation_method in (matrix.constants.INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
+        if permutation_method in (
+                matrix.constants.INCREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD,
+                matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = np.abs(d)
-        if permutation_method in (matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD):
+        if permutation_method in (
+                matrix.constants.INCREASING_DIAGONAL_VALUES_PERMUTATION_METHOD,
+                matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD):
             if np.iscomplexobj(d):
                 if np.all(np.isreal(d)):
                     d = d.real
                 else:
                     raise matrix.errors.MatrixComplexDiagonalValueError(A)
-        if permutation_method in (matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD, matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
+        if permutation_method in (
+                matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD,
+                matrix.constants.DECREASING_ABSOLUTE_DIAGONAL_VALUES_PERMUTATION_METHOD):
             d = -d
         p = np.argsort(d)
-        return p
-    elif permutation_method in matrix.constants.SPARSE_PERMUTATION_METHODS:
+    elif permutation_method in matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS:
         if matrix.sparse.util.is_sparse(A):
-            p = matrix.sparse.permute.fill_reducing_permutation_vector(A, permutation_method=permutation_method)
-            return p
+            p = matrix.sparse.permute.fill_reducing_permutation_vector(
+                A, permutation_method=permutation_method)
         else:
-            error = ValueError('Permutation method {} is allowed only for sparse matrices. But the matrix is dense. Only the following methods are supported for dense matrices: {}.'.format(permutation_method, matrix.constants.PERMUTATION_METHODS))
+            error = ValueError(
+                ('Permutation method {} is allowed only for sparse matrices.'
+                 'But the matrix is dense. Only the following methods are supported '
+                 'for dense matrices: {}.'
+                 ).format(permutation_method, matrix.UNIVERSAL_PERMUTATION_METHODS))
             matrix.logger.error(error)
             raise error
-
     else:
-        error = ValueError('Permutation method {} is unknown. Only the following methods are supported for dense and sparse matrices: {}. For sparse matrices the following methods are also supported: {}.'.format(permutation_method, matrix.constants.PERMUTATION_METHODS, matrix.constants.SPARSE_PERMUTATION_METHODS))
+        error = ValueError(
+            ('Permutation method {} is unknown. Only the following methods are supported '
+             'for dense and sparse matrices: {}. For sparse matrices the following methods '
+             'are also supported: {}.'
+             ).format(permutation_method, DIAGONAL_VALUES_PERMUATION_METHODS,
+                      matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS))
         matrix.logger.error(error)
         raise error
+    return p
 
 
 def invert_permutation_vector(p):

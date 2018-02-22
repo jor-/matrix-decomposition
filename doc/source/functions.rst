@@ -10,9 +10,9 @@ decompose a matrix
 
 .. autofunction:: matrix.decompose
 
-.. autodata:: matrix.PERMUTATION_METHODS
+.. autodata:: matrix.UNIVERSAL_PERMUTATION_METHODS
 
-.. autodata:: matrix.SPARSE_PERMUTATION_METHODS
+.. autodata:: matrix.SPARSE_ONLY_PERMUTATION_METHODS
 
 .. autodata:: matrix.DECOMPOSITION_TYPES
 

@@ -113,9 +113,16 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=False)
     # check matrix A
     matrix.util.check_square_matrix(A)
 
+    # perpare permutaiton method
+    if permutation_method is not None:
+        permutation_method = permutation_method.lower()
+    else:
+        permutation_method = matrix.constants.NO_PERMUTATION_METHOD
+
     # if no permutation
-    if permutation_method is None:
-        return np.arange(A.shape[0])
+    if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
+        n = A.shape[0]
+        return np.arange(n, dtype=np.min_scalar_type(n))
 
     # apply supported permutation method
     elif permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS:

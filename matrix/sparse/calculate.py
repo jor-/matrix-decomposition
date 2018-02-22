@@ -73,12 +73,14 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
     # check and apply permutation_method
     if permutation_method is not None:
         permutation_method = permutation_method.lower()
+    else:
+        permutation_method = matrix.constants.NO_PERMUTATION_METHOD
     supported_permutation_methods = matrix.sparse.constants.PERMUTATION_METHODS
     if permutation_method not in supported_permutation_methods:
         raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, supported_permutation_methods))
 
-    if permutation_method in matrix.constants.PERMUTATION_METHODS:
-        if permutation_method in matrix.constants.NO_PERMUTATION_METHODS:
+    if permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS:
+        if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
             p = None
         else:
             p = matrix.permute.permutation_vector(A, permutation_method)

@@ -27,9 +27,9 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
-        :const:`matrix.PERMUTATION_METHODS`.
+        :const:`matrix.UNIVERSAL_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
-        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
+        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         optional, default: no permutation
     return_type : str
         The type of the decomposition that should be calculated.
@@ -156,9 +156,9 @@ def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
-        :const:`matrix.PERMUTATION_METHODS`.
+        :const:`matrix.UNIVERSAL_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
-        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
+        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         optional, default: No permutation is done.
     return_type : str
         The type of the decomposition that should be calculated.
@@ -249,6 +249,8 @@ def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None
     # check permutation method
     if permutation_method is not None:
         permutation_method = permutation_method.lower()
+    else:
+        permutation_method = matrix.constants.NO_PERMUTATION_METHOD
     if is_sparse:
         supported_permutation_methods = matrix.sparse.constants.PERMUTATION_METHODS
     else:
@@ -260,7 +262,7 @@ def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None
 
     # prepare permutation
     p_previous = None
-    if permutation_method in matrix.constants.PERMUTATION_METHODS:
+    if permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS:
         permutation_method_previous = permutation_method
         permutation_method_decomposite = None
     else:
@@ -619,9 +621,9 @@ def approximate_decomposition_with_reduction_factor_file(A, t=None, min_abs_valu
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
-        :const:`matrix.PERMUTATION_METHODS`.
+        :const:`matrix.UNIVERSAL_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
-        :const:`matrix.SPARSE_PERMUTATION_METHODS`.
+        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         optional, default: No permutation is done.
     return_type : str
         The type of the decomposition that should be calculated.
@@ -844,7 +846,7 @@ def is_positive_semi_definite(A, check_finite=True):
     # try to decompose and check decomposition
     try:
         decomposition = decompose(A,
-                                  permutation_method=None,
+                                  permutation_method=matrix.constants.NO_PERMUTATION_METHOD,
                                   check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
             matrix.errors.MatrixComplexDiagonalValueError,
@@ -890,7 +892,7 @@ def is_positive_definite(A, check_finite=True):
     # try to decompose and check decomposition
     try:
         decomposition = decompose(A,
-                                  permutation_method=None,
+                                  permutation_method=matrix.constants.NO_PERMUTATION_METHOD,
                                   check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
             matrix.errors.MatrixComplexDiagonalValueError,
@@ -936,7 +938,7 @@ def is_invertible(A, check_finite=True):
     # try to decompose and check decomposition
     try:
         decomposition = decompose(A,
-                                  permutation_method=None,
+                                  permutation_method=matrix.constants.NO_PERMUTATION_METHOD,
                                   check_finite=check_finite)
     except (matrix.errors.MatrixNotFiniteError,
             matrix.errors.MatrixNotSquareError):
