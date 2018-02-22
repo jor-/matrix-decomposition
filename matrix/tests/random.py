@@ -35,7 +35,7 @@ def universal_matrix(n, m, dense=True, complex_values=False):
     return A
 
 
-def lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diagonal=False, finite=True, positive_semi_definite=False, invertible=False):
+def lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diagonal=False, finite=True, positive_semidefinite=False, invertible=False):
     # create random triangle matrix
     A = universal_matrix(n, n, dense=dense, complex_values=complex_values)
     if dense:
@@ -46,8 +46,8 @@ def lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diago
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
 
-        # apply real_values_diagonal and positive_semi_definite
-        if real_values_diagonal or positive_semi_definite:
+        # apply real_values_diagonal and positive_semidefinite
+        if real_values_diagonal or positive_semidefinite:
             for i in range(n):
                 A_ii = A[i, i]
                 if A_ii != 0:
@@ -75,10 +75,10 @@ def lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diago
     return A
 
 
-def hermitian_matrix(n, dense=True, complex_values=False, positive_semi_definite=False, invertible=False, min_diag_value=None):
+def hermitian_matrix(n, dense=True, complex_values=False, positive_semidefinite=False, invertible=False, min_diag_value=None):
     # generate hermitian and maybe positive (semi-)definite matrix
     A = universal_matrix(n, n, dense=dense, complex_values=complex_values)
-    if positive_semi_definite or invertible:
+    if positive_semidefinite or invertible:
         d = np.random.rand(n)
         if invertible:
             d = d + 1
@@ -130,9 +130,9 @@ def permutation_vector(n):
     return p
 
 
-def decomposition(n, type_str='LL', dense=True, complex_values=False, finite=True, positive_semi_definite=False, invertible=False):
+def decomposition(n, type_str='LL', dense=True, complex_values=False, finite=True, positive_semidefinite=False, invertible=False):
     # make random parts of decomposition
-    L = lower_triangle_matrix(n, dense=dense, complex_values=complex_values, real_values_diagonal=True, finite=finite, positive_semi_definite=positive_semi_definite, invertible=invertible)
+    L = lower_triangle_matrix(n, dense=dense, complex_values=complex_values, real_values_diagonal=True, finite=finite, positive_semidefinite=positive_semidefinite, invertible=invertible)
     p = permutation_vector(n)
     # make decomposition of correct type
     if type_str == 'LL':

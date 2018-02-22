@@ -26,7 +26,7 @@ test_convert_setups = [
 
 @pytest.mark.parametrize('n, dense, complex_values, type_str, copy', test_convert_setups)
 def test_convert(n, dense, complex_values, type_str, copy):
-    decomposition = matrix.tests.random.decomposition(n, type_str=type_str, dense=dense, complex_values=complex_values, positive_semi_definite=True, invertible=True)
+    decomposition = matrix.tests.random.decomposition(n, type_str=type_str, dense=dense, complex_values=complex_values, positive_semidefinite=True, invertible=True)
     for convert_type_str in matrix.constants.DECOMPOSITION_TYPES:
         converted_decomposition = decomposition.as_type(convert_type_str, copy=copy)
         equal = type_str == convert_type_str
@@ -57,7 +57,7 @@ test_decompose_setups = [
 
 @pytest.mark.parametrize('n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A', test_decompose_setups)
 def test_decompose(n, dense, complex_values, permutation_method, check_finite, return_type, overwrite_A):
-    A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True, invertible=True)
+    A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semidefinite=True, invertible=True)
     if not overwrite_A:
         A_copied = A.copy()
     # decompose
@@ -70,25 +70,6 @@ def test_decompose(n, dense, complex_values, permutation_method, check_finite, r
     # check if real valued d in LDL decomposition
     decomposition = decomposition.as_type(matrix.LDL_DECOMPOSITION_TYPE)
     assert np.all(np.isreal(decomposition.d))
-
-
-# *** positive definite *** #
-
-test_positive_definite_setups = [
-    (n, dense, complex_values)
-    for n in (10,)
-    for dense in (True, False)
-    for complex_values in (True, False)
-]
-
-
-@pytest.mark.parametrize('n, dense, complex_values', test_positive_definite_setups)
-def test_positive_definite(n, dense, complex_values):
-    A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values, positive_semi_definite=True, invertible=True)
-    assert matrix.is_positive_semi_definite(A)
-    assert not matrix.is_positive_semi_definite(-A)
-    assert matrix.is_positive_definite(A)
-    assert not matrix.is_positive_definite(-A)
 
 
 # *** approximate *** #

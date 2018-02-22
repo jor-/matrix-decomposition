@@ -32,7 +32,7 @@ examine a matrix
 
 .. autofunction:: matrix.is_invertible
 
-.. autofunction:: matrix.is_positive_semi_definite
+.. autofunction:: matrix.is_positive_semidefinite
 
 .. autofunction:: matrix.is_positive_definite
 

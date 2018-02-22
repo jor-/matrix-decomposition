@@ -811,7 +811,7 @@ def approximate_positive_definite_matrix(A, positive_definiteness_parameter=None
     return A_approximated
 
 
-def is_positive_semi_definite(A, check_finite=True):
+def is_positive_semidefinite(A, check_finite=True):
     """
     Returns whether the passed matrix is positive semi-definite.
 
@@ -854,7 +854,7 @@ def is_positive_semi_definite(A, check_finite=True):
             matrix.errors.MatrixNotSquareError):
         return False
     else:
-        return decomposition.is_positive_semi_definite()
+        return decomposition.is_positive_semidefinite()
 
 
 def is_positive_definite(A, check_finite=True):

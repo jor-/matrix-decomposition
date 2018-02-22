@@ -341,7 +341,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def is_positive_semi_definite(self):
+    def is_positive_semidefinite(self):
         """
         Returns whether this is a decomposition of a positive semi-definite matrix.
 
@@ -362,7 +362,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         bool
             Whether this is a decomposition of a positive definite matrix.
         """
-        return self.is_positive_semi_definite() and not self.is_singular()
+        return self.is_positive_semidefinite() and not self.is_singular()
 
     @abc.abstractmethod
     def is_finite(self):
@@ -878,7 +878,7 @@ class LDL_Decomposition(DecompositionBase):
     def is_finite(self):
         return matrix.util.is_finite(self.L) and matrix.util.is_finite(self.d)
 
-    def is_positive_semi_definite(self):
+    def is_positive_semidefinite(self):
         return np.all(self.d >= 0)
 
     def is_positive_definite(self):
@@ -1058,7 +1058,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
     def is_finite(self):
         return matrix.util.is_finite(self.LD)
 
-    def is_positive_semi_definite(self):
+    def is_positive_semidefinite(self):
         return np.all(self.d >= 0)
 
     def is_positive_definite(self):
@@ -1225,7 +1225,7 @@ class LL_Decomposition(DecompositionBase):
     def is_finite(self):
         return matrix.util.is_finite(self.L)
 
-    def is_positive_semi_definite(self):
+    def is_positive_semidefinite(self):
         return True
 
     def is_positive_definite(self):
