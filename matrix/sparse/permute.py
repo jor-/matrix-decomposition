@@ -83,7 +83,7 @@ def symmetric(A, p, inplace=False, warn_if_wrong_format=True):
     return A
 
 
-def fill_reducing_permutation_vector(A, permutation_method=None, use_long=False):
+def fill_reducing_permutation_vector(A, permutation_method=None, use_long=None):
     """
     Computes a permutation vector for a fill reducing permutation mwthod.
 
@@ -102,7 +102,7 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=False)
         Specifies if the long type (64 bit) or the int type (32 bit)
         should be used for the indices of the sparse matrices.
         If use_long is None try to estimate if long type is needed.
-        optional, default: False
+        optional, default: None
 
     Returns
     -------
@@ -139,8 +139,25 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=False)
         except ImportError as e:
             raise Exception('scikit-sparse is not installed.') from e
 
+        # convert to csc matrix
+        if not scipy.sparse.isspmatrix_csc(A):
+            matrix.logger.warning('CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+            A = A.tocsc(copy=False)
+
         # calculate permutation vector
         f = sksparse.cholmod.analyze(A, mode='simplicial', ordering_method=permutation_method, use_long=use_long)
+
+        try:
+            f = sksparse.cholmod.analyze(A, mode='simplicial', ordering_method=permutation_method, use_long=use_long)
+        except sksparse.cholmod.CholmodTooLargeError as cholmod_exception:
+            if A.indices.dtype != np.int64 or A.indptr.dtype != np.int64:
+                matrix.logger.warning('Problem to large for index type. Index type is switched to long.')
+                A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=True)
+                f = sksparse.cholmod.analyze(A, mode='simplicial', ordering_method=permutation_method, use_long=True)
+            else:
+                matrix.logger.error(cholmod_exception)
+                raise
+
         p = f.P()
         assert np.all(np.sort(p) == np.arange(len(p)))
         return p

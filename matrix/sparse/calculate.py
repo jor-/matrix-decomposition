@@ -11,7 +11,8 @@ import matrix.sparse.permute
 import matrix.sparse.util
 
 
-def _decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False, use_long=False):
+def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
+               overwrite_A=False, use_long=None):
     """
     Computes a decomposition of a sparse matrix.
 
@@ -46,7 +47,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
         Specifies if the long type (64 bit) or the int type (32 bit)
         should be used for the indices of the sparse matrices.
         If use_long is None try to estimate if long type is needed.
-        optional, default: False
+        optional, default: None
 
     Returns
     -------
@@ -77,7 +78,9 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
         permutation_method = matrix.constants.NO_PERMUTATION_METHOD
     supported_permutation_methods = matrix.sparse.constants.PERMUTATION_METHODS
     if permutation_method not in supported_permutation_methods:
-        raise ValueError('Permutation method {} is unknown. Only the following methods are supported {}.'.format(permutation_method, supported_permutation_methods))
+        raise ValueError(('Permutation method {} is unknown. '
+                          'Only the following methods are supported {}.'
+                          '').format(permutation_method, supported_permutation_methods))
 
     if permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS:
         if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
@@ -89,18 +92,22 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
         permutation_method = 'natural'
     else:
         assert permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS
-        assert permutation_method.startswith(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
-        permutation_method = permutation_method[len(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX):]
+        assert permutation_method.startswith(
+            matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
+        prefix_len = len(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
+        permutation_method = permutation_method[prefix_len:]
         assert permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
 
     # check return type
     supported_return_type = matrix.sparse.constants.DECOMPOSITION_TYPES
     if return_type is not None and return_type not in supported_return_type:
-        raise ValueError('Unkown decomposition type {}. Only values in {} are supported.'.format(return_type, supported_return_type))
+        raise ValueError(('Unkown decomposition type {}. Only values in {} are supported.'
+                          '').format(return_type, supported_return_type))
 
     # convert matrix A
     A_old = A
-    A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True, overwrite_A=overwrite_A)
+    A = matrix.sparse.util.convert_to_csc(A, sort_indices=True, eliminate_zeros=True,
+                                          overwrite_A=overwrite_A)
     overwrite_A = overwrite_A or A_old is not A
     if use_long:
         A = matrix.sparse.util.convert_index_dtype(A, np.int64, overwrite_A=overwrite_A)
@@ -133,7 +140,8 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True, 
         bad_index = cholmod_exception.column
         decomposition.LD[bad_index, bad_index] = np.nan
         raise matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError(
-            A, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE, bad_index, decomposition) from cholmod_exception
+            A, matrix.constants.LDL_DECOMPOSITION_COMPRESSED_TYPE, bad_index,
+            decomposition) from cholmod_exception
 
     # return
     return decomposition.as_type(return_type)
@@ -188,7 +196,10 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     """
 
     try:
-        return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A, use_long=False)
+        return _decompose(A, permutation_method=permutation_method, return_type=return_type,
+                          check_finite=check_finite, overwrite_A=overwrite_A, use_long=None)
     except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
-        matrix.logger.warning('Problem to large for index type {}, index type is switched to long.'.format(e.matrix_index_type))
-        return _decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=False, overwrite_A=overwrite_A, use_long=True)
+        matrix.logger.warning(('Problem to large for index type {}, '
+                               'index type is switched to long.').format(e.matrix_index_type))
+        return _decompose(A, permutation_method=permutation_method, return_type=return_type,
+                          check_finite=False, overwrite_A=overwrite_A, use_long=True)
