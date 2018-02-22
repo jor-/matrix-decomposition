@@ -181,16 +181,49 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     # *** compare methods *** #
+    def _is_same_type_and_permutation(self, other):
+        return (isinstance(other, DecompositionBase) and
+                self.type_str == other.type_str and
+                self.is_permuted == other.is_permuted and
+                (not self.is_permuted or
+                 (self.n == other.n and np.all(self.p == other.p))))
+
+    def is_equal(self, other):
+        """ Whether this decomposition is equal to passed decomposition.
+
+        Parameters
+        ----------
+        other : str
+            The decomposition which to compare to this decomposition.
+
+        Returns
+        -------
+        bool
+            Whether this decomposition is equal to passed decomposition.
+        """
+        return self._is_same_type_and_permutation(other)
 
     def __eq__(self, other):
-        if not isinstance(other, DecompositionBase):
-            return False
-        if not self.type_str == other.type_str:
-            return False
-        if self.is_permuted and other.is_permuted:
-            return np.all(self.p == other.p)
-        else:
-            return not self.is_permuted and not other.is_permuted
+        return self.is_equal(other)
+
+    def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
+        """ Whether this decomposition is close to passed decomposition.
+
+        Parameters
+        ----------
+        other : str
+            The decomposition which to compare to this decomposition.
+        rtol : float
+            The relative tolerance parameter.
+        atol : float
+            The absolute tolerance parameter.
+
+        Returns
+        -------
+        bool
+            Whether this decomposition is close to passed decomposition.
+        """
+        return self._is_same_type_and_permutation(other)
 
     # *** convert type *** #
 
@@ -789,10 +822,15 @@ class LDL_Decomposition(DecompositionBase):
 
     # *** compare methods *** #
 
-    def __eq__(self, other):
-        if not super().__eq__(other):
-            return False
-        return np.all(self.d == other.d) and matrix.util.is_equal(self.L, other.L)
+    def is_equal(self, other):
+        return (super().is_equal(other) and
+                np.all(self.d == other.d) and
+                matrix.util.is_equal(self.L, other.L))
+
+    def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
+        return (super().is_almost_equal(other) and
+                np.allclose(self.d, other.d, rtol=rtol, atol=atol) and
+                matrix.util.is_almost_equal(self.L, other.L, rtol=rtol, atol=atol))
 
     # *** convert type *** #
 
@@ -988,10 +1026,13 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     # *** compare methods *** #
 
-    def __eq__(self, other):
-        if not super().__eq__(other):
-            return False
-        return matrix.util.is_equal(self.LD, other.LD)
+    def is_equal(self, other):
+        return (super().is_equal(other) and
+                matrix.util.is_equal(self.LD, other.LD))
+
+    def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
+        return (super().is_almost_equal(other) and
+                matrix.util.is_almost_equal(self.LD, other.LD, rtol=rtol, atol=atol))
 
     # *** convert type *** #
 
@@ -1106,10 +1147,13 @@ class LL_Decomposition(DecompositionBase):
 
     # *** compare methods *** #
 
-    def __eq__(self, other):
-        if not super().__eq__(other):
-            return False
-        return matrix.util.is_equal(self.L, other.L)
+    def is_equal(self, other):
+        return (super().is_equal(other) and
+                matrix.util.is_equal(self.L, other.L))
+
+    def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
+        return (super().is_almost_equal(other) and
+                matrix.util.is_almost_equal(self.L, other.L, rtol=rtol, atol=atol))
 
     # *** convert type *** #
 
