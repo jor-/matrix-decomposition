@@ -720,7 +720,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Solving lineaar system with  {}.'.format(self))
+        matrix.logging.debug('Solving linear system with {}.'.format(self))
         # solve
         return self.inverse_matrix_right_side_multiplication(b)
 
