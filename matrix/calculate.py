@@ -174,7 +174,7 @@ def approximate_decomposition(A, t=None, min_abs_value=None, min_diag_value=None
         Whether it is allowed to overwrite A.
         Enabling may result in performance gain.
         optional, default: False
-    callback : callable
+    callback :
         In each iteration `callback(i, r)` is called where `i` is the index of
         the row and column where components of `A` are reduced by the factor `r`.
         optional, default : No callback function is called.
