@@ -1,20 +1,32 @@
-Welcome to matrix_decomposition's documentation!
-================================================
+.. Model description included from README
+
+.. include:: ../../README.rst
+    :end-before: Copyright
+
+
+Contents
+========
 
 .. toctree::
+    :numbered:
     :maxdepth: 2
-    :caption: Contents:
-    
+
     functions
     decompositions
     errors
     changelog
 
 
-
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
+
+.. * :ref:`modindex`
+
+
+.. Copyright included from README
+
+.. include:: ../../README.rst
+    :start-after: Code Coverage
