@@ -49,12 +49,27 @@ class MatrixSingularError(MatrixError):
         super().__init__(matrix, message=message)
 
 
-class MatrixComplexDiagonalValueError(MatrixError):
+class MatrixNotHermitianError(MatrixError):
+    """ A matrix is not Hermitian although a Hermitian matrix is required. """
+
+    def __init__(self, matrix, i=None, j=None):
+        message = 'Matrix with shape {} is not Hermitian.'.format(matrix.shape)
+        if i is not None and j is not None:
+            if i != j:
+                message += (' Its value at index ({i}, {j}) is {A_i_j}'
+                            ' and its value at index ({j}, {i}) is {A_j_i}.'
+                            ).format(i=i, j=j, A_i_j=matrix[i, j], A_j_i=matrix[j, i])
+            else:
+                message += (' Its {i}-th diagonal value {A_i_i} is complex.'
+                            ).format(i=i, A_i_i=matrix[i, i])
+        super().__init__(matrix, message=message)
+
+
+class MatrixComplexDiagonalValueError(MatrixNotHermitianError):
     """ A matrix has complex diagonal values although real diagonal values are required. """
 
-    def __init__(self, matrix):
-        message = 'Matrix with shape {} has complex diagonal values.'.format(matrix.shape)
-        super().__init__(matrix, message=message)
+    def __init__(self, matrix, i=None):
+        super().__init__(matrix, matrix, i=i, j=i)
 
 
 # *** general decomposition exceptions *** #

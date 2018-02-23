@@ -44,6 +44,16 @@ MatrixSingularError
 .. autoclass:: matrix.errors.MatrixSingularError
     :show-inheritance:
 
+MatrixNotHermitianError
+-----------------------------------------
+.. autoclass:: matrix.errors.MatrixNotHermitianError
+    :show-inheritance:
+
+MatrixComplexDiagonalValueError
+-----------------------------------------
+.. autoclass:: matrix.errors.MatrixComplexDiagonalValueError
+    :show-inheritance:
+
 
 All these exceptions are based on the following exception:
 
