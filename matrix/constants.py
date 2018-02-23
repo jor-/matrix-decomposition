@@ -24,6 +24,12 @@ DIAGONAL_VALUES_PERMUTATION_METHODS = (
 UNIVERSAL_PERMUTATION_METHODS = (NO_PERMUTATION_METHOD,) + DIAGONAL_VALUES_PERMUTATION_METHODS
 """ Supported permutation methods for decompose dense and sparse matrices. """
 
+MINIMAL_DIFFERENCE_PERMUTATION_METHOD = 'minimal_difference'
+APPROXIMATION_ONLY_PERMUTATION_METHODS = (
+    MINIMAL_DIFFERENCE_PERMUTATION_METHOD,)
+APPROXIMATION_PERMUTATION_METHODS = UNIVERSAL_PERMUTATION_METHODS + APPROXIMATION_ONLY_PERMUTATION_METHODS
+""" Supported permutation methods for approximate dense and sparse matrices. """
+
 from matrix.sparse.constants import SPARSE_ONLY_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
 

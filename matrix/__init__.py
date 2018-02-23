@@ -7,7 +7,8 @@ import matrix.errors
 
 # *** functions *** #
 
-from matrix.calculate import decompose, approximate_decomposition, approximate_positive_definite_matrix, approximate_decomposition_with_reduction_factor_file, is_positive_semidefinite, is_positive_definite, is_invertible, solve
+from matrix.calculate import decompose, is_positive_semidefinite, is_positive_definite, is_invertible, solve
+from matrix.approximate import decomposition, positive_semidefinite_matrix, positive_definite_matrix
 
 
 # *** constants *** #
@@ -22,6 +23,8 @@ UNIVERSAL_PERMUTATION_METHODS = matrix.constants.UNIVERSAL_PERMUTATION_METHODS
 """ Supported permutation methods for decompose dense and sparse matrices. """
 SPARSE_ONLY_PERMUTATION_METHODS = matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
+APPROXIMATION_PERMUTATION_METHODS = matrix.constants.APPROXIMATION_PERMUTATION_METHODS
+""" Supported permutation methods for approximate dense and sparse matrices. """
 
 
 # *** version *** #
