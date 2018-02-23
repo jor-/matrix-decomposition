@@ -2,28 +2,32 @@ language: python
 matrix:
   include:
     - env:
+        - PYTHON=3.6
+        - CODE_TEST=1
+        - COVERAGE=1
+        - DOC_TEST=0
+        - STYLE_TEST=0
+    - env:
         - PYTHON=3.5
-        - PY_TEST=1
-        - SPHINX_TEST=0
-        - PYCODESTYLE=0
+        - CODE_TEST=1
+        - COVERAGE=0
+        - DOC_TEST=0
+        - STYLE_TEST=0
     - env:
         - PYTHON=3.6
-        - PY_TEST=1
-        - SPHINX_TEST=0
-        - PYCODESTYLE=0
+        - CODE_TEST=0
+        - COVERAGE=0
+        - DOC_TEST=1
+        - STYLE_TEST=0
     - env:
         - PYTHON=3.6
-        - PY_TEST=0
-        - SPHINX_TEST=1
-        - PYCODESTYLE=0
-    - env:
-        - PYTHON=3.6
-        - PY_TEST=0
-        - SPHINX_TEST=0
-        - PYCODESTYLE=1
+        - CODE_TEST=0
+        - COVERAGE=0
+        - DOC_TEST=0
+        - STYLE_TEST=1
 install:
     # install conda
-    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - conda config --set always_yes yes --set changeps1 no
@@ -35,30 +39,36 @@ install:
     # install needed packages
     - conda install -q scipy
     - conda install -q scikit-sparse -c conda-forge
-    - if [ "${PY_TEST}" == "1" ]; then
+    - if [ "${CODE_TEST}" == "1" ]; then
           conda install -q nose;
           conda install -q pytest;
+          if [ "${COVERAGE}" == "1" ]; then
+              conda install -q pytest-cov;
+              conda install -q codecov -c conda-forge;
+          fi
       fi
-    - if [ "${SPHINX_TEST}" == "1" ]; then
-          conda install -q sphinx;
-      fi
-    - if [ "${PYCODESTYLE}" == "1" ]; then
+    - if [ "${STYLE_TEST}" == "1" ]; then
           conda install -q pycodestyle;
       fi
+    - if [ "${DOC_TEST}" == "1" ]; then
+          conda install -q sphinx;
+      fi
     - conda list
-    # install package
+    # install this package
     - python3 setup.py install
 script:
-    - if [ "${PY_TEST}" == "1" ]; then
-          pytest -W default;
+    - if [ "${CODE_TEST}" == "1" ]; then
+          if [ "${COVERAGE}" == "1" ]; then
+              pytest -W error --cov=matrix;
+              codecov;
+          else
+              pytest -W error;
+          fi
       fi
-    - if [ "${SPHINX_TEST}" == "1" ]; then
-          sphinx-build -nW -b html -d doc/build/doctrees/ doc/source/ doc/build/html/;
+    - if [ "${DOC_TEST}" == "1" ]; then
+          sphinx-build -nW -b html -d doc/build/doctrees doc/source doc/build/html;
       fi
-    - if [ "${PYCODESTYLE}" == "1" ]; then
-          pycodestyle --ignore=E402,E501 matrix/;
+    - if [ "${STYLE_TEST}" == "1" ]; then
+          pycodestyle;
       fi
-    # E402 = module level import not at top of file
-    # E501 = line too long
-    #
 
