@@ -329,6 +329,11 @@ def _decomposition(
         delta[p[i]] = d[i] + omega[p[i]]**2 * alpha[p[i]] - gamma[p[i]]
         assert np.isfinite(delta[p[i]])
 
+        # debug info
+        matrix.logger.debug(('Doing iteration {} of {} with permutation index {}, omega {}, '
+                             'delta {} and change value {}.'
+                             ).format(i + 1, n, p[i], omega[p[i]], delta[p[i]], f_value_i))
+
         # update i-th row of L
         for j in range(i):
             L_j_i = L[i, j] * omega[p[i]]
