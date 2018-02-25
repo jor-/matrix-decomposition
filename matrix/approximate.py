@@ -455,7 +455,7 @@ def decomposition(
     """
 
     # debug info
-    matrix.logger.debug(('Calculatin approximated decomposition with passed values: '
+    matrix.logger.debug(('Calculating approximated decomposition with passed values: '
                          'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
                          'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
                          'min_abs_value_D={min_abs_value_D}, '
@@ -484,6 +484,8 @@ def decomposition(
         matrix.logger.debug('Converting L to csr format.')
         L = L.tocsr(copy=False)
     decomposition = matrix.decompositions.LDL_Decomposition(L=L, d=d, p=p).as_type(return_type)
+    decomposition.omega = omega
+    decomposition.delta = delta
 
     # return decomposition
     matrix.logger.debug('Approximation of decomposition {} finished.'.format(decomposition))
