@@ -82,6 +82,13 @@ DecompositionInvalidFile
 .. autoclass:: matrix.errors.DecompositionInvalidFile
     :show-inheritance:
 
+If a decomposition should be loaded from a file which caontains a type which does not fit to the type of the decomposition where it should be loaded into, the following exception is raised:
+
+DecompositionInvalidDecompositionTypeFile
+-----------------------------------------
+.. autoclass:: matrix.errors.DecompositionInvalidDecompositionTypeFile
+    :show-inheritance:
+
 
 All these exceptions are based on the following exception:
 

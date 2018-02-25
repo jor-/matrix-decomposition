@@ -511,7 +511,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             with tarfile.open(filename, mode='r') as tar_file_object:
                 with tar_file_object.extractfile(tar_attribute_name) as attribut_file_object:
                     return file_load_function(attribut_file_object)
-        except (OSError, KeyError) as e:
+        except KeyError as e:
             raise matrix.errors.DecompositionInvalidFile(filename) from e
 
     @staticmethod
@@ -582,7 +582,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         # check type
         type_str = self._load_type(filename)
         if type_str != self.type_str:
-            raise ValueError('Decomposition saved in {} is of type {}.'.format(filename, type_str))
+            raise matrix.errors.DecompositionInvalidDecompositionTypeFile(filename, type_str, self.type_str)
 
         # load attributes
         for attribute_name in self._attribute_names:

@@ -100,12 +100,21 @@ class DecompositionSingularError(DecompositionError):
         super().__init__(decomposition, message)
 
 
-class DecompositionInvalidFile(BaseError, OSError):
+class DecompositionInvalidFile(DecompositionError, OSError):
     """ A decomposition indicated that a decomposition should be loaded from an invalid file. """
 
     def __init__(self, filename):
         self.filename = filename
         message = 'File {} is not a valid decomposition file.'.format(filename)
+        super().__init__(message)
+
+
+class DecompositionInvalidDecompositionTypeFile(DecompositionInvalidFile):
+    """ A decomposition indicated that a decomposition should be loaded from an file in which another decomposition type is stored. """
+
+    def __init__(self, filename, type_file, type_needed):
+        self.filename = filename
+        message = 'File {} contains a decomposition of type {} but type {} is needed.'.format(filename, type_file, type_needed)
         super().__init__(message)
 
 
