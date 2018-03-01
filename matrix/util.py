@@ -48,13 +48,13 @@ def is_equal(A, B):
 def is_almost_equal(A, B, rtol=1e-05, atol=1e-08):
     A_is_sparse = matrix.sparse.util.is_sparse(A)
     B_is_sparse = matrix.sparse.util.is_sparse(B)
-    if A_is_sparse != B_is_sparse:
-        return False
-    if A_is_sparse:
-        assert B_is_sparse
+    if A_is_sparse and B_is_sparse:
         is_almost_equal = matrix.sparse.util.is_almost_equal
     else:
-        assert not B_is_sparse
+        if A_is_sparse:
+            A = A.toarray()
+        if B_is_sparse:
+            B = B.toarray()
         is_almost_equal = matrix.dense.util.is_almost_equal
     return is_almost_equal(A, B, rtol=rtol, atol=atol)
 
