@@ -33,6 +33,11 @@ APPROXIMATION_PERMUTATION_METHODS = UNIVERSAL_PERMUTATION_METHODS + APPROXIMATIO
 from matrix.sparse.constants import SPARSE_ONLY_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
 
+from matrix.sparse.constants import BEST_FILL_REDUCE_PERMUTATION_METHOD
+""" Supported permutation method to best reduce fill of decomposed sparse matrices. """
+from matrix.sparse.constants import DEFAULT_FILL_REDUCE_PERMUTATION_METHOD
+""" Supported permutation method to default reduce fill of decomposed sparse matrices. """
+
 # *** save and load *** #
 
 DECOMPOSITION_ATTRIBUTE_FILENAME = 'attribute_{attribute_name}.{file_extension}'
