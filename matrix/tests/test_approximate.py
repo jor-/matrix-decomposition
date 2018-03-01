@@ -17,10 +17,50 @@ import matrix.util
 def supported_permutation_methods(dense):
     if dense:
         return matrix.APPROXIMATION_PERMUTATION_METHODS
-#        return matrix.UNIVERSAL_PERMUTATION_METHODS
     else:
         return matrix.APPROXIMATION_PERMUTATION_METHODS + matrix.SPARSE_ONLY_PERMUTATION_METHODS
-#        return matrix.UNIVERSAL_PERMUTATION_METHODS + matrix.SPARSE_ONLY_PERMUTATION_METHODS
+
+
+test_approximate_dense_sparse_same_setups = [
+    (n, complex_values, min_diag_B, max_diag_B, min_diag_D, max_diag_D, min_abs_value_D)
+    for n in (10,)
+    for complex_values in (True, False)
+    for min_diag_B in (None, 1, np.arange(n) / n)
+    for max_diag_B in (None, 1, np.arange(n) + 1)
+    for min_diag_D in (None, 1)
+    for max_diag_D in (None, 1)
+    for min_abs_value_D in (None, 0.01)
+]
+
+
+@pytest.mark.parametrize(('n, complex_values, min_diag_B, max_diag_B,'
+                          'min_diag_D, max_diag_D, min_abs_value_D'),
+                         test_approximate_dense_sparse_same_setups)
+def test_approximate_dense_sparse_same(n, complex_values, min_diag_B, max_diag_B,
+                                       min_diag_D, max_diag_D, min_abs_value_D):
+
+    # create random hermitian matrix
+    A_sparse = matrix.tests.random.hermitian_matrix(n, dense=False, complex_values=complex_values) * 10
+    A_sparse = A_sparse.tocsc(copy=False)
+    A_dense = A_sparse.todense()
+
+    # approximate decompositions
+    permutation_method = 'none'
+    overwrite_A = False
+
+    decomposition_sparse = matrix.approximate.decomposition(
+        A_sparse, permutation_method=permutation_method,
+        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        overwrite_A=overwrite_A)
+
+    decomposition_dense = matrix.approximate.decomposition(
+        A_dense, permutation_method=permutation_method,
+        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        overwrite_A=overwrite_A)
+
+    assert decomposition_sparse.is_almost_equal(decomposition_dense)
 
 
 test_approximate_setups = [
@@ -44,7 +84,6 @@ test_approximate_setups = [
                          test_approximate_setups)
 def test_approximate(n, dense, complex_values, permutation_method, min_diag_B, max_diag_B,
                      min_diag_D, max_diag_D, min_abs_value_D, overwrite_A):
-
     # create random hermitian matrix
     A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values) * 10
     if not dense:
@@ -88,8 +127,7 @@ def test_approximate(n, dense, complex_values, permutation_method, min_diag_B, m
     assert complex_values or np.all(np.isreal(L))
 
     # reset A after overwrite
-    if overwrite_A:
-        A = A_copy.copy()
+    A = A_copy.copy() if overwrite_A else A
 
     # create approximated positive semidefinite matrix
     with warnings.catch_warnings():
@@ -123,8 +161,7 @@ def test_approximate(n, dense, complex_values, permutation_method, min_diag_B, m
     do_positive_defintie_checks = min_diag_D is not None and min_diag_D > 0
     if do_positive_defintie_checks:
         # reset A after overwrite
-        if overwrite_A:
-            A = A_copy.copy()
+        A = A_copy.copy() if overwrite_A else A
 
         # create approximated positive definite matrix
         with warnings.catch_warnings():
