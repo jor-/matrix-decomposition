@@ -22,6 +22,8 @@ def is_almost_equal(A, B, rtol=1e-05, atol=1e-08):
     if A.shape != B.shape:
         return False
     D = A - B
+    if D.format not in ('coo', 'csc', 'csr'):
+        D.tocsr(copy=False)
     return np.all(np.isclose(D.data, 0, rtol=rtol, atol=atol))
 
 
