@@ -31,7 +31,7 @@ def permutation_vector(A, permutation_method=None):
         The permutation vector.
     """
 
-    matrix.logger.debug(('Calculating permutation vector with method {}.'
+    matrix.logger.debug(('Calculating permutation vector with method "{}".'
                          '').format(permutation_method))
 
     DIAGONAL_VALUES_PERMUATION_METHODS = (
@@ -41,7 +41,8 @@ def permutation_vector(A, permutation_method=None):
         matrix.constants.DECREASING_DIAGONAL_VALUES_PERMUTATION_METHOD)
 
     if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
-        p = np.arange(A.shape[0])
+        n = A.shape[0]
+        p = np.arange(n, dtype=np.min_scalar_type(n))
     elif permutation_method in DIAGONAL_VALUES_PERMUATION_METHODS:
         d = A.diagonal()
         if isinstance(d, np.matrix):
