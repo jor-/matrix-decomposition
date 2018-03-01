@@ -209,13 +209,12 @@ def _decomposition(
         permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD)
 
     # check overwrite_A
-    if overwrite_A is None:
+    if overwrite_A is None or not is_dense:
         overwrite_A = False
     if overwrite_A and np.issubdtype(A.dtype, np.integer):
-        error = ValueError(('A has an integer dtype ({}) which can not be used to store the '
-                            'values of L. Please set overwrite_A to False.').format(A.dtype))
-        matrix.logger.error(error)
-        raise error
+        overwrite_A = False
+        matrix.logger.debug(('A has an integer dtype ({}) which can not be used to store the '
+                             'values of L. Thus L is not overwritten.').format(A.dtype))
 
     # check strict_lower_triangular_only_L
     if strict_lower_triangular_only_L is None:
@@ -227,20 +226,11 @@ def _decomposition(
     else:
         L_dtype = np.promote_types(A.dtype, np.float16)
         if is_dense:
-            if strict_lower_triangular_only_L or use_minimal_difference_permutation_method:
-                L = np.empty((n, n), dtype=L_dtype)
-            else:
-                L = np.identity(n, dtype=L_dtype)
+            L = np.zeros((n, n), dtype=L_dtype)
         else:
-            if strict_lower_triangular_only_L or use_minimal_difference_permutation_method:
-                L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
-            else:
-                L = scipy.sparse.identity(n, dtype=L_dtype, format='lil')
-    L_set_all_strict_lower_triangular_values = overwrite_A or is_dense
-    L_set_all_diagonal_values = ((overwrite_A or use_minimal_difference_permutation_method) and
-                                 not strict_lower_triangular_only_L)
-    L_set_all_upper_triangular_values = ((overwrite_A or is_dense) and
-                                         not strict_lower_triangular_only_L)
+            L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
+            L_rows = L.rows
+            L_data = L.data
 
     # init other values
     alpha = np.zeros(n, dtype=np.float64)
@@ -271,12 +261,20 @@ def _decomposition(
         strict_lower_triangular_only_L=strict_lower_triangular_only_L))
 
     # calculate permutation vector
+    matrix.logger.debug('Calculating permutation vector with method "{}".'
+                        .format(permutation_method))
+
     if use_minimal_difference_permutation_method:
         if min_diag_D < 0:
             raise ValueError(('The permutation method {} is only available if min_diag_D greater '
                               'or equal zero.'
                               ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
-        p = np.arange(n, dtype=np.min_scalar_type(n))
+        if is_dense:
+            p = np.arange(n, dtype=np.min_scalar_type(n))
+        else:
+            p = matrix.permute.permutation_vector(
+                A,
+                permutation_method=matrix.sparse.constants.DEFAULT_FILL_REDUCE_PERMUTATION_METHOD)
     else:
         p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
 
@@ -291,6 +289,8 @@ def _decomposition(
             return v
 
     for i in range(n):
+        matrix.logger.debug('Starting iteration {} of {}.'.format(i, n - 1))
+
         # update p, d, omega
         if use_minimal_difference_permutation_method:
             all_minimal_changes = ((j, *_minimal_change(
@@ -301,9 +301,9 @@ def _decomposition(
             (j, d_i, omega_i, f_value_i) = min(all_minimal_changes,
                                                key=lambda x: (x[3], -x[1], x[2], x[0]))
             # swap p[i] and p[j]
-            p_j = p[j]
+            p_i = p[j]
             p[j] = p[i]
-            p[i] = p_j
+            p[i] = p_i
             # swap L[i, :] and L[j, :]
             if i > 0:
                 if is_dense or L.format != 'lil':
@@ -311,84 +311,121 @@ def _decomposition(
                     L[j, :i] = L[i, :i]
                     L[i, :i] = L_j
                 else:
-                    for iterable in (L.rows, L.data):
+                    for iterable in (L_rows, L_data):
                         tmp = iterable[i]
                         iterable[i] = iterable[j]
                         iterable[j] = tmp
         else:
+            p_i = p[i]
             d_i, omega_i, f_value_i = _minimal_change(
-                alpha[p[i]], beta[p[i]], gamma[p[i]], min_diag_D, max_diag_D=max_diag_D,
-                min_diag_B=get_value_i(min_diag_B, p[i]), max_diag_B=get_value_i(max_diag_B, p[i]),
+                alpha[p_i], beta[p_i], gamma[p_i], min_diag_D, max_diag_D=max_diag_D,
+                min_diag_B=get_value_i(min_diag_B, p_i), max_diag_B=get_value_i(max_diag_B, p_i),
                 min_abs_value_D=min_abs_value_D)
         assert np.isfinite(d_i)
         assert np.isfinite(omega_i)
         d[i] = d_i
-        omega[p[i]] = omega_i
+        omega[p_i] = omega_i
 
         # update delta
-        delta[p[i]] = d[i] + omega[p[i]]**2 * alpha[p[i]] - gamma[p[i]]
-        assert np.isfinite(delta[p[i]])
+        delta[p_i] = d_i + omega_i**2 * alpha[p_i] - gamma[p_i]
+        assert np.isfinite(delta[p_i])
 
         # debug info
-        matrix.logger.debug(('Doing iteration {} of {} with permutation index {}, omega {}, '
-                             'delta {} and change value {}.'
-                             ).format(i + 1, n, p[i], omega[p[i]], delta[p[i]], f_value_i))
+        matrix.logger.debug(('Using permutation index {}, omega {}, delta {} and change value {}'
+                             'for iteration {} of {}. ({:.1%} done.)'
+                             ).format(p_i, omega[p_i], delta[p_i], f_value_i,
+                                      i, n - 1, i / (n - 1)))
 
-        # update i-th row of L
-        for j in range(i):
-            L_j_i = L[i, j] * omega[p[i]]
-            if abs(L_j_i) < L_eps:
-                L_j_i = 0
-            L[i, j] = L_j_i
-
-        # calculate i-th column of L and update beta
-        if d[i] != 0:
-            if i > 0:
-                L_i_d = L[i, :i].conj()
-                if is_dense:
-                    L_i_d = L_i_d * d[:i]
-                else:
-                    L_i_d = L_i_d.multiply(d[:i]).T
-
-        for j in range(i + 1, n):
-            # get value of A
-            if not overwrite_A or p[i] >= p[j]:
-                a = A[p[j], p[i]]
+        # update i-th row of L with omega
+        if omega_i != 1 and i > 0:
+            if is_dense:
+                L[i, :i] *= omega_i
+                L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
             else:
-                a = A[p[i], p[j]].conj()
+                assert L.format == 'lil'
+                L_i_rows = []
+                L_i_data = []
+                for row, data in zip(L_rows[i], L_data[i]):
+                    assert row < i
+                    data_new = data * omega_i
+                    if abs(data_new) >= L_eps:
+                        L_i_rows.append(row)
+                        L_i_data.append(data_new)
+                L_rows[i] = L_i_rows
+                L_data[i] = L_i_data
 
-            # update beta
-            beta_p_j_add = 2 * a * a.conj()
-            assert np.isreal(beta_p_j_add)
-            beta[p[j]] += beta_p_j_add.real
+        # get i-th column of A
+        p_after_i = p[i + 1:]
+        if is_dense:
+            if not overwrite_A:
+                a = A[:, p_i]
+            else:
+                a = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
+        else:
+            if A.format in ('csr', 'lil'):
+                a = A[p_i, :].conj().T
+            else:
+                a = A[:, p_i]
+            a = a.toarray().reshape(-1)
+        a = a[p_after_i]
 
-            # update i-th column of L
-            if d[i] != 0:
+        # update beta
+        beta_add = 2 * a * a.conj()
+        assert np.all(np.isreal(beta_add))
+        beta[p_after_i] += beta_add.real
+
+        # update alpha and i-th column of L
+        if d_i != 0:
+            if is_dense:
+                # calculate	 auxiliary variable
                 if i > 0:
-                    b = L[j, :i] @ L_i_d
-                    if not is_dense:
-                        assert b.shape == (1, 1)
-                        b = b[0, 0]
-                else:
-                    b = 0
-                L_j_i = (a - b) / d[i]
-                assert np.isfinite(L_j_i)
-                if abs(L_j_i) < L_eps:
-                    if L_set_all_strict_lower_triangular_values:
-                        L[j, i] = 0
-                else:
-                    L[j, i] = L_j_i
-                    alpha_p_j_add = L_j_i * L_j_i.conj() * d[i]
-                    assert np.isreal(alpha_p_j_add)
-                    alpha[p[j]] += alpha_p_j_add.real
-            elif L_set_all_strict_lower_triangular_values:
-                L[j, i] = 0
+                    L_row_i_mul_d = L[i, :i].conj() * d[:i]
+                    a -= L[i + 1:, :i] @ L_row_i_mul_d
+
+                # update i-th column of L
+                L[i + 1:, i] = a / d_i
+            else:
+                assert L.format == 'lil'
+                # calculate	auxiliary variable
+                L_row_i_mul_d = L[i, :].conj().multiply(d).T
+                if L_row_i_mul_d.nnz > 0:
+                    L_row_i_mul_d = L_row_i_mul_d.toarray().reshape(-1)
+                    L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
+                    L_below_row_i.rows = L_rows[i + 1:]
+                    L_below_row_i.data = L_data[i + 1:]
+                    L_below_row_i._shape = (n - (i + 1), n)
+                    a -= L_below_row_i @ L_row_i_mul_d
+
+                # update i-th column of L
+                a_non_zero_mask = a != 0
+                for k in np.where(a_non_zero_mask)[0]:
+                    j = i + 1 + k
+                    L_j_i = a[k] / d_i
+                    L_rows[j].append(i)
+                    L_data[j].append(L_j_i)
+#                    L[j, i] = L_j_i
+
+                # reduce alpha to non-zero entries
+                a = a[a_non_zero_mask]
+                p_after_i = p_after_i[a_non_zero_mask]
+
+            # update alpha
+            alpha_add = a * a.conj() / d_i
+            assert np.all(np.isreal(alpha_add))
+            alpha[p_after_i] += alpha_add.real
 
     # prepare diagonal and upper triangle of L if needed
-    if L_set_all_diagonal_values:
-        for i in range(n):
-            L[i, i] = 1
-    if L_set_all_upper_triangular_values:
+    if not strict_lower_triangular_only_L:
+        if is_dense:
+            for i in range(n):
+                L[i, i] = 1
+        else:
+            for i in range(n):
+                L_rows[i].append(i)
+                L_data[i].append(1)
+
+    if not strict_lower_triangular_only_L and overwrite_A:
+        assert is_dense
         for i in range(n):
             L[i, i + 1:] = 0
 
