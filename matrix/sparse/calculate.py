@@ -66,7 +66,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
     try:
         import sksparse.cholmod
     except ImportError as e:
-        raise Exception('scikit-sparse is not installed.') from e
+        raise ImportError('scikit-sparse is not installed.') from e
 
     # check matrix A
     matrix.util.check_square_matrix(A)

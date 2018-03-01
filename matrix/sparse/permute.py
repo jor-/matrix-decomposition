@@ -137,7 +137,7 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=None):
         try:
             import sksparse.cholmod
         except ImportError as e:
-            raise Exception('scikit-sparse is not installed.') from e
+            raise ImportError('scikit-sparse is not installed.') from e
 
         # convert to csc matrix
         if not scipy.sparse.isspmatrix_csc(A):
