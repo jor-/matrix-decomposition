@@ -7,14 +7,11 @@ import matrix.permute
 
 def _indices_of_compressed_matrix(A, p):
     if p is not None:
-        # chose same dtype of indices and indptr
-        try:
-            p = p.astype(A.indices.dtype, casting='safe')
-        except TypeError:
-            A.indptr = A.indptr.astype(p.dtype, casting='safe')
-
+        # make p as same array type as indices
+        p = np.asarray(p, dtype=A.indices.dtype)
         # apply permutation
         p_inverse = matrix.permute.invert_permutation_vector(p)
+        assert p_inverse.dtype == A.indices.dtype
         A.indices = p_inverse[A.indices]
         A.has_sorted_indices = False
     return A
