@@ -48,10 +48,15 @@ test_permute_matrix_setups = [
 def test_permute_matrix(n, dense, complex_values):
     p = matrix.tests.random.permutation_vector(n)
     A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values)
-    A_permuted = matrix.permute.symmetric(A, p)
-    for i in range(n):
-        for j in range(n):
-            assert A[p[i], p[j]] == A_permuted[i, j]
-    p_inverse = matrix.permute.invert_permutation_vector(p)
-    np.testing.assert_array_equal(p[p_inverse], np.arange(n))
-    np.testing.assert_array_equal(p_inverse[p], np.arange(n))
+    if dense:
+        permuted_matrices = (matrix.permute.symmetric(A, p), )
+    else:
+        permuted_matrices = (matrix.permute.symmetric(A_converted, p).tocsc(copy=False) for A_converted in (A.tocoo(copy=False), A.tocsr(copy=False), A.tocsc(copy=False)))
+
+    for A_permuted in permuted_matrices:
+        for i in range(n):
+            for j in range(n):
+                assert A[p[i], p[j]] == A_permuted[i, j]
+        p_inverse = matrix.permute.invert_permutation_vector(p)
+        np.testing.assert_array_equal(p[p_inverse], np.arange(n))
+        np.testing.assert_array_equal(p_inverse[p], np.arange(n))

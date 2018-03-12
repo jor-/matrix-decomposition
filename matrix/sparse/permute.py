@@ -5,39 +5,63 @@ import matrix
 import matrix.permute
 
 
-def _indices_of_compressed_matrix(A, p):
+def _permute_indices(indices, p):
     if p is not None:
         # make p as same array type as indices
-        p = np.asarray(p, dtype=A.indices.dtype)
+        p = np.asarray(p, dtype=indices.dtype)
         # apply permutation
         p_inverse = matrix.permute.invert_permutation_vector(p)
-        assert p_inverse.dtype == A.indices.dtype
-        A.indices = p_inverse[A.indices]
+        assert p_inverse.dtype == indices.dtype
+        indices = p_inverse[indices]
+    return indices
+
+
+def _indices_of_compressed_matrix(A, p):
+    if p is not None:
+        A.indices = _permute_indices(A.indices, p)
         A.has_sorted_indices = False
     return A
 
 
 def rows(A, p, inplace=False, warn_if_wrong_format=True):
     if p is not None:
-        if not scipy.sparse.isspmatrix_csc(A):
+        is_coo = scipy.sparse.isspmatrix_coo(A)
+        is_csc = scipy.sparse.isspmatrix_csc(A)
+        # convert and copy
+        if not is_coo or is_csc:
             if warn_if_wrong_format:
-                matrix.logger.warning('CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                matrix.logger.warning('COO or CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
             A = scipy.sparse.csc_matrix(A)
+            is_csc = True
         elif not inplace:
             A = A.copy()
-        A = _indices_of_compressed_matrix(A, p)
+        # permute
+        if is_coo:
+            A.row = _permute_indices(A.row, p)
+        else:
+            assert is_csc
+            A = _indices_of_compressed_matrix(A, p)
     return A
 
 
 def colums(A, p, inplace=False, warn_if_wrong_format=True):
     if p is not None:
-        if not scipy.sparse.isspmatrix_csr(A):
+        is_coo = scipy.sparse.isspmatrix_coo(A)
+        is_csr = scipy.sparse.isspmatrix_csr(A)
+        # convert and copy
+        if not is_coo or is_csr:
             if warn_if_wrong_format:
-                matrix.logger.warning('CSR matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                matrix.logger.warning('COO or CSR matrix format is required. Converting to CSR matrix format.', scipy.sparse.SparseEfficiencyWarning)
             A = scipy.sparse.csr_matrix(A)
+            is_csr = True
         elif not inplace:
             A = A.copy()
-        A = _indices_of_compressed_matrix(A, p)
+        # permute
+        if is_coo:
+            A.col = _permute_indices(A.col, p)
+        else:
+            assert is_csr
+            A = _indices_of_compressed_matrix(A, p)
     return A
 
 
@@ -69,12 +93,14 @@ def symmetric(A, p, inplace=False, warn_if_wrong_format=True):
     """
 
     if p is not None:
+        if not scipy.sparse.isspmatrix_coo(A):
+            if warn_if_wrong_format:
+                matrix.logger.warning('COO matrix format is required. Converting to needed matrix format.', scipy.sparse.SparseEfficiencyWarning)
+
         if scipy.sparse.isspmatrix_csc(A):
             A = rows(A, p, inplace=inplace, warn_if_wrong_format=False)
             A = colums(A, p, inplace=True, warn_if_wrong_format=False)
         else:
-            if warn_if_wrong_format and not scipy.sparse.isspmatrix_csr(A):
-                matrix.logger.warning('CSC or CSR matrix format is required. Converting to needed matrix format.', scipy.sparse.SparseEfficiencyWarning)
             A = colums(A, p, inplace=inplace, warn_if_wrong_format=False)
             A = rows(A, p, inplace=True, warn_if_wrong_format=False)
     return A
