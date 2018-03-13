@@ -12,7 +12,7 @@ import matrix.dense.permute
 import matrix.dense.util
 
 
-def _decompose(A, permutation_method=None, return_type=None,
+def _decompose(A, permutation=None, return_type=None,
                check_finite=True, overwrite_A=False, clean=True):
     """
     Computes a decomposition of a dense matrix.
@@ -23,10 +23,11 @@ def _decompose(A, permutation_method=None, return_type=None,
         Matrix to be decomposed.
         It is assumed, that A is Hermitian.
         The matrix must be a squared matrix.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
         :const:`matrix.dense.constants.PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: no permutation
     return_type : str
         The type of the decomposition that should be calculated.
@@ -75,18 +76,26 @@ def _decompose(A, permutation_method=None, return_type=None,
     matrix.util.check_square_matrix(A)
     matrix.dense.util.check_finite(A, check_finite=check_finite)
 
-    # check and apply permutation_method
-    if permutation_method is not None:
-        permutation_method = permutation_method.lower()
-    else:
-        permutation_method = matrix.constants.NO_PERMUTATION_METHOD
-    supported_permutation_methods = matrix.dense.constants.PERMUTATION_METHODS
-    if permutation_method not in supported_permutation_methods:
-        raise ValueError(('Permutation method {} is unknown. '
-                          'Only the following methods are supported {}.'
-                          '').format(permutation_method, supported_permutation_methods))
+    # check permutation and calculate permutation vector
+    if permutation is None:
+        permutation = matrix.constants.NO_PERMUTATION_METHOD
 
-    p = matrix.permute.permutation_vector(A, permutation_method)
+    if isinstance(permutation, str):
+        permutation_method = permutation.lower()
+        supported_permutation_methods = matrix.dense.constants.PERMUTATION_METHODS
+        if permutation_method not in supported_permutation_methods:
+            raise ValueError(('Permutation method {} is unknown. '
+                              'Only the following methods are supported {}.'
+                              '').format(permutation_method, supported_permutation_methods))
+        p = matrix.permute.permutation_vector(A, permutation_method)
+    else:
+        p = np.asanyarray(permutation)
+        if p.ndim != 1 or p.shape[0] != A.shape[0]:
+            raise ValueError(('Permutation vactor must have same length as the dimensions of A. '
+                              'Its shape is {} and the shape of A is {}.'
+                              ).format(p.shape, A.shape))
+
+    # permute A
     A = matrix.dense.permute.symmetric(A, p)
     overwrite_A = overwrite_A or p is not None
 
@@ -118,7 +127,7 @@ def _decompose(A, permutation_method=None, return_type=None,
     return decomposition.as_type(return_type)
 
 
-def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
+def decompose(A, permutation=None, return_type=None, check_finite=True, overwrite_A=False):
     """
     Computes a decomposition of a dense matrix.
 
@@ -128,10 +137,11 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
         Matrix to be decomposed.
         It is assumed, that A is Hermitian.
         The matrix must be a squared matrix.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
         :const:`matrix.dense.constants.PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: no permutation
     return_type : str
         The type of the decomposition that should be calculated.
@@ -166,5 +176,5 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
         If `A` is not a finite matrix and `check_finite` is True.
     """
 
-    return _decompose(A, permutation_method=permutation_method, return_type=return_type,
+    return _decompose(A, permutation=permutation, return_type=return_type,
                       check_finite=check_finite, overwrite_A=overwrite_A)

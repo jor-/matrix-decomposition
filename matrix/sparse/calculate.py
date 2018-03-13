@@ -11,7 +11,7 @@ import matrix.sparse.permute
 import matrix.sparse.util
 
 
-def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
+def _decompose(A, permutation=None, return_type=None, check_finite=True,
                overwrite_A=False, use_long=None):
     """
     Computes a decomposition of a sparse matrix.
@@ -22,10 +22,11 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
         Matrix to be decomposed.
         It is assumed, that A is Hermitian.
         The matrix must be a squared matrix.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
         :const:`matrix.sparse.constants.PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: no permutation
     return_type : str
         The type of the decomposition that should be calculated.
@@ -71,32 +72,47 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
     # check matrix A
     matrix.util.check_square_matrix(A)
 
-    # check and apply permutation_method
-    if permutation_method is not None:
-        permutation_method = permutation_method.lower()
-    else:
-        permutation_method = matrix.constants.NO_PERMUTATION_METHOD
-    supported_permutation_methods = matrix.sparse.constants.PERMUTATION_METHODS
-    if permutation_method not in supported_permutation_methods:
-        raise ValueError(('Permutation method {} is unknown. '
-                          'Only the following methods are supported {}.'
-                          '').format(permutation_method, supported_permutation_methods))
+    # check permutation and calculate permutation vector
+    if permutation is None:
+        permutation = matrix.constants.NO_PERMUTATION_METHOD
 
-    if permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS:
-        if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
-            p = None
+    if isinstance(permutation, str):
+        # check passed permutation method
+        permutation_method = permutation.lower()
+        supported_permutation_methods = matrix.sparse.constants.PERMUTATION_METHODS
+        if permutation_method not in supported_permutation_methods:
+            raise ValueError(('Permutation method {} is unknown. '
+                              'Only the following methods are supported {}.'
+                              '').format(permutation_method, supported_permutation_methods))
+
+        # apply permutation
+        if permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS:
+            if permutation_method == matrix.constants.NO_PERMUTATION_METHOD:
+                p = None
+            else:
+                p = matrix.permute.permutation_vector(A, permutation_method)
+                A = matrix.sparse.permute.symmetric(A, p)
+                A = A.tocsc()
+            permutation_method = matrix.sparse.constants.CHOLMOD_NO_PERMUTATION_METHOD
         else:
-            p = matrix.permute.permutation_vector(A, permutation_method)
-            A = matrix.sparse.permute.symmetric(A, p)
-            A = A.tocsc()
-        permutation_method = 'natural'
+            assert permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS
+            assert permutation_method.startswith(
+                matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
+            prefix_len = len(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
+            permutation_method = permutation_method[prefix_len:]
+            assert permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
     else:
-        assert permutation_method in matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHODS
-        assert permutation_method.startswith(
-            matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
-        prefix_len = len(matrix.sparse.constants.FILL_REDUCE_PERMUTATION_METHOD_PREFIX)
-        permutation_method = permutation_method[prefix_len:]
-        assert permutation_method in matrix.sparse.constants.CHOLMOD_PERMUTATION_METHODS
+        # check permutation vector
+        p = np.asanyarray(permutation)
+        if p.ndim != 1 or p.shape[0] != A.shape[0]:
+            raise ValueError(('Permutation vactor must have same length as the dimensions of A. '
+                              'Its shape is {} and the shape of A is {}.'
+                              ).format(p.shape, A.shape))
+
+        # apply permutation vector
+        A = matrix.sparse.permute.symmetric(A, p)
+        A = A.tocsc()
+        permutation_method = matrix.sparse.constants.CHOLMOD_NO_PERMUTATION_METHOD
 
     # check return type
     supported_return_type = matrix.sparse.constants.DECOMPOSITION_TYPES
@@ -127,7 +143,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
         cholmod_exception = None
 
     # get correct permutation vector
-    if permutation_method != 'natural':
+    if permutation_method != matrix.sparse.constants.CHOLMOD_NO_PERMUTATION_METHOD:
         p = f.P()
     else:
         assert np.all(f.P() == np.arange(len(f.P())))
@@ -147,7 +163,7 @@ def _decompose(A, permutation_method=None, return_type=None, check_finite=True,
     return decomposition.as_type(return_type)
 
 
-def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
+def decompose(A, permutation=None, return_type=None, check_finite=True, overwrite_A=False):
     """
     Computes a decomposition of a sparse matrix.
 
@@ -157,10 +173,11 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
         Matrix to be decomposed.
         It is assumed, that A is Hermitian.
         The matrix must be a squared matrix.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
         :const:`matrix.sparse.constants.PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: no permutation
     return_type : str
         The type of the decomposition that should be calculated.
@@ -196,10 +213,10 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     """
 
     try:
-        return _decompose(A, permutation_method=permutation_method, return_type=return_type,
+        return _decompose(A, permutation=permutation, return_type=return_type,
                           check_finite=check_finite, overwrite_A=overwrite_A, use_long=None)
     except matrix.errors.NoDecompositionPossibleTooManyEntriesError as e:
         matrix.logger.warning(('Problem to large for index type {}, '
                                'index type is switched to long.').format(e.matrix_index_type))
-        return _decompose(A, permutation_method=permutation_method, return_type=return_type,
+        return _decompose(A, permutation=permutation, return_type=return_type,
                           check_finite=False, overwrite_A=overwrite_A, use_long=True)

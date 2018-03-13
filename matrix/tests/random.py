@@ -125,9 +125,7 @@ def vector(n, complex_values=False):
 
 def permutation_vector(n):
     np.random.seed(RANDOM_STATE)
-    p = np.arange(n)
-    np.random.shuffle(p)
-    return p
+    return np.random.permutation(n)
 
 
 def decomposition(n, type_str='LL', dense=True, complex_values=False, finite=True, positive_semidefinite=False, invertible=False):

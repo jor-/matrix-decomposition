@@ -8,7 +8,7 @@ import matrix.sparse.calculate
 import matrix.sparse.util
 
 
-def decompose(A, permutation_method=None, return_type=None, check_finite=True, overwrite_A=False):
+def decompose(A, permutation=None, return_type=None, check_finite=True, overwrite_A=False):
     """
     Computes a decomposition of a matrix.
 
@@ -18,12 +18,13 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
         Matrix to be decomposed.
         It is assumed, that A is Hermitian.
         The matrix must be a squared matrix.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
         :const:`matrix.UNIVERSAL_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: no permutation
     return_type : str
         The type of the decomposition that should be calculated.
@@ -58,17 +59,17 @@ def decompose(A, permutation_method=None, return_type=None, check_finite=True, o
     """
 
     # debug logging
-    matrix.logger.debug('Decomposing matrix with permutation_method={permutation_method}, return_type={return_type}, check_finite={check_finite}, overwrite_A={overwrite_A}.'.format(
-        permutation_method=permutation_method,
+    matrix.logger.debug('Decomposing matrix with permutation={permutation}, return_type={return_type}, check_finite={check_finite}, overwrite_A={overwrite_A}.'.format(
+        permutation=permutation,
         return_type=return_type,
         check_finite=check_finite,
         overwrite_A=overwrite_A))
 
     # decompose
     if matrix.sparse.util.is_sparse(A):
-        decomposition = matrix.sparse.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+        decomposition = matrix.sparse.calculate.decompose(A, permutation=permutation, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
     else:
-        decomposition = matrix.dense.calculate.decompose(A, permutation_method=permutation_method, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
+        decomposition = matrix.dense.calculate.decompose(A, permutation=permutation, return_type=return_type, check_finite=check_finite, overwrite_A=overwrite_A)
 
     # return
     matrix.logger.debug('Decomposing matrix finished.')
@@ -110,7 +111,7 @@ def is_positive_semidefinite(A, check_finite=True):
     # try to decompose and check decomposition
     try:
         decomposition = decompose(A,
-                                  permutation_method=matrix.constants.NO_PERMUTATION_METHOD,
+                                  permutation=matrix.constants.NO_PERMUTATION_METHOD,
                                   check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
             matrix.errors.MatrixComplexDiagonalValueError,
@@ -156,7 +157,7 @@ def is_positive_definite(A, check_finite=True):
     # try to decompose and check decomposition
     try:
         decomposition = decompose(A,
-                                  permutation_method=matrix.constants.NO_PERMUTATION_METHOD,
+                                  permutation=matrix.constants.NO_PERMUTATION_METHOD,
                                   check_finite=check_finite)
     except (matrix.errors.NoDecompositionPossibleError,
             matrix.errors.MatrixComplexDiagonalValueError,
@@ -202,7 +203,7 @@ def is_invertible(A, check_finite=True):
     # try to decompose and check decomposition
     try:
         decomposition = decompose(A,
-                                  permutation_method=matrix.constants.NO_PERMUTATION_METHOD,
+                                  permutation=matrix.constants.NO_PERMUTATION_METHOD,
                                   check_finite=check_finite)
     except (matrix.errors.MatrixNotFiniteError,
             matrix.errors.MatrixNotSquareError):

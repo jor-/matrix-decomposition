@@ -11,7 +11,7 @@ import matrix.sparse.util
 
 def _decomposition(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation_method=None, overwrite_A=False,
+        min_abs_value_D=None, permutation=None, overwrite_A=False,
         strict_lower_triangular_only_L=False):
     """
     Computes an (approximative) `LDL` decomposition of a matrix with the specified properties.
@@ -45,11 +45,12 @@ def _decomposition(
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` of an approximated `LDL` decomposition.
         optional, default : The square root of the resolution of the underlying data type.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
         Whether it is allowed to overwrite A. Enabling may result in performance gain.
@@ -86,12 +87,12 @@ def _decomposition(
                          'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
                          'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
                          'min_abs_value_D={min_abs_value_D}, '
-                         'permutation_method={permutation_method}, overwrite_A={overwrite_A}, '
+                         'permutation={permutation}, overwrite_A={overwrite_A}, '
                          'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.'
                          ).format(
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A,
+        permutation=permutation, overwrite_A=overwrite_A,
         strict_lower_triangular_only_L=strict_lower_triangular_only_L))
 
     # check A
@@ -189,25 +190,6 @@ def _decomposition(
         matrix.logger.error(error)
         raise error
 
-    # check permutation method
-    if permutation_method is None:
-        permutation_method = matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
-    else:
-        permutation_method = permutation_method.lower()
-    if is_dense:
-        supported_permutation_methods = matrix.APPROXIMATION_PERMUTATION_METHODS
-    else:
-        supported_permutation_methods = (matrix.APPROXIMATION_PERMUTATION_METHODS +
-                                         matrix.SPARSE_ONLY_PERMUTATION_METHODS)
-    if permutation_method not in supported_permutation_methods:
-        error = ValueError(('Permutation method {} is unknown. Only the following methods are '
-                            'supported {}.'
-                            ).format(permutation_method, supported_permutation_methods))
-        matrix.logger.error(error)
-        raise error
-    use_minimal_difference_permutation_method = (
-        permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD)
-
     # check overwrite_A
     if overwrite_A is None or not is_dense:
         overwrite_A = False
@@ -219,6 +201,57 @@ def _decomposition(
     # check strict_lower_triangular_only_L
     if strict_lower_triangular_only_L is None:
         strict_lower_triangular_only_L = False
+
+    # check permutation method
+    if permutation is None:
+        permutation = matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
+
+    # name of permutation method passed
+    use_permutation_method = isinstance(permutation, str)
+    if use_permutation_method:
+        # check permutation method
+        permutation_method = permutation.lower()
+        if is_dense:
+            supported_permutation_methods = matrix.APPROXIMATION_PERMUTATION_METHODS
+        else:
+            supported_permutation_methods = (matrix.APPROXIMATION_PERMUTATION_METHODS +
+                                             matrix.SPARSE_ONLY_PERMUTATION_METHODS)
+        if permutation_method not in supported_permutation_methods:
+            error = ValueError(('Permutation method {} is unknown. Only the following methods are '
+                                'supported {}.'
+                                ).format(permutation_method, supported_permutation_methods))
+            matrix.logger.error(error)
+            raise error
+
+        # calculate permutation vector
+        matrix.logger.debug('Calculating permutation vector with method "{}".'
+                            .format(permutation_method))
+
+        use_minimal_difference_permutation_method = (
+            permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD)
+
+        if use_minimal_difference_permutation_method:
+            if min_diag_D < 0:
+                raise ValueError(('The permutation method {} is only available if min_diag_D greater '
+                                  'or equal zero.'
+                                  ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
+            if is_dense:
+                p = np.arange(n, dtype=np.min_scalar_type(n))
+            else:
+                p = matrix.permute.permutation_vector(
+                    A,
+                    permutation_method=matrix.sparse.constants.DEFAULT_FILL_REDUCE_PERMUTATION_METHOD)
+        else:
+            p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
+    else:
+        p = np.asanyarray(permutation)
+        if p.ndim != 1 or p.shape[0] != n:
+            error = ValueError(('Permutation vactor must have same length as the dimensions of A. '
+                                'Its shape is {} and the shape of A is {}.'
+                                ).format(p.shape, A.shape))
+            matrix.logger.error(error)
+            raise error
+        use_minimal_difference_permutation_method = False
 
     # init L
     if overwrite_A:
@@ -252,31 +285,13 @@ def _decomposition(
                          'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
                          'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
                          'min_abs_value_D={min_abs_value_D} '
-                         'permutation_method={permutation_method}, overwrite_A={overwrite_A}, '
+                         'permutation={permutation}, overwrite_A={overwrite_A}, '
                          'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.'
                          ).format(
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A,
+        permutation=permutation, overwrite_A=overwrite_A,
         strict_lower_triangular_only_L=strict_lower_triangular_only_L))
-
-    # calculate permutation vector
-    matrix.logger.debug('Calculating permutation vector with method "{}".'
-                        .format(permutation_method))
-
-    if use_minimal_difference_permutation_method:
-        if min_diag_D < 0:
-            raise ValueError(('The permutation method {} is only available if min_diag_D greater '
-                              'or equal zero.'
-                              ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
-        if is_dense:
-            p = np.arange(n, dtype=np.min_scalar_type(n))
-        else:
-            p = matrix.permute.permutation_vector(
-                A,
-                permutation_method=matrix.sparse.constants.DEFAULT_FILL_REDUCE_PERMUTATION_METHOD)
-    else:
-        p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
 
     # calculate values iteratively
     def get_value_i(v, i):
@@ -403,7 +418,6 @@ def _decomposition(
                     L_j_i = a[k] / d_i
                     L_rows[j].append(i)
                     L_data[j].append(L_j_i)
-#                    L[j, i] = L_j_i
 
                 # reduce alpha to non-zero entries
                 a = a[a_non_zero_mask]
@@ -436,7 +450,7 @@ def _decomposition(
 
 def decomposition(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation_method=None, overwrite_A=False, return_type=None):
+        min_abs_value_D=None, permutation=None, overwrite_A=False, return_type=None):
     """
     Computes an approximative decomposition of a matrix with the specified properties.
 
@@ -469,11 +483,12 @@ def decomposition(
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` of an approximated `LDL` decomposition.
         optional, default : _matrixThe square root of the resolution of the underlying data type.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
         Whether it is allowed to overwrite A. Enabling may result in performance gain.
@@ -501,11 +516,11 @@ def decomposition(
                          'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
                          'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
                          'min_abs_value_D={min_abs_value_D}, '
-                         'permutation_method={permutation_method}, overwrite_A={overwrite_A}, '
+                         'permutation={permutation}, overwrite_A={overwrite_A}, '
                          'return_type={return_type}.').format(
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A, return_type=return_type))
+        permutation=permutation, overwrite_A=overwrite_A, return_type=return_type))
 
     # check return type
     supported_return_types = matrix.constants.DECOMPOSITION_TYPES
@@ -519,7 +534,7 @@ def decomposition(
     L, d, p, omega, delta = _decomposition(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A,
+        permutation=permutation, overwrite_A=overwrite_A,
         strict_lower_triangular_only_L=False)
 
     if matrix.sparse.util.is_sparse(L):
@@ -536,7 +551,7 @@ def decomposition(
 
 def _matrix(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation_method=None, overwrite_A=False):
+        min_abs_value_D=None, permutation=None, overwrite_A=False):
     """
     Computes an approximation of `A` which has a `LDL` decomposition with the specified properties.
 
@@ -568,11 +583,12 @@ def _matrix(
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` in a `LDL` decomposition of the returned matrix.
         optional, default : _matrixThe square root of the resolution of the underlying data type.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
         Whether it is allowed to overwrite A. Enabling may result in performance gain.
@@ -596,17 +612,17 @@ def _matrix(
                          'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
                          'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
                          'min_abs_value_D={min_abs_value_D}, '
-                         'permutation_method={permutation_method}, overwrite_A={overwrite_A}.'
+                         'permutation={permutation}, overwrite_A={overwrite_A}.'
                          ).format(
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A))
+        permutation=permutation, overwrite_A=overwrite_A))
 
     # calculate decomposition
     L, d, p, omega, delta = _decomposition(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A,
+        permutation=permutation, overwrite_A=overwrite_A,
         strict_lower_triangular_only_L=True)
 
     # init B
@@ -676,7 +692,6 @@ def _matrix(
                     B_i_j = 0
             assert np.isfinite(B_i_j)
             B[i, j] = B_i_j
-#            B[j, i] = np.conj(B_i_j)
 
     # set lower diagonal entries
     for i in range(n):
@@ -692,7 +707,7 @@ def _matrix(
 
 def positive_semidefinite_matrix(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation_method=None, overwrite_A=False):
+        min_abs_value_D=None, permutation=None, overwrite_A=False):
     """
     Computes a positive semidefinite approximation of `A`.
 
@@ -724,11 +739,12 @@ def positive_semidefinite_matrix(
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` in a `LDL` decomposition of the returned matrix.
         optional, default : _matrixThe square root of the resolution of the underlying data type.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
         Whether it is allowed to overwrite A. Enabling may result in performance gain.
@@ -750,12 +766,12 @@ def positive_semidefinite_matrix(
     return _matrix(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A)
+        permutation=permutation, overwrite_A=overwrite_A)
 
 
 def positive_definite_matrix(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation_method=None, overwrite_A=False):
+        min_abs_value_D=None, permutation=None, overwrite_A=False):
     """
     Computes a positive definite approximation of `A`.
 
@@ -787,11 +803,12 @@ def positive_definite_matrix(
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` in a `LDL` decomposition of the returned matrix.
         optional, default : _matrixThe square root of the resolution of the underlying data type.
-    permutation_method : str
+    permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
         Whether it is allowed to overwrite A. Enabling may result in performance gain.
@@ -818,7 +835,7 @@ def positive_definite_matrix(
     return _matrix(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation_method=permutation_method, overwrite_A=overwrite_A)
+        permutation=permutation, overwrite_A=overwrite_A)
 
 
 def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
