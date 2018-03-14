@@ -168,8 +168,6 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=None):
             A = A.tocsc(copy=False)
 
         # calculate permutation vector
-        f = sksparse.cholmod.analyze(A, mode='simplicial', ordering_method=permutation_method, use_long=use_long)
-
         try:
             f = sksparse.cholmod.analyze(A, mode='simplicial', ordering_method=permutation_method, use_long=use_long)
         except sksparse.cholmod.CholmodTooLargeError as cholmod_exception:
