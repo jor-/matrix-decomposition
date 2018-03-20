@@ -346,7 +346,7 @@ def _decomposition(
         assert np.isfinite(delta[p_i])
 
         # debug info
-        matrix.logger.debug(('Using permutation index {}, omega {}, delta {} and change value {}'
+        matrix.logger.debug(('Using permutation index {}, omega {}, delta {} and change value {} '
                              'for iteration {} of {}. ({:.1%} done.)'
                              ).format(p_i, omega[p_i], delta[p_i], f_value_i,
                                       i, n - 1, i / (n - 1)))
