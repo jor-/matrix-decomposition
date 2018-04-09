@@ -847,6 +847,11 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert min_abs_value_D >= 0
     assert beta != 0 or alpha == 0
     assert max(min_diag_D, min_diag_B) <= min(max_diag_D, max_diag_B)
+    assert np.isfinite(alpha)
+    assert np.isfinite(beta)
+    assert np.isfinite(gamma)
+    assert np.isfinite(min_diag_D)
+    assert np.isfinite(min_abs_value_D)
 
     def f(d, omega):
         f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
@@ -891,6 +896,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
         if min_diag_D == 0:
             d_values.append(min_diag_D)
         for d in d_values:
+            assert np.isfinite(d)
             # get roots
             omegas = np.roots([2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta])
             assert len(omegas) == 3
