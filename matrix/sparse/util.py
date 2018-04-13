@@ -47,7 +47,8 @@ def convert_to_csc_or_csr(A, matrix_format, warn_if_wrong_format=True, sort_indi
     copied = False
     if not scipy.sparse.isspmatrix_csc(A):
         if warn_if_wrong_format:
-            matrix.logger.warning('{} matrix format is required. Converting to CSC matrix format.'.format(matrix_format), scipy.sparse.SparseEfficiencyWarning)
+            w = scipy.sparse.SparseEfficiencyWarning('{} matrix format is required. Converting to CSC matrix format.'.format(matrix_format))
+            matrix.logger.warning(w)
         if matrix_format == 'CSC':
             A = scipy.sparse.csc_matrix(A)
         else:

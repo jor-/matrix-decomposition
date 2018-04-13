@@ -30,7 +30,8 @@ def rows(A, p, inplace=False, warn_if_wrong_format=True):
         # convert and copy
         if not is_coo or is_csc:
             if warn_if_wrong_format:
-                matrix.logger.warning('COO or CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                w = scipy.sparse.SparseEfficiencyWarning('COO or CSC matrix format is required. Converting to CSC matrix format.')
+                matrix.logger.warning(w)
             A = scipy.sparse.csc_matrix(A)
             is_csc = True
         elif not inplace:
@@ -51,7 +52,8 @@ def colums(A, p, inplace=False, warn_if_wrong_format=True):
         # convert and copy
         if not is_coo or is_csr:
             if warn_if_wrong_format:
-                matrix.logger.warning('COO or CSR matrix format is required. Converting to CSR matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                w = scipy.sparse.SparseEfficiencyWarning('COO or CSR matrix format is required. Converting to CSR matrix format.')
+                matrix.logger.warning(w)
             A = scipy.sparse.csr_matrix(A)
             is_csr = True
         elif not inplace:
@@ -95,7 +97,8 @@ def symmetric(A, p, inplace=False, warn_if_wrong_format=True):
     if p is not None:
         if not scipy.sparse.isspmatrix_coo(A):
             if warn_if_wrong_format:
-                matrix.logger.warning('COO matrix format is required. Converting to needed matrix format.', scipy.sparse.SparseEfficiencyWarning)
+                w = scipy.sparse.SparseEfficiencyWarning('COO matrix format is required. Converting to COO matrix format.')
+                matrix.logger.warning(w)
 
         if scipy.sparse.isspmatrix_csc(A):
             A = rows(A, p, inplace=inplace, warn_if_wrong_format=False)
@@ -164,7 +167,8 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=None):
 
         # convert to csc matrix
         if not scipy.sparse.isspmatrix_csc(A):
-            matrix.logger.warning('CSC matrix format is required. Converting to CSC matrix format.', scipy.sparse.SparseEfficiencyWarning)
+            w = scipy.sparse.SparseEfficiencyWarning('CSC matrix format is required. Converting to CSC matrix format.')
+            matrix.logger.warning(w)
             A = A.tocsc(copy=False)
 
         # calculate permutation vector
