@@ -337,7 +337,11 @@ def _decomposition(
                 min_diag_B=get_value_i(min_diag_B, p_i), max_diag_B=get_value_i(max_diag_B, p_i),
                 min_abs_value_D=min_abs_value_D)
         assert np.isfinite(d_i)
+        assert d_i >= min_diag_D
+        assert d_i <= max_diag_D
+        assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
         assert np.isfinite(omega_i)
+        assert omega_i >= 0
         d[i] = d_i
         omega[p_i] = omega_i
 
@@ -426,7 +430,10 @@ def _decomposition(
             # update alpha
             alpha_add = a * a.conj() / d_i
             assert np.all(np.isreal(alpha_add))
-            alpha[p_after_i] += alpha_add.real
+            alpha_add = alpha_add.real
+            assert np.all(np.isfinite(alpha_add))
+            alpha[p_after_i] += alpha_add
+            assert np.all(np.isfinite(alpha[p_after_i]))
 
     # prepare diagonal and upper triangle of L if needed
     if not strict_lower_triangular_only_L:
@@ -840,6 +847,14 @@ def positive_definite_matrix(
 
 def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
+
+    # debug info
+    matrix.logger.debug(('Calculating best d and omega for alpha {}, beta {}, gamma {}, '
+                         'min_diag_D {}, max_diag_D {}, min_abs_value_D {} and '
+                         'min_diag_B {}, max_diag_B {}.'
+                         ).format(alpha, beta, gamma, min_diag_D, max_diag_D, min_abs_value_D,
+                                  min_diag_B, max_diag_B))
+
     # check input
     assert min_diag_D >= 0
     assert alpha >= 0
