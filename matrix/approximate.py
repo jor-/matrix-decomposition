@@ -353,7 +353,7 @@ def _decomposition(
         matrix.logger.debug(('Using permutation index {}, omega {}, delta {} and change value {} '
                              'for iteration {} of {}. ({:.1%} done.)'
                              ).format(p_i, omega[p_i], delta[p_i], f_value_i,
-                                      i, n - 1, i / (n - 1)))
+                                      i, n - 1, (i + 1) / n))
 
         # update i-th row of L with omega
         if omega_i != 1 and i > 0:
