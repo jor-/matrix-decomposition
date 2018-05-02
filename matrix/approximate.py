@@ -377,35 +377,32 @@ def _decomposition(
         p_after_i = p[i + 1:]
         if is_dense:
             if not overwrite_A:
-                a = A[:, p_i]
+                A_column_i = A[:, p_i]
             else:
-                a = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
+                A_column_i = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
         else:
             if A.format in ('csr', 'lil'):
-                a = A[p_i, :].conj().T
+                A_column_i = A[p_i, :].conj().T
             else:
-                a = A[:, p_i]
-            a = a.toarray().reshape(-1)
-        a = a[p_after_i]
+                A_column_i = A[:, p_i]
+            A_column_i = A_column_i.toarray().reshape(-1)
+        A_column_i = A_column_i[p_after_i]
 
         # update beta
-        beta_add = 2 * a * a.conj()
+        beta_add = 2 * A_column_i * A_column_i.conj()
         assert np.all(np.isreal(beta_add))
         beta[p_after_i] += beta_add.real
 
         # update alpha and i-th column of L
+        L_column_i = A_column_i
         if d_i != 0:
+            # calculate i-th column of L
             if is_dense:
-                # calculate	 auxiliary variable
                 if i > 0:
                     L_row_i_mul_d = L[i, :i].conj() * d[:i]
-                    a -= L[i + 1:, :i] @ L_row_i_mul_d
-
-                # update i-th column of L
-                L[i + 1:, i] = a / d_i
+                    L_column_i -= L[i + 1:, :i] @ L_row_i_mul_d
             else:
                 assert L.format == 'lil'
-                # calculate	auxiliary variable
                 L_row_i_mul_d = L[i, :].conj().multiply(d).T
                 if L_row_i_mul_d.nnz > 0:
                     L_row_i_mul_d = L_row_i_mul_d.toarray().reshape(-1)
@@ -413,22 +410,28 @@ def _decomposition(
                     L_below_row_i.rows = L_rows[i + 1:]
                     L_below_row_i.data = L_data[i + 1:]
                     L_below_row_i._shape = (n - (i + 1), n)
-                    a -= L_below_row_i @ L_row_i_mul_d
+                    L_column_i -= L_below_row_i @ L_row_i_mul_d
 
-                # update i-th column of L
-                a_non_zero_mask = a != 0
-                for k in np.where(a_non_zero_mask)[0]:
+            # devide by d_i
+            assert np.all(np.isfinite(L_column_i))
+            L_column_i /= d_i
+            assert np.all(np.isfinite(L_column_i))
+
+            # update i-th column of L
+            if is_dense:
+                L[i + 1:, i] = L_column_i
+            else:
+                assert L.format == 'lil'
+                L_column_i_non_zero_mask = L_column_i != 0
+                L_column_i = L_column_i[L_column_i_non_zero_mask]
+                p_after_i = p_after_i[L_column_i_non_zero_mask]
+                for k, L_column_i_k in zip(np.where(L_column_i_non_zero_mask)[0], L_column_i):
                     j = i + 1 + k
-                    L_j_i = a[k] / d_i
                     L_rows[j].append(i)
-                    L_data[j].append(L_j_i)
-
-                # reduce alpha to non-zero entries
-                a = a[a_non_zero_mask]
-                p_after_i = p_after_i[a_non_zero_mask]
+                    L_data[j].append(L_column_i_k)
 
             # update alpha
-            alpha_add = a * a.conj() / d_i
+            alpha_add = L_column_i * L_column_i.conj() * d_i
             assert np.all(np.isreal(alpha_add))
             alpha_add = alpha_add.real
             assert np.all(np.isfinite(alpha_add))
