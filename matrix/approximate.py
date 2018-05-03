@@ -336,18 +336,25 @@ def _decomposition(
                 alpha[p_i], beta[p_i], gamma[p_i], min_diag_D, max_diag_D=max_diag_D,
                 min_diag_B=get_value_i(min_diag_B, p_i), max_diag_B=get_value_i(max_diag_B, p_i),
                 min_abs_value_D=min_abs_value_D)
+
+        # update d
         assert np.isfinite(d_i)
         assert d_i >= min_diag_D
         assert d_i <= max_diag_D
         assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
+        d[i] = d_i
+
+        # update omega
         assert np.isfinite(omega_i)
         assert omega_i >= 0
-        d[i] = d_i
         omega[p_i] = omega_i
 
         # update delta
-        delta[p_i] = d_i + omega_i**2 * alpha[p_i] - gamma[p_i]
-        assert np.isfinite(delta[p_i])
+        delta_i = d_i - gamma[p_i]
+        if omega_i != 0:
+            delta_i += omega_i**2 * alpha[p_i]
+        assert np.isfinite(delta_i)
+        delta[p_i] = delta_i
 
         # debug info
         matrix.logger.debug(('Using permutation index {}, omega {}, delta {} and change value {} '
@@ -417,9 +424,7 @@ def _decomposition(
                     L_column_i -= L_below_row_i @ L_row_i_mul_d
 
             # devide by d_i
-            assert np.all(np.isfinite(L_column_i))
             L_column_i /= d_i
-            assert np.all(np.isfinite(L_column_i))
 
             # update i-th column of L
             if is_dense:
@@ -438,9 +443,8 @@ def _decomposition(
             alpha_add = L_column_i * L_column_i.conj() * d_i
             assert np.all(np.isreal(alpha_add))
             alpha_add = alpha_add.real
-            assert np.all(np.isfinite(alpha_add))
             alpha[p_after_i] += alpha_add
-            assert np.all(np.isfinite(alpha[p_after_i]))
+            assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
 
     # prepare diagonal and upper triangle of L if needed
     if not strict_lower_triangular_only_L:
@@ -863,88 +867,104 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                                   min_diag_B, max_diag_B))
 
     # check input
+    assert np.isfinite(alpha) or alpha == np.inf
+    assert np.isfinite(beta)
+    assert np.isfinite(gamma)
+    assert np.isfinite(min_diag_D)
+    assert np.isfinite(min_abs_value_D)
     assert min_diag_D >= 0
     assert alpha >= 0
     assert beta >= 0
     assert min_abs_value_D >= 0
     assert beta != 0 or alpha == 0
     assert max(min_diag_D, min_diag_B) <= min(max_diag_D, max_diag_B)
-    assert np.isfinite(alpha)
-    assert np.isfinite(beta)
-    assert np.isfinite(gamma)
-    assert np.isfinite(min_diag_D)
-    assert np.isfinite(min_abs_value_D)
 
     def f(d, omega):
-        f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
+        if alpha != np.inf:
+            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
+        elif omega == 0:
+            f_value = (d - gamma)**2 + beta
+        else:
+            raise ValueError('f can not be evaluated with alpha = {} and omega = {}'.format(alpha, omega))
         assert f_value >= 0
         return f_value
 
-    # inner solution
-    d = gamma - alpha
-    if (max(min_diag_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha) and
-            (d == 0 or d >= min_abs_value_D)):
-        omega = 1
-        f_value = 0
-        assert np.isclose(f(d, omega), f_value)
-
-    # solution at bound,  alpha == 0
-    elif alpha == 0:
+    # alpha == 0 or alpha == inf
+    if alpha == 0 or alpha == np.inf:
         if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma < min_abs_value_D:
             d = 0
         else:
             d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
-        omega = 1
+        if alpha == np.inf:
+            matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
+                                   'Maybe the datatype should be changed to a more accurate one.'))
+            omega = 0
+        else:
+            omega = 1
         f_value = f(d, omega)
 
-    # solution at bound, alpha != 0
+    # alpha != 0 and alpha != inf
     else:
-        # omega on bound
-        assert alpha > 0
-        assert beta > 0
-        C = []
-        a = max(min_diag_D, min_abs_value_D)
-        b = min(max_diag_D, max_diag_B)
-        for d in (min_diag_B - alpha, max_diag_B - alpha):
-            if np.isfinite(d) and a <= d <= b:
-                C.append((d, 1))
-        if max(a, min_diag_B) <= gamma <= b:
-            C.append((gamma, 0))
+        # inner solution
+        d = gamma - alpha
+        if (max(min_diag_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha) and
+                (d == 0 or d >= min_abs_value_D)):
+            omega = 1
+            f_value = 0
+            assert np.isclose(f(d, omega), f_value)
 
-        # d on bound
-        d_values = [a]
-        if np.isfinite(b):
-            d_values.append(b)
-        if min_diag_D == 0:
-            d_values.append(min_diag_D)
-        for d in d_values:
-            assert np.isfinite(d)
-            # get roots
-            omegas = np.roots([2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta])
-            assert len(omegas) == 3
-            # use only real roots
-            omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
-            assert len(omegas) in (1, 3)
-            # apply bounds and add to candidate list
-            omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
-            assert omega_lower >= 0
-            omega_upper = ((max_diag_B - d) / alpha)**0.5
-            assert omega_upper >= omega_lower
-            for omega in omegas:
-                omega = min(max(omega, omega_lower), omega_upper)
-                C.append((d, omega))
+        # solution at bound
+        else:
+            # omega on bound
+            assert alpha > 0
+            assert beta > 0
+            C = []
+            a = max(min_diag_D, min_abs_value_D)
+            b = min(max_diag_D, max_diag_B)
+            for d in (min_diag_B - alpha, max_diag_B - alpha):
+                if np.isfinite(d) and a <= d <= b:
+                    C.append((d, 1))
+            if max(a, min_diag_B) <= gamma <= b:
+                C.append((gamma, 0))
 
-        # calculate function values for candidates
-        C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+            # d on bound
+            d_values = [a]
+            if np.isfinite(b):
+                d_values.append(b)
+            if min_diag_D == 0:
+                d_values.append(min_diag_D)
+            for d in d_values:
+                assert np.isfinite(d)
+                # get roots
+                omegas = np.roots([2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta])
+                assert len(omegas) == 3
+                # use only real roots
+                omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
+                assert len(omegas) in (1, 3)
+                # apply bounds and add to candidate list
+                omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
+                assert omega_lower >= 0
+                omega_upper = ((max_diag_B - d) / alpha)**0.5
+                assert omega_upper >= omega_lower
+                for omega in omegas:
+                    omega = min(max(omega, omega_lower), omega_upper)
+                    C.append((d, omega))
 
-        # return best values
-        (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
+            # calculate function values for candidates
+            C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+
+            # return best values
+            (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
     # return value
     assert min_diag_D <= d <= max_diag_D
-    assert d >= min_abs_value_D or (d == 0 and min_diag_D == 0)
+    assert d >= min_abs_value_D or (d == 0 and min_diag_D <= 0 and max_diag_D >= 0)
     assert omega >= 0
-    assert min_diag_B <= d + omega**2 * alpha or np.isclose(min_diag_B, d + omega**2 * alpha)
-    assert d + omega**2 * alpha <= max_diag_B or np.isclose(max_diag_B, d + omega**2 * alpha)
     assert f_value >= 0
+    assert np.isfinite(alpha) or alpha == np.inf
+    assert alpha != np.inf or omega == 0
+    assert alpha == np.inf or (min_diag_B <= d + omega**2 * alpha or np.isclose(min_diag_B, d + omega**2 * alpha))
+    assert alpha == np.inf or (max_diag_B >= d + omega**2 * alpha or np.isclose(max_diag_B, d + omega**2 * alpha))
+    assert alpha != np.inf or (min_diag_B <= d or np.isclose(min_diag_B, d))
+    assert alpha != np.inf or (max_diag_B >= d or np.isclose(max_diag_B, d))
     return (d, omega, f_value)
