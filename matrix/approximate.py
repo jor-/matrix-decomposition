@@ -358,18 +358,22 @@ def _decomposition(
         # update i-th row of L with omega
         if omega_i != 1 and i > 0:
             if is_dense:
-                L[i, :i] *= omega_i
-                L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
+                if omega_i != 0:
+                    L[i, :i] *= omega_i
+                    L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
+                else:
+                    L[i, :i] = 0
             else:
                 assert L.format == 'lil'
                 L_i_rows = []
                 L_i_data = []
-                for row, data in zip(L_rows[i], L_data[i]):
-                    assert row < i
-                    data_new = data * omega_i
-                    if abs(data_new) >= L_eps:
-                        L_i_rows.append(row)
-                        L_i_data.append(data_new)
+                if omega_i != 0:
+                    for row, data in zip(L_rows[i], L_data[i]):
+                        assert row < i
+                        data_new = data * omega_i
+                        if abs(data_new) >= L_eps:
+                            L_i_rows.append(row)
+                            L_i_data.append(data_new)
                 L_rows[i] = L_i_rows
                 L_data[i] = L_i_data
 
