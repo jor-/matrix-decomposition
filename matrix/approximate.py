@@ -875,9 +875,9 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert min_diag_D >= 0
     assert alpha >= 0
     assert beta >= 0
-    assert min_abs_value_D >= 0
+    assert min_abs_value_D > 0
     assert beta != 0 or alpha == 0
-    assert max(min_diag_D, min_diag_B) <= min(max_diag_D, max_diag_B)
+    assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
 
     def f(d, omega):
         if alpha != np.inf:
@@ -889,36 +889,33 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
         assert f_value >= 0
         return f_value
 
-    # alpha == 0 or alpha == inf
-    if alpha == 0 or alpha == np.inf:
-        if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma < min_abs_value_D:
-            d = 0
-        else:
-            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
-        if alpha == np.inf:
-            matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
-                                   'Maybe the datatype should be changed to a more accurate one.'))
-            omega = 0
-        else:
-            omega = 1
-        f_value = f(d, omega)
+    # global solution
+    d = gamma - alpha
+    if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha) and alpha != np.inf:
+        omega = 1
+        f_value = 0
+        assert np.isclose(f(d, omega), f_value)
 
-    # alpha != 0 and alpha != inf
+    # solution at bounds
     else:
-        # inner solution
-        d = gamma - alpha
-        if (max(min_diag_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha) and
-                (d == 0 or d >= min_abs_value_D)):
-            omega = 1
-            f_value = 0
-            assert np.isclose(f(d, omega), f_value)
+        C = []
 
-        # solution at bound
+        # alpha == 0 or alpha == inf
+        if alpha == 0 or alpha == np.inf:
+            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
+            if alpha == np.inf:
+                matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
+                                       'Maybe the datatype should be changed to a more accurate one.'))
+                omega = 0
+            else:
+                omega = 1
+            C.append((d, omega))
+
+        # 0 < alpha < inf
         else:
             # omega on bound
             assert alpha > 0
             assert beta > 0
-            C = []
             a = max(min_diag_D, min_abs_value_D)
             b = min(max_diag_D, max_diag_B)
             for d in (min_diag_B - alpha, max_diag_B - alpha):
@@ -931,8 +928,6 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
             d_values = [a]
             if np.isfinite(b):
                 d_values.append(b)
-            if min_diag_D == 0:
-                d_values.append(min_diag_D)
             for d in d_values:
                 assert np.isfinite(d)
                 # get roots
@@ -950,11 +945,15 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     omega = min(max(omega, omega_lower), omega_upper)
                     C.append((d, omega))
 
-            # calculate function values for candidates
-            C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+        # (d, omega) = (0, 0)
+        if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma < min_abs_value_D:
+            C.append((0, 0))
 
-            # return best values
-            (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
+        # calculate function values for candidates
+        C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+
+        # return best values
+        (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
     # return value
     assert min_diag_D <= d <= max_diag_D
