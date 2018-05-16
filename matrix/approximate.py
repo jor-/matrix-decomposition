@@ -696,6 +696,8 @@ def _matrix(
             assert q[a] < q[b]
             if d[q[a]] != 0:
                 B_i_j = A[i, j] * omega[b]
+            elif omega[b] == 0:
+                B_i_j = 0
             else:
                 if q[a] > 0:
                     if is_dense:
