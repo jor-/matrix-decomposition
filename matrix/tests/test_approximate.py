@@ -129,14 +129,19 @@ def test_approximate(n, dense, complex_values, permutation, min_diag_B, max_diag
     # reset A after overwrite
     A = A_copy.copy() if overwrite_A else A
 
-    # create approximated positive semidefinite matrix
+    # create approximated positive definite matrix
+    if min_abs_value_D is not None:
+        if min_diag_D is not None:
+            min_diag_D = max(min_diag_D, min_abs_value_D)
+        else:
+            min_diag_D = min_abs_value_D
     with warnings.catch_warnings():
         warnings.simplefilter(sparse_efficiency_warning_action,
                               scipy.sparse.SparseEfficiencyWarning)
-        B = matrix.approximate.positive_semidefinite_matrix(
+        B = matrix.approximate.positive_definite_matrix(
             A, permutation=permutation,
             min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
             overwrite_A=overwrite_A)
 
     # check overwrite
@@ -157,31 +162,9 @@ def test_approximate(n, dense, complex_values, permutation, min_diag_B, max_diag
     # check if approximation are the same
     assert matrix.util.is_almost_equal(decomposition.composed_matrix, B)
 
-    # checks for positive definite matrix
-    do_positive_defintie_checks = min_diag_D is not None and min_diag_D > 0
-    if do_positive_defintie_checks:
-        # reset A after overwrite
-        A = A_copy.copy() if overwrite_A else A
-
-        # create approximated positive definite matrix
-        with warnings.catch_warnings():
-            warnings.simplefilter(sparse_efficiency_warning_action,
-                                  scipy.sparse.SparseEfficiencyWarning)
-            C = matrix.approximate.positive_definite_matrix(
-                A, permutation=permutation,
-                min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-                min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-                overwrite_A=overwrite_A)
-
-        # check overwrite
-        assert overwrite_A or matrix.util.is_equal(A, A_copy)
-
-        # check if approximation are the same
-        assert matrix.util.is_equal(B, C)
-
 
 test_approximate_invariance_setups = [
-    (n, dense, complex_values, min_diag_B, max_diag_B, min_diag_D, max_diag_D, min_abs_value_D)
+    (n, dense, complex_values, min_diag_B, max_diag_B, min_diag_D, max_diag_D)
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
@@ -189,15 +172,14 @@ test_approximate_invariance_setups = [
     for max_diag_B in (None, 1, np.arange(n) + 1)
     for min_diag_D in (None, 1)
     for max_diag_D in (None, 1)
-    for min_abs_value_D in (None, 0.01)
 ]
 
 
 @pytest.mark.parametrize(('n, dense, complex_values, min_diag_B, max_diag_B,'
-                          'min_diag_D, max_diag_D, min_abs_value_D'),
+                          'min_diag_D, max_diag_D'),
                          test_approximate_invariance_setups)
 def test_approximate_invariance(n, dense, complex_values, min_diag_B, max_diag_B,
-                                min_diag_D, max_diag_D, min_abs_value_D):
+                                min_diag_D, max_diag_D):
     # create random hermitian matrix
     A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values) * 10
     if not dense:
@@ -206,26 +188,16 @@ def test_approximate_invariance(n, dense, complex_values, min_diag_B, max_diag_B
     # approximate matrix
     permutation = 'none'
     overwrite_A = False
-    B = matrix.approximate.positive_semidefinite_matrix(
+    B = matrix.approximate.positive_definite_matrix(
         A, permutation=permutation,
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
         overwrite_A=overwrite_A)
 
     # approximate again matrix
-    B_invariant = matrix.approximate.positive_semidefinite_matrix(
+    B_invariant = matrix.approximate.positive_definite_matrix(
         B, permutation=permutation,
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
         overwrite_A=overwrite_A)
     assert matrix.util.is_almost_equal(B, B_invariant, rtol=1e-04, atol=1e-06)
-
-    # checks for positive definite matrix
-    do_positive_defintie_checks = min_diag_D is not None and min_diag_D > 0
-    if do_positive_defintie_checks:
-        B_invariant = matrix.approximate.positive_definite_matrix(
-            B, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-            overwrite_A=overwrite_A)
-        assert matrix.util.is_almost_equal(B, B_invariant, rtol=1e-04, atol=1e-06)

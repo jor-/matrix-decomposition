@@ -35,8 +35,8 @@ def _decomposition(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         `LDL` decomposition is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater or equal to 0.
-        optional, default : 0
+        `min_diag_D` must be greater to 0.
+        optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         `LDL` decomposition is forced to be lower or equal to `max_diag_D`.
@@ -44,6 +44,7 @@ def _decomposition(
     min_abs_value_D : float
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` of an approximated `LDL` decomposition.
+        `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
@@ -110,6 +111,10 @@ def _decomposition(
             index_with_complex_value = np.where(~np.isreal(gamma))[0][0]
             raise matrix.errors.MatrixComplexDiagonalValueError(A, i=index_with_complex_value)
         gamma = gamma.real
+
+    # data type to use for calculations
+    DTYPE = np.float64
+    d_eps = np.finfo(DTYPE).eps
 
     # check diag values
     def check_float_scalar_or_vector(f, f_name='variable', default_value=None,
@@ -178,7 +183,7 @@ def _decomposition(
                                               minus_inf_okay=False, plus_inf_okay=True)
 
     min_diag_D = check_float_scalar(min_diag_D, f_name='min_diag_D',
-                                    default_value=0, lower_bound=0,
+                                    default_value=d_eps**0.5, lower_bound=d_eps,
                                     minus_inf_okay=False, plus_inf_okay=False)
     max_diag_D = check_float_scalar(max_diag_D, f_name='max_diag_D',
                                     default_value=np.inf, lower_bound=None,
@@ -189,6 +194,11 @@ def _decomposition(
                             'to the values of max_diag_B and max_diag_D.'))
         matrix.logger.error(error)
         raise error
+
+    min_abs_value_D = check_float_scalar(min_abs_value_D, f_name='min_abs_value_D',
+                                         default_value=d_eps**0.5, lower_bound=0,
+                                         minus_inf_okay=False, plus_inf_okay=False)
+    min_abs_value_D = max(min_abs_value_D, d_eps)
 
     # check overwrite_A
     if overwrite_A is None or not is_dense:
@@ -264,21 +274,14 @@ def _decomposition(
             L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
             L_rows = L.rows
             L_data = L.data
+    L_eps = np.finfo(L.dtype).eps
 
     # init other values
-    alpha = np.zeros(n, dtype=np.float64)
-    beta = np.zeros(n, dtype=np.float64)
-    delta = np.empty(n, dtype=np.float64)
-    omega = np.empty(n, dtype=np.float64)
-    d = np.empty(n, dtype=np.float64)
-
-    # check min_abs_values
-    d_eps = np.finfo(d.dtype).eps
-    L_eps = np.finfo(L.dtype).eps
-    min_abs_value_D = check_float_scalar(min_abs_value_D, f_name='min_abs_value_D',
-                                         default_value=d_eps**0.5, lower_bound=0,
-                                         minus_inf_okay=False, plus_inf_okay=False)
-    min_abs_value_D = max(min_abs_value_D, d_eps)
+    alpha = np.zeros(n, dtype=DTYPE)
+    beta = np.zeros(n, dtype=DTYPE)
+    delta = np.empty(n, dtype=DTYPE)
+    omega = np.empty(n, dtype=DTYPE)
+    d = np.empty(n, dtype=DTYPE)
 
     # debug info
     matrix.logger.debug(('Using the following values: '
@@ -491,8 +494,8 @@ def decomposition(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         `LDL` decomposition is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater or equal to 0.
-        optional, default : 0
+        `min_diag_D` must be greater to 0.
+        optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         `LDL` decomposition is forced to be lower or equal to `max_diag_D`.
@@ -500,7 +503,8 @@ def decomposition(
     min_abs_value_D : float
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` of an approximated `LDL` decomposition.
-        optional, default : _matrixThe square root of the resolution of the underlying data type.
+        `min_abs_value_D` must be greater or equal to 0.
+        optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
@@ -591,8 +595,8 @@ def _matrix(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in a `LDL` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater or equal to 0.
-        optional, default : 0
+        `min_diag_D` must be greater to 0.
+        optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in a `LDL` decomposition
         of the returned matrix is forced to be lower or equal to `max_diag_D`.
@@ -600,7 +604,8 @@ def _matrix(
     min_abs_value_D : float
         Absolute values below `min_abs_value_D` are considered as zero
         in the matrix `D` in a `LDL` decomposition of the returned matrix.
-        optional, default : _matrixThe square root of the resolution of the underlying data type.
+        `min_abs_value_D` must be greater or equal to 0.
+        optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
@@ -725,73 +730,9 @@ def _matrix(
     return B
 
 
-def positive_semidefinite_matrix(
-        A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation=None, overwrite_A=False):
-    """
-    Computes a positive semidefinite approximation of `A`.
-
-    Returns `A` if `A` is positive semidefinite and otherwise an approximation of `A`.
-
-    Parameters
-    ----------
-    A : numpy.ndarray or scipy.sparse.spmatrix
-        The matrix that should be approximated.
-        It is assumed, that A is Hermitian. The matrix must be a squared matrix.
-    min_diag_B : numpy.ndarray or float
-        Each component of the diagonal of the returned matrix
-        is forced to be greater or equal to `min_diag_B`.
-        optional, default : No minimal value is forced.
-    max_diag_B : numpy.ndarray or float
-        Each component of the diagonal of the returned matrix
-        is forced to be lower or equal to `max_diag_B`.
-        optional, default : No maximal value is forced.
-    min_diag_D : float
-        Each component of the diagonal of the matrix `D` in a `LDL` decomposition
-        of the returned matrix is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater or equal to 0.
-        optional, default : 0
-    max_diag_D : float
-        Each component of the diagonal of the matrix `D` in a `LDL` decomposition
-        of the returned matrix is forced to be lower or equal to `max_diag_D`.
-        optional, default : No maximal value is forced.
-    min_abs_value_D : float
-        Absolute values below `min_abs_value_D` are considered as zero
-        in the matrix `D` in a `LDL` decomposition of the returned matrix.
-        optional, default : _matrixThe square root of the resolution of the underlying data type.
-    permutation : str or numpy.ndarray
-        The symmetric permutation method that is applied to the matrix before it is decomposed.
-        It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
-        If `A` is sparse, it can also be a value in
-        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
-        It is also possible to directly pass a permutation vector.
-        optional, default: The permutation is chosen by the algorithm.
-    overwrite_A : bool
-        Whether it is allowed to overwrite A. Enabling may result in performance gain.
-        optional, default: False
-
-    Returns
-    -------
-    B : numpy.ndarray or scipy.sparse.spmatrix (same type as `A`)
-        An approximation of `A` which has a `LDL` decomposition.
-
-    Raises
-    ------
-    matrix.errors.MatrixNotSquareError
-        If `A` is not a square matrix.
-    matrix.errors.MatrixComplexDiagonalValueError
-        If `A` has complex diagonal values.
-    """
-
-    return _matrix(
-        A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation=permutation, overwrite_A=overwrite_A)
-
-
 def positive_definite_matrix(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation=None, overwrite_A=False):
+        permutation=None, overwrite_A=False):
     """
     Computes a positive definite approximation of `A`.
 
@@ -813,16 +754,12 @@ def positive_definite_matrix(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in a `LDL` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater than 0.
+        `min_diag_D` must be greater to 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in a `LDL` decomposition
         of the returned matrix is forced to be lower or equal to `max_diag_D`.
         optional, default : No maximal value is forced.
-    min_abs_value_D : float
-        Absolute values below `min_abs_value_D` are considered as zero
-        in the matrix `D` in a `LDL` decomposition of the returned matrix.
-        optional, default : _matrixThe square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
@@ -854,7 +791,7 @@ def positive_definite_matrix(
 
     return _matrix(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
         permutation=permutation, overwrite_A=overwrite_A)
 
 
@@ -874,9 +811,9 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert np.isfinite(gamma)
     assert np.isfinite(min_diag_D)
     assert np.isfinite(min_abs_value_D)
-    assert min_diag_D >= 0
     assert alpha >= 0
     assert beta >= 0
+    assert min_diag_D > 0
     assert min_abs_value_D > 0
     assert beta != 0 or alpha == 0
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
@@ -946,10 +883,6 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                 for omega in omegas:
                     omega = min(max(omega, omega_lower), omega_upper)
                     C.append((d, omega))
-
-        # (d, omega) = (0, 0)
-        if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma < min_abs_value_D:
-            C.append((0, 0))
 
         # calculate function values for candidates
         C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)

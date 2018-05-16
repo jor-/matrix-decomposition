@@ -8,7 +8,7 @@ import matrix.errors
 # *** functions *** #
 
 from matrix.calculate import decompose, is_positive_semidefinite, is_positive_definite, is_invertible, solve
-from matrix.approximate import decomposition, positive_semidefinite_matrix, positive_definite_matrix
+from matrix.approximate import decomposition, positive_definite_matrix
 
 
 # *** constants *** #

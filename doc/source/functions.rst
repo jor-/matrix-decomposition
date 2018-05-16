@@ -22,8 +22,6 @@ approximate a matrix
 
 .. autofunction:: matrix.approximate.decomposition
 
-.. autofunction:: matrix.approximate.positive_semidefinite_matrix
-
 .. autofunction:: matrix.approximate.positive_definite_matrix
 
 .. autodata:: matrix.APPROXIMATION_PERMUTATION_METHODS
