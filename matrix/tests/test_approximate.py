@@ -201,3 +201,37 @@ def test_approximate_invariance(n, dense, complex_values, min_diag_B, max_diag_B
         min_diag_D=min_diag_D, max_diag_D=max_diag_D,
         overwrite_A=overwrite_A)
     assert matrix.util.is_almost_equal(B, B_invariant, rtol=1e-04, atol=1e-06)
+
+
+test_approximate_infinity_values_setups = [
+    (n, dense, min_diag_B, max_diag_B, min_diag_D, max_diag_D)
+    for n in (3,)
+    for dense in (True, False)
+    for min_diag_B in (None, 1, np.arange(n) / n)
+    for max_diag_B in (None, 1, np.arange(n) + 1)
+    for min_diag_D in (None, 1)
+    for max_diag_D in (None, 1)
+]
+
+
+@pytest.mark.parametrize('n, dense, min_diag_B, max_diag_B, min_diag_D, max_diag_D',
+                         test_approximate_infinity_values_setups)
+def test_approximate_infinity_values(n, dense, min_diag_B, max_diag_B, min_diag_D, max_diag_D):
+
+    # create matrix
+    A = np.ones((n, n)) * np.finfo(np.float64).max
+    for i in range(n):
+        A[i, i] = 1
+    if not dense:
+        A = scipy.sparse.csc_matrix(A)
+
+    # approximate matrix
+    permutation = 'none'
+    overwrite_A = False
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
