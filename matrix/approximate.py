@@ -807,24 +807,25 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
 
     # check input
     assert np.isfinite(alpha) or alpha == np.inf
-    assert np.isfinite(beta)
+    assert np.isfinite(beta) or beta == np.inf
     assert np.isfinite(gamma)
     assert np.isfinite(min_diag_D)
     assert np.isfinite(min_abs_value_D)
     assert alpha >= 0
     assert beta >= 0
+    assert beta != 0 or alpha == 0
     assert min_diag_D > 0
     assert min_abs_value_D > 0
-    assert beta != 0 or alpha == 0
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
 
+    # define difference function
     def f(d, omega):
-        if alpha != np.inf:
-            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
-        elif omega == 0:
+        if omega == 0:
             f_value = (d - gamma)**2 + beta
+        elif omega == 1:
+            f_value = (d + alpha - gamma)**2
         else:
-            raise ValueError('f can not be evaluated with alpha = {} and omega = {}'.format(alpha, omega))
+            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
         assert f_value >= 0
         return f_value
 
@@ -839,18 +840,22 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     else:
         C = []
 
-        # alpha == 0 or alpha == inf
-        if alpha == 0 or alpha == np.inf:
+        # alpha == 0 or alpha == inf or beta == inf
+        if alpha == 0 or alpha == np.inf or beta == np.inf:
             d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
             if alpha == np.inf:
                 matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
+                                       'Maybe the datatype should be changed to a more accurate one.'))
+                omega = 0
+            elif beta == np.inf:
+                matrix.logger.warning(('Beta is infinity so omega is forced to be zero. '
                                        'Maybe the datatype should be changed to a more accurate one.'))
                 omega = 0
             else:
                 omega = 1
             C.append((d, omega))
 
-        # 0 < alpha < inf
+        # 0 < alpha, beta < inf
         else:
             # omega on bound
             assert alpha > 0
