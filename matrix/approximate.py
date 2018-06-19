@@ -401,6 +401,7 @@ def _decomposition(
                 A_column_i = A[:, p_i]
             A_column_i = A_column_i.toarray().reshape(-1)
         A_column_i = A_column_i[p_after_i]
+        assert np.all(np.isfinite(A_column_i))
 
         # update beta
         beta_add = 2 * A_column_i * A_column_i.conj()
@@ -428,6 +429,9 @@ def _decomposition(
 
             # devide by d_i
             L_column_i /= d_i
+            assert np.all(np.logical_or(np.isfinite(L_column_i),
+                                        np.logical_or(L_column_i == np.inf,
+                                                      L_column_i == -np.inf)))
 
             # update i-th column of L
             if is_dense:
@@ -446,7 +450,10 @@ def _decomposition(
             alpha_add = L_column_i * L_column_i.conj() * d_i
             assert np.all(np.isreal(alpha_add))
             alpha_add = alpha_add.real
+            assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == np.inf))
+            alpha_add[L_column_i == np.inf] = np.inf
             alpha[p_after_i] += alpha_add
+            assert np.all(np.logical_or(np.isfinite(alpha), alpha == np.inf))
             assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
 
     # prepare diagonal and upper triangle of L if needed
@@ -831,7 +838,8 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
 
     # global solution
     d = gamma - alpha
-    if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha) and alpha != np.inf:
+    if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha):
+        assert alpha != np.inf
         omega = 1
         f_value = 0
         assert np.isclose(f(d, omega), f_value)
@@ -853,7 +861,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                 omega = 1
             f_value = f(d, omega)
 
-        # 0 < alpha, beta < inf
+        # 0 < alpha < inf and 0 < beta < inf
         else:
             # prepare candidate set
             C = []
