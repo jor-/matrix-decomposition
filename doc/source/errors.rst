@@ -29,6 +29,11 @@ NoDecompositionConversionImplementedError
 
 If a matrix has an invalid characteristic, the following exceptions can occur:
 
+MatrixError
+-----------
+.. autoclass:: matrix.errors.MatrixError
+    :show-inheritance:
+
 MatrixNotSquareError
 --------------------
 .. autoclass:: matrix.errors.MatrixNotSquareError
@@ -55,15 +60,12 @@ MatrixComplexDiagonalValueError
     :show-inheritance:
 
 
-All these exceptions are based on the following exception:
-
-MatrixError
------------
-.. autoclass:: matrix.errors.MatrixError
-    :show-inheritance:
-
-
 If the matrix represented by a decomposition has an invalid characteristic, the following exceptions can occur:
+
+DecompositionError
+------------------
+.. autoclass:: matrix.errors.DecompositionError
+    :show-inheritance:
 
 DecompositionNotFiniteError
 ---------------------------
@@ -87,14 +89,6 @@ If a decomposition should be loaded from a file which caontains a type which doe
 DecompositionInvalidDecompositionTypeFile
 -----------------------------------------
 .. autoclass:: matrix.errors.DecompositionInvalidDecompositionTypeFile
-    :show-inheritance:
-
-
-All these exceptions are based on the following exception:
-
-DecompositionError
-------------------
-.. autoclass:: matrix.errors.DecompositionError
     :show-inheritance:
 
 

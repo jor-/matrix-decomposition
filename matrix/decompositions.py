@@ -959,7 +959,8 @@ class LDL_DecompositionCompressed(DecompositionBase):
         Parameters
         ----------
         LD : numpy.ndarray or scipy.sparse.spmatrix
-            A matrix whose diagonal values are the diagonal values of `D` and whose off-diagonal values are those of `L`.
+            A matrix whose diagonal values are the diagonal values of `D` and whose off-diagonal
+            values are those of `L`.
             optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.

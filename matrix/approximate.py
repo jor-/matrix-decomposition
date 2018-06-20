@@ -35,7 +35,7 @@ def _decomposition(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater to 0.
+        `min_diag_D` must be greater than 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
@@ -57,8 +57,8 @@ def _decomposition(
         Whether it is allowed to overwrite `A`. Enabling may result in performance gain.
         optional, default: False
     strict_lower_triangular_only_L : bool
-        Whether only the strict lower triangular matrix of the matrix `L` in the
-        :math:`LDL^H` decomposition should be computed. If this is true, its upper triangular matrix
+        Whether only the strict lower triangular matrix of the matrix `L` in the :math:`LDL^H`
+        decomposition should be computed. If this is true, its upper triangular matrix
         may contain arbitrary values. Enabling may result in performance gain.
         optional, default : False
 
@@ -242,8 +242,8 @@ def _decomposition(
 
         if use_minimal_difference_permutation_method:
             if min_diag_D < 0:
-                raise ValueError(('The permutation method {} is only available if min_diag_D greater '
-                                  'or equal zero.'
+                raise ValueError(('The permutation method {} is only available if min_diag_D '
+                                  'greater or equal zero.'
                                   ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
             if is_dense:
                 p = np.arange(n, dtype=np.min_scalar_type(n))
@@ -501,7 +501,7 @@ def decomposition(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater to 0.
+        `min_diag_D` must be greater than 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
@@ -602,7 +602,7 @@ def _matrix(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater to 0.
+        `min_diag_D` must be greater than 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
@@ -761,7 +761,7 @@ def positive_definite_matrix(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater to 0.
+        `min_diag_D` must be greater than 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
@@ -794,7 +794,7 @@ def positive_definite_matrix(
     if min_diag_D is None:
         min_diag_D = np.finfo(np.float64).eps**(0.5)
     elif min_diag_D <= 0:
-        raise ValueError('min_diag_D must be greater to zero.')
+        raise ValueError('min_diag_D must be greater than zero.')
 
     return _matrix(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,

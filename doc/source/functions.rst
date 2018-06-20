@@ -2,10 +2,10 @@ Functions
 =========
 
 Several functions are included in this package.
-The most important are summarized here.
+The most important ones are summarized here.
 
 
-decompose a matrix
+Decompose a matrix
 ------------------
 
 .. autofunction:: matrix.decompose
@@ -17,7 +17,7 @@ decompose a matrix
 .. autodata:: matrix.DECOMPOSITION_TYPES
 
 
-approximate a matrix
+Approximate a matrix
 --------------------
 
 .. autofunction:: matrix.approximate.decomposition
@@ -27,17 +27,17 @@ approximate a matrix
 .. autodata:: matrix.APPROXIMATION_PERMUTATION_METHODS
 
 
-examine a matrix
+Examine a matrix
 ----------------
-
-.. autofunction:: matrix.is_invertible
 
 .. autofunction:: matrix.is_positive_semidefinite
 
 .. autofunction:: matrix.is_positive_definite
 
+.. autofunction:: matrix.is_invertible
 
-solve system of linear equations
+
+Solve system of linear equations
 --------------------------------
 
 .. autofunction:: matrix.solve

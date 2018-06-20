@@ -28,7 +28,7 @@ LDL decomposition compressed
     :undoc-members:
     :show-inheritance:
 
-base decomposition
+Base decomposition
 ------------------
 .. autoclass:: matrix.decompositions.DecompositionBase
     :members:
