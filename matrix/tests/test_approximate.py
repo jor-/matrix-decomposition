@@ -15,10 +15,10 @@ import matrix.util
 
 
 def supported_permutation_methods(dense):
-    if dense:
-        return matrix.APPROXIMATION_PERMUTATION_METHODS
-    else:
-        return matrix.APPROXIMATION_PERMUTATION_METHODS + matrix.SPARSE_ONLY_PERMUTATION_METHODS
+    methods = matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS + matrix.UNIVERSAL_PERMUTATION_METHODS
+    if not dense:
+        methods += matrix.SPARSE_ONLY_PERMUTATION_METHODS
+    return methods
 
 
 test_approximate_dense_sparse_same_setups = [

@@ -48,7 +48,8 @@ def _decomposition(
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
-        It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
+        It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
+        :const:`matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         It is also possible to directly pass a permutation vector.
@@ -221,10 +222,10 @@ def _decomposition(
     if use_permutation_method:
         # check permutation method
         permutation_method = permutation.lower()
-        if is_dense:
-            supported_permutation_methods = matrix.APPROXIMATION_PERMUTATION_METHODS
-        else:
-            supported_permutation_methods = (matrix.APPROXIMATION_PERMUTATION_METHODS +
+        supported_permutation_methods = (matrix.UNIVERSAL_PERMUTATION_METHODS +
+                                         matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS)
+        if not is_dense:
+            supported_permutation_methods = (supported_permutation_methods +
                                              matrix.SPARSE_ONLY_PERMUTATION_METHODS)
         if permutation_method not in supported_permutation_methods:
             error = ValueError(('Permutation method {} is unknown. Only the following methods are '
@@ -514,7 +515,8 @@ def decomposition(
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
-        It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
+        It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
+        :const:`matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         It is also possible to directly pass a permutation vector.
@@ -615,7 +617,8 @@ def _matrix(
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
-        It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
+        It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
+        :const:`matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         It is also possible to directly pass a permutation vector.
@@ -769,7 +772,8 @@ def positive_definite_matrix(
         optional, default : No maximal value is forced.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
-        It has to be a value in :const:`matrix.APPROXIMATION_PERMUTATION_METHODS`.
+        It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
+        :const:`matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS`.
         If `A` is sparse, it can also be a value in
         :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
         It is also possible to directly pass a permutation vector.

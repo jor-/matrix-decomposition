@@ -23,8 +23,8 @@ UNIVERSAL_PERMUTATION_METHODS = matrix.constants.UNIVERSAL_PERMUTATION_METHODS
 """ Supported permutation methods for decompose dense and sparse matrices. """
 SPARSE_ONLY_PERMUTATION_METHODS = matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS
 """ Supported permutation methods only for sparse matrices. """
-APPROXIMATION_PERMUTATION_METHODS = matrix.constants.APPROXIMATION_PERMUTATION_METHODS
-""" Supported permutation methods for approximate dense and sparse matrices. """
+APPROXIMATION_ONLY_PERMUTATION_METHODS = matrix.constants.APPROXIMATION_ONLY_PERMUTATION_METHODS
+""" Supported permutation methods only for approximate dense and sparse matrices. """
 
 
 # *** version *** #

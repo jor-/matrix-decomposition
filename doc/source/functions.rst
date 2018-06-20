@@ -24,7 +24,7 @@ Approximate a matrix
 
 .. autofunction:: matrix.approximate.positive_definite_matrix
 
-.. autodata:: matrix.APPROXIMATION_PERMUTATION_METHODS
+.. autodata:: matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS
 
 
 Examine a matrix
