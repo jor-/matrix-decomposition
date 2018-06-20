@@ -14,36 +14,36 @@ def _decomposition(
         min_abs_value_D=None, permutation=None, overwrite_A=False,
         strict_lower_triangular_only_L=False):
     """
-    Computes an (approximative) `LDL` decomposition of a matrix with the specified properties.
+    Computes an (approximative) :math:`LDL^H` decomposition of a matrix with the specified properties.
 
-    Returns a `LDL` decomposition of `A` if such a decomposition exists.
-    Otherwise a `LDL` decomposition of an approximation of `A` is retuned.
+    Returns a :math:`LDL^H` decomposition of `A` if such a decomposition exists.
+    Otherwise a :math:`LDL^H` decomposition of an approximation of `A` is retuned.
 
     Parameters
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be approximated by a decomposition.
-        It is assumed, that A is Hermitian. The matrix must be a squared matrix.
+        `A` must be Hermitian.
     min_diag_B : numpy.ndarray or float
         Each component of the diagonal of the composed matrix `B` of an approximated
-        `LDL` decomposition is forced to be greater or equal to `min_diag_B`.
+        :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_B`.
         optional, default : No minimal value is forced.
     max_diag_B : numpy.ndarray or float
         Each component of the diagonal of the composed matrix `B` of an approximated
-        `LDL` decomposition is forced to be lower or equal to `max_diag_B`.
+        :math:`LDL^H` decomposition is forced to be lower or equal to `max_diag_B`.
         optional, default : No maximal value is forced.
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
-        `LDL` decomposition is forced to be greater or equal to `min_diag_D`.
+        :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_D`.
         `min_diag_D` must be greater to 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
-        `LDL` decomposition is forced to be lower or equal to `max_diag_D`.
+        :math:`LDL^H` decomposition is forced to be lower or equal to `max_diag_D`.
         optional, default : No maximal value is forced.
     min_abs_value_D : float
         Absolute values below `min_abs_value_D` are considered as zero
-        in the matrix `D` of an approximated `LDL` decomposition.
+        in the matrix `D` of an approximated :math:`LDL^H` decomposition.
         `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
@@ -54,20 +54,20 @@ def _decomposition(
         It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
-        Whether it is allowed to overwrite A. Enabling may result in performance gain.
+        Whether it is allowed to overwrite `A`. Enabling may result in performance gain.
         optional, default: False
     strict_lower_triangular_only_L : bool
         Whether only the strict lower triangular matrix of the matrix `L` in the
-        `LDL` decomposition should be computed. If this is true, its upper triangular matrix
+        :math:`LDL^H` decomposition should be computed. If this is true, its upper triangular matrix
         may contain arbitrary values. Enabling may result in performance gain.
         optional, default : False
 
     Returns
     -------
     L : numpy.ndarray or scipy.sparse.spmatrix (same type as A)
-        Matrix `L` of `LDL` decomposition.
+        Matrix `L` of the decomposition.
     d : numpy.ndarray
-        Diagonal of matrix `D` of `LDL` decomposition.
+        Diagonal of matrix `D` of the decomposition.
     p : numpy.ndarray
         Permutation vector.
     omega : numpy.ndarray
@@ -489,27 +489,27 @@ def decomposition(
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be approximated by a decomposition.
-        It is assumed, that A is Hermitian. The matrix must be a squared matrix.
+        `A` must be Hermitian.
     min_diag_B : numpy.ndarray or float
         Each component of the diagonal of the composed matrix `B` of an approximated
-        `LDL` decomposition is forced to be greater or equal to `min_diag_B`.
+        :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_B`.
         optional, default : No minimal value is forced.
     max_diag_B : numpy.ndarray or float
         Each component of the diagonal of the composed matrix `B` of an approximated
-        `LDL` decomposition is forced to be lower or equal to `max_diag_B`.
+        :math:`LDL^H` decomposition is forced to be lower or equal to `max_diag_B`.
         optional, default : No maximal value is forced.
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
-        `LDL` decomposition is forced to be greater or equal to `min_diag_D`.
+        :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_D`.
         `min_diag_D` must be greater to 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
-        `LDL` decomposition is forced to be lower or equal to `max_diag_D`.
+        :math:`LDL^H` decomposition is forced to be lower or equal to `max_diag_D`.
         optional, default : No maximal value is forced.
     min_abs_value_D : float
         Absolute values below `min_abs_value_D` are considered as zero
-        in the matrix `D` of an approximated `LDL` decomposition.
+        in the matrix `D` of an approximated :math:`LDL^H` decomposition.
         `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
@@ -520,7 +520,7 @@ def decomposition(
         It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
-        Whether it is allowed to overwrite A. Enabling may result in performance gain.
+        Whether it is allowed to overwrite `A`. Enabling may result in performance gain.
         optional, default: False
     return_type : str
         The type of the decomposition that should be returned.
@@ -582,7 +582,7 @@ def _matrix(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
         min_abs_value_D=None, permutation=None, overwrite_A=False):
     """
-    Computes an approximation of `A` which has a `LDL` decomposition with the specified properties.
+    Computes an approximation of `A` which has a :math:`LDL^H` decomposition with the specified properties.
 
     Returns `A` if `A` has such a decomposition and otherwise an approximation of `A`.
 
@@ -590,7 +590,7 @@ def _matrix(
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be approximated.
-        It is assumed, that A is Hermitian. The matrix must be a squared matrix.
+        `A` must be Hermitian.
     min_diag_B : numpy.ndarray or float
         Each component of the diagonal of the returned matrix
         is forced to be greater or equal to `min_diag_B`.
@@ -600,17 +600,17 @@ def _matrix(
         is forced to be lower or equal to `max_diag_B`.
         optional, default : No maximal value is forced.
     min_diag_D : float
-        Each component of the diagonal of the matrix `D` in a `LDL` decomposition
+        Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
         `min_diag_D` must be greater to 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
-        Each component of the diagonal of the matrix `D` in a `LDL` decomposition
+        Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be lower or equal to `max_diag_D`.
         optional, default : No maximal value is forced.
     min_abs_value_D : float
         Absolute values below `min_abs_value_D` are considered as zero
-        in the matrix `D` in a `LDL` decomposition of the returned matrix.
+        in the matrix `D` in a :math:`LDL^H` decomposition of the returned matrix.
         `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
     permutation : str or numpy.ndarray
@@ -621,13 +621,13 @@ def _matrix(
         It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
-        Whether it is allowed to overwrite A. Enabling may result in performance gain.
+        Whether it is allowed to overwrite `A`. Enabling may result in performance gain.
         optional, default: False
 
     Returns
     -------
     B : numpy.ndarray or scipy.sparse.spmatrix (same type as `A`)
-        An approximation of `A` which has a `LDL` decomposition.
+        An approximation of `A` which has a :math:`LDL^H` decomposition.
 
     Raises
     ------
@@ -749,7 +749,7 @@ def positive_definite_matrix(
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be approximated.
-        It is assumed, that A is Hermitian. The matrix must be a squared matrix.
+        `A` must be Hermitian.
     min_diag_B : numpy.ndarray or float
         Each component of the diagonal of the returned matrix
         is forced to be greater or equal to `min_diag_B`.
@@ -759,12 +759,12 @@ def positive_definite_matrix(
         is forced to be lower or equal to `max_diag_B`.
         optional, default : No maximal value is forced.
     min_diag_D : float
-        Each component of the diagonal of the matrix `D` in a `LDL` decomposition
+        Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
         `min_diag_D` must be greater to 0.
         optional, default : The square root of the resolution of the underlying data type.
     max_diag_D : float
-        Each component of the diagonal of the matrix `D` in a `LDL` decomposition
+        Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be lower or equal to `max_diag_D`.
         optional, default : No maximal value is forced.
     permutation : str or numpy.ndarray
@@ -775,13 +775,13 @@ def positive_definite_matrix(
         It is also possible to directly pass a permutation vector.
         optional, default: The permutation is chosen by the algorithm.
     overwrite_A : bool
-        Whether it is allowed to overwrite A. Enabling may result in performance gain.
+        Whether it is allowed to overwrite `A`. Enabling may result in performance gain.
         optional, default: False
 
     Returns
     -------
     B : numpy.ndarray or scipy.sparse.spmatrix (same type as `A`)
-        An approximation of `A` which has a `LDL` decomposition.
+        An approximation of `A` which is positive definite.
 
     Raises
     ------

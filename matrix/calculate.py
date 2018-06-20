@@ -16,8 +16,7 @@ def decompose(A, permutation=None, return_type=None, check_finite=True, overwrit
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         Matrix to be decomposed.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
@@ -33,13 +32,13 @@ def decompose(A, permutation=None, return_type=None, check_finite=True, overwrit
         chosen by the function itself.
         optional, default: the type of the decomposition is chosen by the function itself
     check_finite : bool
-        Whether to check that the input matrix contains only finite numbers.
+        Whether to check that `A` contains only finite numbers.
         Disabling may result in problems (crashes, non-termination)
         if the inputs do contain infinities or NaNs.
         Disabling gives a performance gain.
         optional, default: True
     overwrite_A : bool
-        Whether it is allowed to overwrite A.
+        Whether it is allowed to overwrite `A`.
         Enabling may result in performance gain.
         optional, default: False
 
@@ -84,8 +83,7 @@ def is_positive_semidefinite(A, check_finite=True):
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be checked.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian.
     check_finite : bool
         Whether to check that `A` contain only finite numbers.
         Disabling may result in problems (crashes, non-termination)
@@ -130,8 +128,7 @@ def is_positive_definite(A, check_finite=True):
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be checked.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian.
     check_finite : bool
         Whether to check that `A` contain only finite numbers.
         Disabling may result in problems (crashes, non-termination)
@@ -176,8 +173,7 @@ def is_invertible(A, check_finite=True):
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be checked.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian and positive semidefinite.
     check_finite : bool
         Whether to check that `A` contain only finite numbers.
         Disabling may result in problems (crashes, non-termination)
@@ -197,7 +193,7 @@ def is_invertible(A, check_finite=True):
     """
 
     # debug logging
-    matrix.logger.debug('Checking whether matrix isinvertable with check_finite={check_finite}.'.format(
+    matrix.logger.debug('Checking whether matrix is invertable with check_finite={check_finite}.'.format(
         check_finite=check_finite))
 
     # try to decompose and check decomposition
@@ -220,11 +216,10 @@ def solve(A, b, overwrite_b=False, check_finite=True):
     ----------
     A : numpy.ndarray or scipy.sparse.spmatrix
         The matrix that should be checked.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian and positive definite.
     b : numpy.ndarray
         Right-hand side vector or matrix in equation `A x = b`.
-        Ii must hold `b.shape[0] == A.shape[0]`.
+        It must hold `b.shape[0] == A.shape[0]`.
     overwrite_b : bool
         Allow overwriting data in `b`.
         Enabling gives a performance gain.

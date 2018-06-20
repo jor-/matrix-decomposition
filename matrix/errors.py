@@ -26,7 +26,7 @@ class MatrixError(BaseError):
 
 
 class MatrixNotSquareError(MatrixError):
-    """ A matrix is not a square matrix although this is required. """
+    """ A matrix is not a square matrix although a square matrix is required. """
 
     def __init__(self, matrix):
         message = 'Matrix with shape {} is not a square matrix.'.format(matrix.shape)
@@ -101,7 +101,7 @@ class DecompositionSingularError(DecompositionError):
 
 
 class DecompositionInvalidFile(DecompositionError, OSError):
-    """ A decomposition indicated that a decomposition should be loaded from an invalid file. """
+    """ An attempt was made to load a decomposition from an invalid file. """
 
     def __init__(self, filename):
         self.filename = filename
@@ -110,7 +110,7 @@ class DecompositionInvalidFile(DecompositionError, OSError):
 
 
 class DecompositionInvalidDecompositionTypeFile(DecompositionInvalidFile):
-    """ A decomposition indicated that a decomposition should be loaded from an file in which another decomposition type is stored. """
+    """ An attempt was made to load a decomposition from an file in which another decomposition type is stored. """
 
     def __init__(self, filename, type_file, type_needed):
         self.filename = filename
@@ -121,7 +121,7 @@ class DecompositionInvalidDecompositionTypeFile(DecompositionInvalidFile):
 # *** decomposition not calculable exceptions *** #
 
 class NoDecompositionPossibleError(BaseError):
-    """ It is to possible to calculate a desired matrix decomposition. """
+    """ It is not possible to calculate a desired matrix decomposition. """
 
     def __init__(self, base, desired_type):
         self.desired_type = desired_type
@@ -141,7 +141,7 @@ class NoDecompositionPossibleWithProblematicSubdecompositionError(NoDecompositio
 
 
 class NoDecompositionPossibleTooManyEntriesError(NoDecompositionPossibleError):
-    """ The matrix decomposition is not possible for this matrix because it would have too many entries. """
+    """ The decomposition is not possible for this matrix because it would have too many entries. """
 
     def __init__(self, matrix, desired_type):
         super().__init__(matrix, desired_type)

@@ -18,7 +18,7 @@ import matrix.util
 class DecompositionBase(metaclass=abc.ABCMeta):
     """ A matrix decomposition.
 
-    This class is a base class for matrix decompositions.
+    This class is a base class for all other matrix decompositions.
     """
 
     type_str = matrix.constants.BASE_DECOMPOSITION_TYPE
@@ -30,7 +30,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         ----------
         p : numpy.ndarray
             The permutation vector used for the decomposition.
-            This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
+            This decomposition is of `A[p[:, np.newaxis], p[np.newaxis, :]]` where `A` is a matrix.
             optional, default: no permutation
         """
 
@@ -58,7 +58,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     @property
     def p(self):
         """ :class:`numpy.ndarray`: The permutation vector.
-        A[p[:, np.newaxis], p[np.newaxis, :]] is the matrix A permuted by the permutation of the decomposition"""
+        `A[p[:, np.newaxis], p[np.newaxis, :]]` is the matrix `A` permuted by the permutation of the decomposition"""
 
         try:
             return self._p
@@ -82,7 +82,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
     @property
     def p_inverse(self):
-        """ :class:`numpy.ndarray`: The permutation vector that undos the permutation."""
+        """ :class:`numpy.ndarray`: The permutation vector that undoes the permutation."""
 
         return matrix.permute.invert_permutation_vector(self.p)
 
@@ -119,7 +119,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     @property
     def P(self):
         """ :class:`scipy.sparse.dok_matrix`: The permutation matrix.
-        P @ A @ P.T is the matrix A permuted by the permutation of the decomposition"""
+        `P @ A @ P.T` is the matrix `A` permuted by the permutation of the decomposition"""
 
         p = self.p
         n = len(p)
@@ -747,7 +747,7 @@ class LDL_Decomposition(DecompositionBase):
             optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.
-            This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
+            This decomposition is of `A[p[:, np.newaxis], p[np.newaxis, :]]` where `A` is a matrix.
             optional, default: no permutation
         """
 
@@ -963,7 +963,7 @@ class LDL_DecompositionCompressed(DecompositionBase):
             optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.
-            This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
+            This decomposition is of `A[p[:, np.newaxis], p[np.newaxis, :]]` where `A` is a matrix.
             optional, default: no permutation
         """
         self.LD = LD
@@ -1108,7 +1108,7 @@ class LL_Decomposition(DecompositionBase):
             optional, If it is not set yet, it must be set later.
         p : numpy.ndarray
             The permutation vector used for the decomposition.
-            This decomposition is of A[p[:, np.newaxis], p[np.newaxis, :]] where A is a matrix.
+            This decomposition is of `A[p[:, np.newaxis], p[np.newaxis, :]]` where `A` is a matrix.
             optional, default: no permutation
         """
         self.L = L

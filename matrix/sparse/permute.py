@@ -117,8 +117,7 @@ def fill_reducing_permutation_vector(A, permutation_method=None, use_long=None):
     ----------
     A : scipy.sparse.spmatrix
         Matrix that is supposed to be decomposed.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian.
     permutation_method : str
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in

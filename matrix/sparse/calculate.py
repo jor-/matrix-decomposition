@@ -20,8 +20,7 @@ def _decompose(A, permutation=None, return_type=None, check_finite=True,
     ----------
     A : scipy.sparse.spmatrix
         Matrix to be decomposed.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
@@ -41,7 +40,7 @@ def _decompose(A, permutation=None, return_type=None, check_finite=True,
         Disabling gives a performance gain.
         optional, default: True
     overwrite_A : bool
-        Whether it is allowed to overwrite A.
+        Whether it is allowed to overwrite `A`.
         Enabling may result in performance gain.
         optional, default: False
     use_long: bool
@@ -171,8 +170,7 @@ def decompose(A, permutation=None, return_type=None, check_finite=True, overwrit
     ----------
     A : scipy.sparse.spmatrix
         Matrix to be decomposed.
-        It is assumed, that A is Hermitian.
-        The matrix must be a squared matrix.
+        `A` must be Hermitian.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before
         it is decomposed. It has to be a value in
@@ -192,7 +190,7 @@ def decompose(A, permutation=None, return_type=None, check_finite=True, overwrit
         Disabling gives a performance gain.
         optional, default: True
     overwrite_A : bool
-        Whether it is allowed to overwrite A.
+        Whether it is allowed to overwrite `A`.
         Enabling may result in performance gain.
         optional, default: False
 
