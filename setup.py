@@ -43,7 +43,7 @@ setuptools.setup(
 
     classifiers=[
         # Development Status
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         # Intended Audience, Topic
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Mathematics',
