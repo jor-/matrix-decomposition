@@ -32,9 +32,9 @@ with open(readme_file, mode='r', encoding='utf-8') as f:
 setuptools.setup(
     # general informations
     name='matrix-decomposition',
-    description='decompose (factorize) dense and sparse matrices and solve associated systems of linear equations',
+    description='This library allows to approximate Hermitian (dense and sparse) matrices by positive definite matrices. Furthermore it allows to decompose (factorize) positive definite matrices and solve associated systems of linear equations.',
     long_description=long_description,
-    keywords='decomposition factorization decompose factorize dense sparse matrix matrices Cholesky positive definite systems of linear equations',
+    keywords='approximation Hermitian dense sparse matrix matrices positive definite decompose factorize decomposition factorization linear equation equations Cholesky',
 
     url='https://github.com/jor-/matrix_decomposition',
     author='Joscha Reimer',

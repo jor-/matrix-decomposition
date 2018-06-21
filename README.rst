@@ -2,7 +2,7 @@
 MATRIX-DECOMPOSITION
 ====================
 
-This is *matrix-decomposition*, a library for decompose (factorize) dense and sparse matrices in Python.
+This is *matrix-decomposition*, a library to approximate Hermitian (dense and sparse) matrices by positive definite matrices. Furthermore it allows to decompose (factorize) positive definite matrices and solve associated systems of linear equations.
 
 
 Release info
