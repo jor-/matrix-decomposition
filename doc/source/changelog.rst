@@ -1,6 +1,14 @@
 Changelog
 =========
 
+
+1.0
+---
+    * Approximation functions are slightly faster now.
+    * Better overflow handling in approximation functions.
+    * Prebuild html documentation included.
+    * Function for approximating a matrix by a positive semidefinite matrix (`matrix.approximate.positive_semidefinite_matrix`) removed.
+
 0.8
 ---
     * Approximation functions are replaced by more sophisticated approximation functions.
