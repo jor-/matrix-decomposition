@@ -75,6 +75,14 @@ To install this package after that with *python* run:
 https://github.com/jor-/matrix-decomposition
 
 
+Zenodo
+------
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1295505.svg
+    :target: https://doi.org/10.5281/zenodo.1295505
+    :alt: Zenodo doi 10.5281/zenodo.1295505
+
+
 Documentation
 =============
 
