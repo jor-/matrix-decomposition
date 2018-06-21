@@ -1,0 +1,46 @@
+matrix.sparse package
+=====================
+
+Submodules
+----------
+
+matrix.sparse.calculate module
+------------------------------
+
+.. automodule:: matrix.sparse.calculate
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+matrix.sparse.constants module
+------------------------------
+
+.. automodule:: matrix.sparse.constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+matrix.sparse.permute module
+----------------------------
+
+.. automodule:: matrix.sparse.permute
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+matrix.sparse.util module
+-------------------------
+
+.. automodule:: matrix.sparse.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: matrix.sparse
+    :members:
+    :undoc-members:
+    :show-inheritance:

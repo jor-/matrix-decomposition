@@ -1,0 +1,343 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>matrix.calculate &#8212; matrix-decomposition 0.8.post.dev21+dirty.g4678efe documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for matrix.calculate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">matrix</span>
+<span class="kn">import</span> <span class="nn">matrix.constants</span>
+<span class="kn">import</span> <span class="nn">matrix.errors</span>
+<span class="kn">import</span> <span class="nn">matrix.permute</span>
+<span class="kn">import</span> <span class="nn">matrix.util</span>
+<span class="kn">import</span> <span class="nn">matrix.dense.calculate</span>
+<span class="kn">import</span> <span class="nn">matrix.sparse.calculate</span>
+<span class="kn">import</span> <span class="nn">matrix.sparse.util</span>
+
+
+<div class="viewcode-block" id="decompose"><a class="viewcode-back" href="../../functions.html#matrix.decompose">[docs]</a><span class="k">def</span> <span class="nf">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes a decomposition of a matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse.spmatrix</span>
+<span class="sd">        Matrix to be decomposed.</span>
+<span class="sd">        `A` must be Hermitian.</span>
+<span class="sd">    permutation : str or numpy.ndarray</span>
+<span class="sd">        The symmetric permutation method that is applied to the matrix before</span>
+<span class="sd">        it is decomposed. It has to be a value in</span>
+<span class="sd">        :const:`matrix.UNIVERSAL_PERMUTATION_METHODS`.</span>
+<span class="sd">        If `A` is sparse, it can also be a value in</span>
+<span class="sd">        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.</span>
+<span class="sd">        It is also possible to directly pass a permutation vector.</span>
+<span class="sd">        optional, default: no permutation</span>
+<span class="sd">    return_type : str</span>
+<span class="sd">        The type of the decomposition that should be calculated.</span>
+<span class="sd">        It has to be a value in :const:`matrix.DECOMPOSITION_TYPES`.</span>
+<span class="sd">        If return_type is None the type of the returned decomposition is</span>
+<span class="sd">        chosen by the function itself.</span>
+<span class="sd">        optional, default: the type of the decomposition is chosen by the function itself</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that `A` contains only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if the inputs do contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+<span class="sd">    overwrite_A : bool</span>
+<span class="sd">        Whether it is allowed to overwrite `A`.</span>
+<span class="sd">        Enabling may result in performance gain.</span>
+<span class="sd">        optional, default: False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix.decompositions.DecompositionBase</span>
+<span class="sd">        A decomposition of `A` of type `return_type`.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.NoDecompositionPossibleError</span>
+<span class="sd">        If the decomposition of `A` is not possible.</span>
+<span class="sd">    matrix.errors.MatrixNotSquareError</span>
+<span class="sd">        If `A` is not a square matrix.</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># debug logging</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Decomposing matrix with permutation=</span><span class="si">{permutation}</span><span class="s1">, return_type=</span><span class="si">{return_type}</span><span class="s1">, check_finite=</span><span class="si">{check_finite}</span><span class="s1">, overwrite_A=</span><span class="si">{overwrite_A}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">permutation</span><span class="o">=</span><span class="n">permutation</span><span class="p">,</span>
+        <span class="n">return_type</span><span class="o">=</span><span class="n">return_type</span><span class="p">,</span>
+        <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">,</span>
+        <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">))</span>
+
+    <span class="c1"># decompose</span>
+    <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">is_sparse</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+        <span class="n">decomposition</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">calculate</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation</span><span class="o">=</span><span class="n">permutation</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="n">return_type</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">decomposition</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">dense</span><span class="o">.</span><span class="n">calculate</span><span class="o">.</span><span class="n">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation</span><span class="o">=</span><span class="n">permutation</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="n">return_type</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">)</span>
+
+    <span class="c1"># return</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Decomposing matrix finished.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">decomposition</span></div>
+
+
+<div class="viewcode-block" id="is_positive_semidefinite"><a class="viewcode-back" href="../../functions.html#matrix.is_positive_semidefinite">[docs]</a><span class="k">def</span> <span class="nf">is_positive_semidefinite</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns whether the passed matrix is positive semi-definite.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse.spmatrix</span>
+<span class="sd">        The matrix that should be checked.</span>
+<span class="sd">        `A` must be Hermitian.</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that `A` contain only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if they contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        Whether `A` is positive semi-definite.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># debug logging</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Checking whether matrix is positive semi-definite with check_finite=</span><span class="si">{check_finite}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">))</span>
+
+    <span class="c1"># try to decompose and check decomposition</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">decomposition</span> <span class="o">=</span> <span class="n">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span>
+                                  <span class="n">permutation</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NO_PERMUTATION_METHOD</span><span class="p">,</span>
+                                  <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">NoDecompositionPossibleError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixComplexDiagonalValueError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixNotFiniteError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixNotSquareError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">is_positive_semidefinite</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="is_positive_definite"><a class="viewcode-back" href="../../functions.html#matrix.is_positive_definite">[docs]</a><span class="k">def</span> <span class="nf">is_positive_definite</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns whether the passed matrix is positive definite.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse.spmatrix</span>
+<span class="sd">        The matrix that should be checked.</span>
+<span class="sd">        `A` must be Hermitian.</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that `A` contain only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if they contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        Whether `A` is positive definite.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># debug logging</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Checking whether matrix is positive definite with check_finite=</span><span class="si">{check_finite}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">))</span>
+
+    <span class="c1"># try to decompose and check decomposition</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">decomposition</span> <span class="o">=</span> <span class="n">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span>
+                                  <span class="n">permutation</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NO_PERMUTATION_METHOD</span><span class="p">,</span>
+                                  <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">NoDecompositionPossibleError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixComplexDiagonalValueError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixNotFiniteError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixNotSquareError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">is_positive_definite</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="is_invertible"><a class="viewcode-back" href="../../functions.html#matrix.is_invertible">[docs]</a><span class="k">def</span> <span class="nf">is_invertible</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns whether the passed matrix is an invertible matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse.spmatrix</span>
+<span class="sd">        The matrix that should be checked.</span>
+<span class="sd">        `A` must be Hermitian and positive semidefinite.</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that `A` contain only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if they contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        Whether `A` is invertible.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># debug logging</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Checking whether matrix is invertable with check_finite=</span><span class="si">{check_finite}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">))</span>
+
+    <span class="c1"># try to decompose and check decomposition</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">decomposition</span> <span class="o">=</span> <span class="n">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span>
+                                  <span class="n">permutation</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NO_PERMUTATION_METHOD</span><span class="p">,</span>
+                                  <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixNotFiniteError</span><span class="p">,</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixNotSquareError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">is_invertible</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="solve"><a class="viewcode-back" href="../../functions.html#matrix.solve">[docs]</a><span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Solves the equation `A x = b` regarding `x`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : numpy.ndarray or scipy.sparse.spmatrix</span>
+<span class="sd">        The matrix that should be checked.</span>
+<span class="sd">        `A` must be Hermitian and positive definite.</span>
+<span class="sd">    b : numpy.ndarray</span>
+<span class="sd">        Right-hand side vector or matrix in equation `A x = b`.</span>
+<span class="sd">        It must hold `b.shape[0] == A.shape[0]`.</span>
+<span class="sd">    overwrite_b : bool</span>
+<span class="sd">        Allow overwriting data in `b`.</span>
+<span class="sd">        Enabling gives a performance gain.</span>
+<span class="sd">        optional, default: False</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that `A` and b` contain only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if they contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray</span>
+<span class="sd">        An `x` so that `A x = b`.</span>
+<span class="sd">        The shape of `x` matches the shape of `b`.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.MatrixNotSquareError</span>
+<span class="sd">        If `A` is not a square matrix.</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    matrix.errors.MatrixSingularError</span>
+<span class="sd">        If `A` is singular.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># debug logging</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Solving linear system with overwrite_b=</span><span class="si">{overwrite_b}</span><span class="s1"> check_finite=</span><span class="si">{check_finite}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">overwrite_b</span><span class="o">=</span><span class="n">overwrite_b</span><span class="p">,</span>
+        <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">))</span>
+
+    <span class="c1"># try to decompose and solve with decomposition</span>
+    <span class="n">decomposition</span> <span class="o">=</span> <span class="n">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="n">overwrite_b</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">DecompositionSingularError</span> <span class="k">as</span> <span class="n">base_error</span><span class="p">:</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">MatrixSingularError</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">error</span> <span class="kn">from</span> <span class="nn">base_error</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, AGPLv3+.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

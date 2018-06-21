@@ -1,0 +1,46 @@
+matrix.dense package
+====================
+
+Submodules
+----------
+
+matrix.dense.calculate module
+-----------------------------
+
+.. automodule:: matrix.dense.calculate
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+matrix.dense.constants module
+-----------------------------
+
+.. automodule:: matrix.dense.constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+matrix.dense.permute module
+---------------------------
+
+.. automodule:: matrix.dense.permute
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+matrix.dense.util module
+------------------------
+
+.. automodule:: matrix.dense.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: matrix.dense
+    :members:
+    :undoc-members:
+    :show-inheritance:

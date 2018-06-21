@@ -1,0 +1,283 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>matrix.sparse.calculate &#8212; matrix-decomposition 0.8.post.dev20+ga0bf066 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for matrix.sparse.calculate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">matrix</span>
+<span class="kn">import</span> <span class="nn">matrix.constants</span>
+<span class="kn">import</span> <span class="nn">matrix.decompositions</span>
+<span class="kn">import</span> <span class="nn">matrix.errors</span>
+<span class="kn">import</span> <span class="nn">matrix.permute</span>
+<span class="kn">import</span> <span class="nn">matrix.util</span>
+<span class="kn">import</span> <span class="nn">matrix.sparse.constants</span>
+<span class="kn">import</span> <span class="nn">matrix.sparse.permute</span>
+<span class="kn">import</span> <span class="nn">matrix.sparse.util</span>
+
+
+<span class="k">def</span> <span class="nf">_decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+               <span class="n">overwrite_A</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">use_long</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes a decomposition of a sparse matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : scipy.sparse.spmatrix</span>
+<span class="sd">        Matrix to be decomposed.</span>
+<span class="sd">        It is assumed, that A is Hermitian.</span>
+<span class="sd">        The matrix must be a squared matrix.</span>
+<span class="sd">    permutation_method : str</span>
+<span class="sd">        The symmetric permutation method that is applied to the matrix before</span>
+<span class="sd">        it is decomposed. It has to be a value in</span>
+<span class="sd">        :const:`matrix.sparse.constants.PERMUTATION_METHODS`.</span>
+<span class="sd">        optional, default: no permutation</span>
+<span class="sd">    return_type : str</span>
+<span class="sd">        The type of the decomposition that should be calculated.</span>
+<span class="sd">        It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.</span>
+<span class="sd">        If return_type is None the type of the returned decomposition is</span>
+<span class="sd">        chosen by the function itself.</span>
+<span class="sd">        optional, default: the type of the decomposition is chosen by the function itself</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that the input matrix contains only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if the inputs do contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+<span class="sd">    overwrite_A : bool</span>
+<span class="sd">        Whether it is allowed to overwrite A.</span>
+<span class="sd">        Enabling may result in performance gain.</span>
+<span class="sd">        optional, default: False</span>
+<span class="sd">    use_long: bool</span>
+<span class="sd">        Specifies if the long type (64 bit) or the int type (32 bit)</span>
+<span class="sd">        should be used for the indices of the sparse matrices.</span>
+<span class="sd">        If use_long is None try to estimate if long type is needed.</span>
+<span class="sd">        optional, default: None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix.decompositions.DecompositionBase</span>
+<span class="sd">        A decomposition of `A` of type `return_type`.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.NoDecompositionPossibleError</span>
+<span class="sd">        If the decomposition of `A` is not possible.</span>
+<span class="sd">    matrix.errors.MatrixNotSquareError</span>
+<span class="sd">        If `A` is not a square matrix.</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">sksparse.cholmod</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;scikit-sparse is not installed.&#39;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+
+    <span class="c1"># check matrix A</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">check_square_matrix</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="c1"># check and apply permutation_method</span>
+    <span class="k">if</span> <span class="n">permutation_method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">permutation_method</span> <span class="o">=</span> <span class="n">permutation_method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">permutation_method</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NO_PERMUTATION_METHOD</span>
+    <span class="n">supported_permutation_methods</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">PERMUTATION_METHODS</span>
+    <span class="k">if</span> <span class="n">permutation_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_permutation_methods</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s1">&#39;Permutation method </span><span class="si">{}</span><span class="s1"> is unknown. &#39;</span>
+                          <span class="s1">&#39;Only the following methods are supported </span><span class="si">{}</span><span class="s1">.&#39;</span>
+                          <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">permutation_method</span><span class="p">,</span> <span class="n">supported_permutation_methods</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">permutation_method</span> <span class="ow">in</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">UNIVERSAL_PERMUTATION_METHODS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">permutation_method</span> <span class="o">==</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">NO_PERMUTATION_METHOD</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">permute</span><span class="o">.</span><span class="n">permutation_vector</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation_method</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">permute</span><span class="o">.</span><span class="n">symmetric</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">tocsc</span><span class="p">()</span>
+        <span class="n">permutation_method</span> <span class="o">=</span> <span class="s1">&#39;natural&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">permutation_method</span> <span class="ow">in</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FILL_REDUCE_PERMUTATION_METHODS</span>
+        <span class="k">assert</span> <span class="n">permutation_method</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+            <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FILL_REDUCE_PERMUTATION_METHOD_PREFIX</span><span class="p">)</span>
+        <span class="n">prefix_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">FILL_REDUCE_PERMUTATION_METHOD_PREFIX</span><span class="p">)</span>
+        <span class="n">permutation_method</span> <span class="o">=</span> <span class="n">permutation_method</span><span class="p">[</span><span class="n">prefix_len</span><span class="p">:]</span>
+        <span class="k">assert</span> <span class="n">permutation_method</span> <span class="ow">in</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">CHOLMOD_PERMUTATION_METHODS</span>
+
+    <span class="c1"># check return type</span>
+    <span class="n">supported_return_type</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">DECOMPOSITION_TYPES</span>
+    <span class="k">if</span> <span class="n">return_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">return_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_return_type</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s1">&#39;Unkown decomposition type </span><span class="si">{}</span><span class="s1">. Only values in </span><span class="si">{}</span><span class="s1"> are supported.&#39;</span>
+                          <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">return_type</span><span class="p">,</span> <span class="n">supported_return_type</span><span class="p">))</span>
+
+    <span class="c1"># convert matrix A</span>
+    <span class="n">A_old</span> <span class="o">=</span> <span class="n">A</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">convert_to_csc</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">sort_indices</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eliminate_zeros</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                          <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">)</span>
+    <span class="n">overwrite_A</span> <span class="o">=</span> <span class="n">overwrite_A</span> <span class="ow">or</span> <span class="n">A_old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">A</span>
+    <span class="k">if</span> <span class="n">use_long</span><span class="p">:</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">convert_index_dtype</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">)</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">check_finite</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">check_finite</span><span class="p">)</span>
+
+    <span class="c1"># calculate decomposition</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">sksparse</span><span class="o">.</span><span class="n">cholmod</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">ordering_method</span><span class="o">=</span><span class="n">permutation_method</span><span class="p">,</span> <span class="n">use_long</span><span class="o">=</span><span class="n">use_long</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">sksparse</span><span class="o">.</span><span class="n">cholmod</span><span class="o">.</span><span class="n">CholmodTooLargeError</span> <span class="k">as</span> <span class="n">cholmod_exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">NoDecompositionPossibleTooManyEntriesError</span><span class="p">(</span>
+                <span class="n">A</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">LDL_DECOMPOSITION_COMPRESSED_TYPE</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">cholmod_exception</span>
+    <span class="k">except</span> <span class="n">sksparse</span><span class="o">.</span><span class="n">cholmod</span><span class="o">.</span><span class="n">CholmodNotPositiveDefiniteError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">cholmod_exception</span> <span class="o">=</span> <span class="n">e</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">cholmod_exception</span><span class="o">.</span><span class="n">factor</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cholmod_exception</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># get correct permutation vector</span>
+    <span class="k">if</span> <span class="n">permutation_method</span> <span class="o">!=</span> <span class="s1">&#39;natural&#39;</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">P</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">P</span><span class="p">()</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">P</span><span class="p">())))</span>
+
+    <span class="c1"># make docomposition</span>
+    <span class="n">decomposition</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">decompositions</span><span class="o">.</span><span class="n">LDL_DecompositionCompressed</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">LD</span><span class="p">(),</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="c1"># check exception</span>
+    <span class="k">if</span> <span class="n">cholmod_exception</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bad_index</span> <span class="o">=</span> <span class="n">cholmod_exception</span><span class="o">.</span><span class="n">column</span>
+        <span class="n">decomposition</span><span class="o">.</span><span class="n">LD</span><span class="p">[</span><span class="n">bad_index</span><span class="p">,</span> <span class="n">bad_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">raise</span> <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">NoDecompositionPossibleWithProblematicSubdecompositionError</span><span class="p">(</span>
+            <span class="n">A</span><span class="p">,</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">LDL_DECOMPOSITION_COMPRESSED_TYPE</span><span class="p">,</span> <span class="n">bad_index</span><span class="p">,</span>
+            <span class="n">decomposition</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">cholmod_exception</span>
+
+    <span class="c1"># return</span>
+    <span class="k">return</span> <span class="n">decomposition</span><span class="o">.</span><span class="n">as_type</span><span class="p">(</span><span class="n">return_type</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="decompose"><a class="viewcode-back" href="../../../matrix.sparse.html#matrix.sparse.calculate.decompose">[docs]</a><span class="k">def</span> <span class="nf">decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Computes a decomposition of a sparse matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : scipy.sparse.spmatrix</span>
+<span class="sd">        Matrix to be decomposed.</span>
+<span class="sd">        It is assumed, that A is Hermitian.</span>
+<span class="sd">        The matrix must be a squared matrix.</span>
+<span class="sd">    permutation_method : str</span>
+<span class="sd">        The symmetric permutation method that is applied to the matrix before</span>
+<span class="sd">        it is decomposed. It has to be a value in</span>
+<span class="sd">        :const:`matrix.sparse.constants.PERMUTATION_METHODS`.</span>
+<span class="sd">        optional, default: no permutation</span>
+<span class="sd">    return_type : str</span>
+<span class="sd">        The type of the decomposition that should be calculated.</span>
+<span class="sd">        It has to be a value in :const:`matrix.constants.DECOMPOSITION_TYPES`.</span>
+<span class="sd">        If return_type is None the type of the returned decomposition is</span>
+<span class="sd">        chosen by the function itself.</span>
+<span class="sd">        optional, default: the type of the decomposition is chosen by the function itself</span>
+<span class="sd">    check_finite : bool</span>
+<span class="sd">        Whether to check that the input matrix contains only finite numbers.</span>
+<span class="sd">        Disabling may result in problems (crashes, non-termination)</span>
+<span class="sd">        if the inputs do contain infinities or NaNs.</span>
+<span class="sd">        Disabling gives a performance gain.</span>
+<span class="sd">        optional, default: True</span>
+<span class="sd">    overwrite_A : bool</span>
+<span class="sd">        Whether it is allowed to overwrite A.</span>
+<span class="sd">        Enabling may result in performance gain.</span>
+<span class="sd">        optional, default: False</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    matrix.decompositions.DecompositionBase</span>
+<span class="sd">        A decomposition of `A`. If `return_type` is not None, the decomposition</span>
+<span class="sd">        is of this type.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    matrix.errors.NoDecompositionPossibleError</span>
+<span class="sd">        If the decomposition of `A` is not possible.</span>
+<span class="sd">    matrix.errors.MatrixNotSquareError</span>
+<span class="sd">        If `A` is not a square matrix.</span>
+<span class="sd">    matrix.errors.MatrixNotFiniteError</span>
+<span class="sd">        If `A` is not a finite matrix and `check_finite` is True.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation_method</span><span class="o">=</span><span class="n">permutation_method</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="n">return_type</span><span class="p">,</span>
+                          <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">,</span> <span class="n">use_long</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">NoDecompositionPossibleTooManyEntriesError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">((</span><span class="s1">&#39;Problem to large for index type </span><span class="si">{}</span><span class="s1">, &#39;</span>
+                               <span class="s1">&#39;index type is switched to long.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">matrix_index_type</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_decompose</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">permutation_method</span><span class="o">=</span><span class="n">permutation_method</span><span class="p">,</span> <span class="n">return_type</span><span class="o">=</span><span class="n">return_type</span><span class="p">,</span>
+                          <span class="n">check_finite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_A</span><span class="o">=</span><span class="n">overwrite_A</span><span class="p">,</span> <span class="n">use_long</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, AGPLv3+.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
