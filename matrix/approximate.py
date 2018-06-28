@@ -367,26 +367,33 @@ def _decomposition(
                                       i, n - 1, (i + 1) / n))
 
         # update i-th row of L with omega
-        if omega_i != 1 and i > 0:
+        if i > 0:
             if is_dense:
                 if omega_i != 0:
-                    L[i, :i] *= omega_i
+                    if omega_i != 1:
+                        L[i, :i] *= omega_i
                     L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
                 else:
                     L[i, :i] = 0
             else:
                 assert L.format == 'lil'
-                L_i_rows = []
-                L_i_data = []
+
                 if omega_i != 0:
-                    for row, data in zip(L_rows[i], L_data[i]):
-                        assert row < i
-                        data_new = data * omega_i
-                        if abs(data_new) >= L_eps:
-                            L_i_rows.append(row)
-                            L_i_data.append(data_new)
-                L_rows[i] = L_i_rows
-                L_data[i] = L_i_data
+                    L_i_rows = L_rows[i]
+                    L_i_data_array = np.asarray(L_data[i])
+                    if omega_i != 1:
+                        L_i_data_array *= omega_i
+                    L_i_nonzero_mask = np.abs(L_i_data_array) >= L_eps
+                    L_rows[i] = [L_i_rows[i] for i in range(len(L_i_nonzero_mask))
+                                 if L_i_nonzero_mask[i]]
+                    L_data[i] = [L_i_data_array[i] for i in range(len(L_i_nonzero_mask))
+                                 if L_i_nonzero_mask[i]]
+                else:
+                    L_rows[i] = []
+                    L_data[i] = []
+
+            assert not is_dense or np.all(np.isfinite(L[i, :i]))
+            assert is_dense or np.all(np.isfinite(L_data[i]))
 
         # get i-th column of A
         p_after_i = p[i + 1:]
@@ -410,52 +417,66 @@ def _decomposition(
         beta[p_after_i] += beta_add.real
 
         # update alpha and i-th column of L
-        L_column_i = A_column_i
         if d_i != 0:
             # calculate i-th column of L
+            L_column_i = A_column_i
             if is_dense:
                 if i > 0:
                     L_row_i_mul_d = L[i, :i].conj() * d[:i]
-                    L_column_i -= L[i + 1:, :i] @ L_row_i_mul_d
+                    assert np.all(np.logical_or(np.isfinite(L_row_i_mul_d),
+                                                np.isinf(L_row_i_mul_d)))
+                    L_below_row_i = L[i + 1:, :i]
+                    assert np.all(np.logical_or(np.isfinite(L_below_row_i),
+                                                np.isinf(L_below_row_i)))
+                    L_column_i -= L_below_row_i @ L_row_i_mul_d
             else:
                 assert L.format == 'lil'
-                L_row_i_mul_d = L[i, :].conj().multiply(d).T
-                if L_row_i_mul_d.nnz > 0:
-                    L_row_i_mul_d = L_row_i_mul_d.toarray().reshape(-1)
+                if len(L_rows[i]) > 0:
+                    L_row_i_mul_d = L[i, :].conj().multiply(d).toarray().reshape(-1)
+                    assert np.all(np.logical_or(np.isfinite(L_row_i_mul_d),
+                                                np.isinf(L_row_i_mul_d)))
                     L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
                     L_below_row_i.rows = L_rows[i + 1:]
                     L_below_row_i.data = L_data[i + 1:]
                     L_below_row_i._shape = (n - (i + 1), n)
+                    assert np.all((np.all(np.logical_or(np.isfinite(l), np.isinf(l))) for l in L_below_row_i.data))
                     L_column_i -= L_below_row_i @ L_row_i_mul_d
 
-            # devide by d_i
-            L_column_i /= d_i
-            assert np.all(np.logical_or(np.isfinite(L_column_i),
-                                        np.logical_or(L_column_i == np.inf,
-                                                      L_column_i == -np.inf)))
-
-            # update i-th column of L
-            if is_dense:
-                L[i + 1:, i] = L_column_i
-            else:
-                assert L.format == 'lil'
+            # remove zero entries if sparse
+            if not is_dense:
                 L_column_i_non_zero_mask = L_column_i != 0
                 L_column_i = L_column_i[L_column_i_non_zero_mask]
                 p_after_i = p_after_i[L_column_i_non_zero_mask]
-                for k, L_column_i_k in zip(np.where(L_column_i_non_zero_mask)[0], L_column_i):
-                    j = i + 1 + k
-                    L_rows[j].append(i)
-                    L_data[j].append(L_column_i_k)
 
-            # update alpha
-            alpha_add = L_column_i * L_column_i.conj() * d_i
-            assert np.all(np.isreal(alpha_add))
-            alpha_add = alpha_add.real
-            assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == np.inf))
-            alpha_add[L_column_i == np.inf] = np.inf
-            alpha[p_after_i] += alpha_add
-            assert np.all(np.logical_or(np.isfinite(alpha), alpha == np.inf))
-            assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
+            # update i-th column of L
+            assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
+
+            if len(L_column_i) > 0:
+                # devide by d_i
+                assert np.isfinite(d_i)
+                assert d_i != 0
+                L_column_i /= d_i
+                assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
+
+                # update i-th column of L
+                if is_dense:
+                    L[i + 1:, i] = L_column_i
+                else:
+                    assert L.format == 'lil'
+                    for k, L_column_i_k in zip(np.where(L_column_i_non_zero_mask)[0], L_column_i):
+                        j = i + 1 + k
+                        L_rows[j].append(i)
+                        L_data[j].append(L_column_i_k)
+
+                # update alpha
+                alpha_add = L_column_i * L_column_i.conj() * d_i
+                assert np.all(np.isreal(alpha_add))
+                alpha_add = alpha_add.real
+                assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == np.inf))
+                alpha_add[L_column_i == np.inf] = np.inf
+                alpha[p_after_i] += alpha_add
+                assert np.all(np.logical_or(np.isfinite(alpha), alpha == np.inf))
+                assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
 
     # prepare diagonal and upper triangle of L if needed
     if not strict_lower_triangular_only_L:
