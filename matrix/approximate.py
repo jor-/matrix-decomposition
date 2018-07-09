@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import scipy.sparse
 
@@ -869,6 +871,14 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert min_diag_D > 0
     assert min_abs_value_D > 0
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
+
+    # ensure that alpha**2 is finite if alpha is finite (for np.roots)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars', category=RuntimeWarning)
+        try:
+            alpha**2
+        except RuntimeWarning:
+            alpha = np.inf
 
     # define difference function
     def f(d, omega):
