@@ -235,3 +235,10 @@ def test_approximate_infinity_values(n, dense, min_diag_B, max_diag_B, min_diag_
             min_diag_B=min_diag_B, max_diag_B=max_diag_B,
             min_diag_D=min_diag_D, max_diag_D=max_diag_D,
             overwrite_A=overwrite_A)
+
+
+def test_approximate_infinite_alpha_square():
+    m = np.finfo(np.float64).max
+    a = np.sqrt(m)
+    A = np.array([[1, a / 10], [-a / 10, m / 100]])
+    matrix.approximate.decomposition(A, permutation='none')
