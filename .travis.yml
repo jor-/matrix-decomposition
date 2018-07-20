@@ -66,7 +66,7 @@ script:
           fi
       fi
     - if [ "${DOC_TEST}" == "1" ]; then
-          sphinx-build -nW -b html -d doc/build/doctrees doc/source doc/build/html;
+          sphinx-build -nW -b html -a doc/source doc/build/html;
       fi
     - if [ "${STYLE_TEST}" == "1" ]; then
           pycodestyle . --exclude=versioneer.py;
