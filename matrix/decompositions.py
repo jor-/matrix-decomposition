@@ -539,11 +539,11 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
         def file_load_function_nonsparse(buffered_reader):
             with np.load(buffered_reader, allow_pickle=False) as npz_file_object:
-                keys = npz_file_object.keys()
-                if len(keys) != 1 or keys[0] != attribute_name:
+                if len(npz_file_object) == 1:
+                    key, value = next(iter(npz_file_object.items()))
+                if len(npz_file_object) != 1 or key != attribute_name:
                     raise matrix.errors.DecompositionInvalidFile(filename)
-                array = npz_file_object[attribute_name]
-                return array
+                return value
 
         # load
         try:

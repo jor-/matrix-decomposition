@@ -37,6 +37,7 @@ install:
     - conda create -q -n test-environment python=$PYTHON
     - source activate test-environment
     # install needed packages
+    - conda install -q numpy>=1.15
     - conda install -q scipy
     - conda install -q scikit-sparse -c conda-forge
     - if [ "${CODE_TEST}" == "1" ]; then

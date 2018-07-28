@@ -69,7 +69,7 @@ setuptools.setup(
         'pip>=1.4',
     ],
     install_requires=[
-        'numpy',
+        'numpy>=1.15',
         'scipy>=0.19',
     ],
     extras_require={
