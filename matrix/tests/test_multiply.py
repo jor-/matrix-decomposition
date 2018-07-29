@@ -26,7 +26,7 @@ def test_multiply(n, dense, complex_values, type_str, invertible, x, y):
     decomposition = matrix.tests.random.decomposition(n, type_str=type_str, dense=dense, complex_values=complex_values, invertible=invertible)
     A = decomposition.composed_matrix
     if not dense:
-        A = A.todense().getA()
+        A = A.toarray()
     if y is None:
         y_H = x.transpose().conj()
     else:

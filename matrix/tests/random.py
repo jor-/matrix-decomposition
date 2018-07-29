@@ -60,7 +60,11 @@ def lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diago
 
         # apply invertible
         if invertible:
-            A = A + scipy.sparse.eye(n)
+            if dense:
+                eye = np.eye(n)
+            else:
+                eye = scipy.sparse.eye(n)
+            A = A + eye
         else:
             i = np.random.randint(n)
             A[i, i] = 0

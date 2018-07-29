@@ -42,7 +42,7 @@ def test_approximate_dense_sparse_same(n, complex_values, min_diag_B, max_diag_B
     # create random hermitian matrix
     A_sparse = matrix.tests.random.hermitian_matrix(n, dense=False, complex_values=complex_values) * 10
     A_sparse = A_sparse.tocsc(copy=False)
-    A_dense = A_sparse.todense()
+    A_dense = A_sparse.toarray()
 
     # approximate decompositions
     permutation = 'none'
