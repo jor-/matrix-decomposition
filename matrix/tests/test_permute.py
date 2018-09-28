@@ -13,17 +13,18 @@ test_permutation_vector_setups = [
     (n, dense, permutation_method)
     for n in (10,)
     for dense in (True, False)
-    for permutation_method in (matrix.UNIVERSAL_PERMUTATION_METHODS +
-                               matrix.SPARSE_ONLY_PERMUTATION_METHODS + ('DUMMY_METHOD',))
+    for permutation_method in (matrix.UNIVERSAL_PERMUTATION_METHODS
+                               + matrix.SPARSE_ONLY_PERMUTATION_METHODS
+                               + ('DUMMY_METHOD',))
 ]
 
 
 @pytest.mark.parametrize('n, dense, permutation_method', test_permutation_vector_setups)
 def test_permutation_vector(n, dense, permutation_method):
     A = matrix.tests.random.hermitian_matrix(n, dense=dense)
-    if (permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS or
-            (permutation_method in matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS and
-             not dense)):
+    if (permutation_method in matrix.constants.UNIVERSAL_PERMUTATION_METHODS
+            or (permutation_method in matrix.constants.SPARSE_ONLY_PERMUTATION_METHODS
+                and not dense)):
         p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
         assert p is not None
         assert p.ndim == 1

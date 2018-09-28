@@ -182,11 +182,11 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
     # *** compare methods *** #
     def _is_same_type_and_permutation(self, other):
-        return (isinstance(other, DecompositionBase) and
-                self.type_str == other.type_str and
-                self.is_permuted == other.is_permuted and
-                (not self.is_permuted or
-                 (self.n == other.n and np.all(self.p == other.p))))
+        return (isinstance(other, DecompositionBase)
+                and self.type_str == other.type_str
+                and self.is_permuted == other.is_permuted
+                and (not self.is_permuted
+                     or (self.n == other.n and np.all(self.p == other.p))))
 
     def is_equal(self, other):
         """ Whether this decomposition is equal to passed decomposition.
@@ -822,14 +822,14 @@ class LDL_Decomposition(DecompositionBase):
     # *** compare methods *** #
 
     def is_equal(self, other):
-        return (super().is_equal(other) and
-                np.all(self.d == other.d) and
-                matrix.util.is_equal(self.L, other.L))
+        return (super().is_equal(other)
+                and np.all(self.d == other.d)
+                and matrix.util.is_equal(self.L, other.L))
 
     def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
-        return (super().is_almost_equal(other) and
-                np.allclose(self.d, other.d, rtol=rtol, atol=atol) and
-                matrix.util.is_almost_equal(self.L, other.L, rtol=rtol, atol=atol))
+        return (super().is_almost_equal(other)
+                and np.allclose(self.d, other.d, rtol=rtol, atol=atol)
+                and matrix.util.is_almost_equal(self.L, other.L, rtol=rtol, atol=atol))
 
     # *** convert type *** #
 
@@ -1027,12 +1027,12 @@ class LDL_DecompositionCompressed(DecompositionBase):
     # *** compare methods *** #
 
     def is_equal(self, other):
-        return (super().is_equal(other) and
-                matrix.util.is_equal(self.LD, other.LD))
+        return (super().is_equal(other)
+                and matrix.util.is_equal(self.LD, other.LD))
 
     def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
-        return (super().is_almost_equal(other) and
-                matrix.util.is_almost_equal(self.LD, other.LD, rtol=rtol, atol=atol))
+        return (super().is_almost_equal(other)
+                and matrix.util.is_almost_equal(self.LD, other.LD, rtol=rtol, atol=atol))
 
     # *** convert type *** #
 
@@ -1148,12 +1148,12 @@ class LL_Decomposition(DecompositionBase):
     # *** compare methods *** #
 
     def is_equal(self, other):
-        return (super().is_equal(other) and
-                matrix.util.is_equal(self.L, other.L))
+        return (super().is_equal(other)
+                and matrix.util.is_equal(self.L, other.L))
 
     def is_almost_equal(self, other, rtol=1e-04, atol=1e-06):
-        return (super().is_almost_equal(other) and
-                matrix.util.is_almost_equal(self.L, other.L, rtol=rtol, atol=atol))
+        return (super().is_almost_equal(other)
+                and matrix.util.is_almost_equal(self.L, other.L, rtol=rtol, atol=atol))
 
     # *** convert type *** #
 

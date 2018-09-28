@@ -144,10 +144,10 @@ def _decomposition(
                                                                      f == np.inf),
                                                       np.logical_and(minus_inf_okay,
                                                                      f == -np.inf)))):
-                error = ValueError('{} must be finite'.format(f_name) +
-                                   (' or minus infinity' if minus_inf_okay else '') +
-                                   (' or plus infinity' if plus_inf_okay else '') +
-                                   ' but it is {}.'.format(f))
+                error = ValueError('{} must be finite'.format(f_name)
+                                   + (' or minus infinity' if minus_inf_okay else '')
+                                   + (' or plus infinity' if plus_inf_okay else '')
+                                   + ' but it is {}.'.format(f))
                 matrix.logger.error(error)
                 raise error
         else:
@@ -163,12 +163,12 @@ def _decomposition(
                 error = ValueError('{} must a float value but it is {}.'.format(f_name, f))
                 matrix.logger.error(error)
                 raise error from original_error
-            if not (np.isfinite(f) or (minus_inf_okay and f == -np.inf) or
-                    (plus_inf_okay and f == np.inf)):
-                error = ValueError('{} must be finite'.format(f_name) +
-                                   (' or minus infinity' if minus_inf_okay else '') +
-                                   (' or plus infinity' if plus_inf_okay else '') +
-                                   ' but it is {}.'.format(f))
+            if not (np.isfinite(f) or (minus_inf_okay and f == -np.inf)
+                    or (plus_inf_okay and f == np.inf)):
+                error = ValueError('{} must be finite'.format(f_name)
+                                   + (' or minus infinity' if minus_inf_okay else '')
+                                   + (' or plus infinity' if plus_inf_okay else '')
+                                   + ' but it is {}.'.format(f))
                 matrix.logger.error(error)
                 raise error
             if lower_bound is not None and f < lower_bound:
@@ -224,11 +224,11 @@ def _decomposition(
     if use_permutation_method:
         # check permutation method
         permutation_method = permutation.lower()
-        supported_permutation_methods = (matrix.UNIVERSAL_PERMUTATION_METHODS +
-                                         matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS)
+        supported_permutation_methods = (matrix.UNIVERSAL_PERMUTATION_METHODS
+                                         + matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS)
         if not is_dense:
-            supported_permutation_methods = (supported_permutation_methods +
-                                             matrix.SPARSE_ONLY_PERMUTATION_METHODS)
+            supported_permutation_methods = (supported_permutation_methods
+                                             + matrix.SPARSE_ONLY_PERMUTATION_METHODS)
         if permutation_method not in supported_permutation_methods:
             error = ValueError(('Permutation method {} is unknown. Only the following methods are '
                                 'supported {}.'
