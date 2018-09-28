@@ -2,6 +2,11 @@ Changelog
 =========
 
 
+1.0.1
+-----
+    * Approximation functions now also work if an overflows occurs.
+    * NumPys matrix is avoided now because it is deprecated now.
+
 1.0
 ---
     * Approximation functions are slightly faster now.

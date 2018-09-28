@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>matrix.approximate &#8212; matrix-decomposition 1.0.post.dev0+dirty.g930e53a documentation</title>
+    <title>matrix.approximate &#8212; matrix-decomposition 1.0.post0.dev16+dirty.ge869d2b documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -33,7 +33,9 @@
           <div class="body" role="main">
             
   <h1>Source code for matrix.approximate</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy.sparse</span>
 
 <span class="kn">import</span> <span class="nn">matrix</span>
@@ -177,10 +179,10 @@
                                                                      <span class="n">f</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">),</span>
                                                       <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">minus_inf_okay</span><span class="p">,</span>
                                                                      <span class="n">f</span> <span class="o">==</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)))):</span>
-                <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be finite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">+</span>
-                                   <span class="p">(</span><span class="s1">&#39; or minus infinity&#39;</span> <span class="k">if</span> <span class="n">minus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
-                                   <span class="p">(</span><span class="s1">&#39; or plus infinity&#39;</span> <span class="k">if</span> <span class="n">plus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
-                                   <span class="s1">&#39; but it is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be finite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="p">(</span><span class="s1">&#39; or minus infinity&#39;</span> <span class="k">if</span> <span class="n">minus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="p">(</span><span class="s1">&#39; or plus infinity&#39;</span> <span class="k">if</span> <span class="n">plus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="s1">&#39; but it is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
                 <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">error</span>
         <span class="k">else</span><span class="p">:</span>
@@ -196,12 +198,12 @@
                 <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must a float value but it is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
                 <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">error</span> <span class="kn">from</span> <span class="nn">original_error</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">minus_inf_okay</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span> <span class="ow">or</span>
-                    <span class="p">(</span><span class="n">plus_inf_okay</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
-                <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be finite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span> <span class="o">+</span>
-                                   <span class="p">(</span><span class="s1">&#39; or minus infinity&#39;</span> <span class="k">if</span> <span class="n">minus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
-                                   <span class="p">(</span><span class="s1">&#39; or plus infinity&#39;</span> <span class="k">if</span> <span class="n">plus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span>
-                                   <span class="s1">&#39; but it is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">minus_inf_okay</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">plus_inf_okay</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)):</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> must be finite&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f_name</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="p">(</span><span class="s1">&#39; or minus infinity&#39;</span> <span class="k">if</span> <span class="n">minus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="p">(</span><span class="s1">&#39; or plus infinity&#39;</span> <span class="k">if</span> <span class="n">plus_inf_okay</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                   <span class="o">+</span> <span class="s1">&#39; but it is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
                 <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">error</span>
             <span class="k">if</span> <span class="n">lower_bound</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="n">lower_bound</span><span class="p">:</span>
@@ -257,11 +259,11 @@
     <span class="k">if</span> <span class="n">use_permutation_method</span><span class="p">:</span>
         <span class="c1"># check permutation method</span>
         <span class="n">permutation_method</span> <span class="o">=</span> <span class="n">permutation</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-        <span class="n">supported_permutation_methods</span> <span class="o">=</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">UNIVERSAL_PERMUTATION_METHODS</span> <span class="o">+</span>
-                                         <span class="n">matrix</span><span class="o">.</span><span class="n">APPROXIMATION_ONLY_PERMUTATION_METHODS</span><span class="p">)</span>
+        <span class="n">supported_permutation_methods</span> <span class="o">=</span> <span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">UNIVERSAL_PERMUTATION_METHODS</span>
+                                         <span class="o">+</span> <span class="n">matrix</span><span class="o">.</span><span class="n">APPROXIMATION_ONLY_PERMUTATION_METHODS</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dense</span><span class="p">:</span>
-            <span class="n">supported_permutation_methods</span> <span class="o">=</span> <span class="p">(</span><span class="n">supported_permutation_methods</span> <span class="o">+</span>
-                                             <span class="n">matrix</span><span class="o">.</span><span class="n">SPARSE_ONLY_PERMUTATION_METHODS</span><span class="p">)</span>
+            <span class="n">supported_permutation_methods</span> <span class="o">=</span> <span class="p">(</span><span class="n">supported_permutation_methods</span>
+                                             <span class="o">+</span> <span class="n">matrix</span><span class="o">.</span><span class="n">SPARSE_ONLY_PERMUTATION_METHODS</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">permutation_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_permutation_methods</span><span class="p">:</span>
             <span class="n">error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">((</span><span class="s1">&#39;Permutation method </span><span class="si">{}</span><span class="s1"> is unknown. Only the following methods are &#39;</span>
                                 <span class="s1">&#39;supported </span><span class="si">{}</span><span class="s1">.&#39;</span>
@@ -402,26 +404,33 @@
                                       <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">n</span><span class="p">))</span>
 
         <span class="c1"># update i-th row of L with omega</span>
-        <span class="k">if</span> <span class="n">omega_i</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">is_dense</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">omega_i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">omega_i</span>
+                    <span class="k">if</span> <span class="n">omega_i</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">omega_i</span>
                     <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">L_eps</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">L</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;lil&#39;</span>
-                <span class="n">L_i_rows</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">L_i_data</span> <span class="o">=</span> <span class="p">[]</span>
+
                 <span class="k">if</span> <span class="n">omega_i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">L_data</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
-                        <span class="k">assert</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="n">i</span>
-                        <span class="n">data_new</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="n">omega_i</span>
-                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">data_new</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">L_eps</span><span class="p">:</span>
-                            <span class="n">L_i_rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-                            <span class="n">L_i_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_new</span><span class="p">)</span>
-                <span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_i_rows</span>
-                <span class="n">L_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_i_data</span>
+                    <span class="n">L_i_rows</span> <span class="o">=</span> <span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">L_i_data_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">L_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">omega_i</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">L_i_data_array</span> <span class="o">*=</span> <span class="n">omega_i</span>
+                    <span class="n">L_i_nonzero_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">L_i_data_array</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">L_eps</span>
+                    <span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_i_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">L_i_nonzero_mask</span><span class="p">))</span>
+                                 <span class="k">if</span> <span class="n">L_i_nonzero_mask</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                    <span class="n">L_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">L_i_data_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">L_i_nonzero_mask</span><span class="p">))</span>
+                                 <span class="k">if</span> <span class="n">L_i_nonzero_mask</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">L_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">is_dense</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">i</span><span class="p">]))</span>
+            <span class="k">assert</span> <span class="n">is_dense</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_data</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 
         <span class="c1"># get i-th column of A</span>
         <span class="n">p_after_i</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
@@ -445,52 +454,86 @@
         <span class="n">beta</span><span class="p">[</span><span class="n">p_after_i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">beta_add</span><span class="o">.</span><span class="n">real</span>
 
         <span class="c1"># update alpha and i-th column of L</span>
-        <span class="n">L_column_i</span> <span class="o">=</span> <span class="n">A_column_i</span>
         <span class="k">if</span> <span class="n">d_i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="c1"># calculate i-th column of L</span>
+            <span class="c1"># get auxiliary variables for calculation of i-th column of L</span>
             <span class="k">if</span> <span class="n">is_dense</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">L_row_i_mul_d</span> <span class="o">=</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">d</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
-                    <span class="n">L_column_i</span> <span class="o">-=</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">@</span> <span class="n">L_row_i_mul_d</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_row_i_mul_d</span><span class="p">))</span>
+                    <span class="n">L_below_row_i</span> <span class="o">=</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:</span><span class="n">i</span><span class="p">]</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_below_row_i</span><span class="p">),</span>
+                                                <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_below_row_i</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">L</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;lil&#39;</span>
-                <span class="n">L_row_i_mul_d</span> <span class="o">=</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-                <span class="k">if</span> <span class="n">L_row_i_mul_d</span><span class="o">.</span><span class="n">nnz</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">L_row_i_mul_d</span> <span class="o">=</span> <span class="n">L_row_i_mul_d</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">L_row_i_mul_d</span> <span class="o">=</span> <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_row_i_mul_d</span><span class="p">))</span>
                     <span class="n">L_below_row_i</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">lil_matrix</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">L</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
                     <span class="n">L_below_row_i</span><span class="o">.</span><span class="n">rows</span> <span class="o">=</span> <span class="n">L_rows</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
                     <span class="n">L_below_row_i</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">L_data</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
                     <span class="n">L_below_row_i</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span>
-                    <span class="n">L_column_i</span> <span class="o">-=</span> <span class="n">L_below_row_i</span> <span class="o">@</span> <span class="n">L_row_i_mul_d</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">l</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">l</span><span class="p">)))</span>
+                                   <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">L_below_row_i</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
 
-            <span class="c1"># devide by d_i</span>
-            <span class="n">L_column_i</span> <span class="o">/=</span> <span class="n">d_i</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span>
-                                        <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">L_column_i</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span>
-                                                      <span class="n">L_column_i</span> <span class="o">==</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)))</span>
+            <span class="c1"># calculate i-th column of L</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">is_dense</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_dense</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_rows</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">L_column_i</span> <span class="o">=</span> <span class="n">L_below_row_i</span> <span class="o">@</span> <span class="n">L_row_i_mul_d</span>
 
-            <span class="c1"># update i-th column of L</span>
-            <span class="k">if</span> <span class="n">is_dense</span><span class="p">:</span>
-                <span class="n">L</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_column_i</span>
+                <span class="c1"># recalculate values where inf * 0 is involved (inf * 0 is nan and should be 0)</span>
+                <span class="n">L_column_i_nan_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">))]),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">))])))</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">L_column_i_nan_mask</span><span class="p">):</span>
+                    <span class="n">L_row_i_mul_d_zero_mask</span> <span class="o">=</span> <span class="n">L_row_i_mul_d</span> <span class="o">==</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">L_column_i_nan_mask</span><span class="p">:</span>
+                        <span class="n">L_row_i_j</span> <span class="o">=</span> <span class="n">L_below_row_i</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">L_row_i_j</span><span class="p">[</span><span class="n">L_row_i_mul_d_zero_mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">L_coulmn_i_j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inner</span><span class="p">(</span><span class="n">L_row_i_j</span><span class="p">,</span> <span class="n">L_row_i_mul_d</span><span class="p">)</span>
+                        <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_coulmn_i_j</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_coulmn_i_j</span><span class="p">))</span>
+                        <span class="n">L_column_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_coulmn_i_j</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">)))</span>
+
+                <span class="n">L_column_i</span> <span class="o">=</span> <span class="n">A_column_i</span> <span class="o">-</span> <span class="n">L_column_i</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">L</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;lil&#39;</span>
+                <span class="n">L_column_i</span> <span class="o">=</span> <span class="n">A_column_i</span>
+
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">)))</span>
+
+            <span class="c1"># remove zero entries if sparse</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_dense</span><span class="p">:</span>
                 <span class="n">L_column_i_non_zero_mask</span> <span class="o">=</span> <span class="n">L_column_i</span> <span class="o">!=</span> <span class="mi">0</span>
                 <span class="n">L_column_i</span> <span class="o">=</span> <span class="n">L_column_i</span><span class="p">[</span><span class="n">L_column_i_non_zero_mask</span><span class="p">]</span>
                 <span class="n">p_after_i</span> <span class="o">=</span> <span class="n">p_after_i</span><span class="p">[</span><span class="n">L_column_i_non_zero_mask</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">L_column_i_k</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">L_column_i_non_zero_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L_column_i</span><span class="p">):</span>
-                    <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">k</span>
-                    <span class="n">L_rows</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                    <span class="n">L_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L_column_i_k</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">)))</span>
 
-            <span class="c1"># update alpha</span>
-            <span class="n">alpha_add</span> <span class="o">=</span> <span class="n">L_column_i</span> <span class="o">*</span> <span class="n">L_column_i</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">d_i</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="n">alpha_add</span><span class="p">))</span>
-            <span class="n">alpha_add</span> <span class="o">=</span> <span class="n">alpha_add</span><span class="o">.</span><span class="n">real</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">alpha_add</span><span class="p">),</span> <span class="n">alpha_add</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
-            <span class="n">alpha_add</span><span class="p">[</span><span class="n">L_column_i</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
-            <span class="n">alpha</span><span class="p">[</span><span class="n">p_after_i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">alpha_add</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">alpha</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
-            <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span> <span class="n">alpha</span><span class="p">[</span><span class="n">p_after_i</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+            <span class="c1"># update i-th column of L</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># devide by d_i</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">d_i</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="n">d_i</span> <span class="o">!=</span> <span class="mi">0</span>
+                <span class="n">L_column_i</span> <span class="o">/=</span> <span class="n">d_i</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">)))</span>
+
+                <span class="c1"># update i-th column of L</span>
+                <span class="k">if</span> <span class="n">is_dense</span><span class="p">:</span>
+                    <span class="n">L</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">L_column_i</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">L</span><span class="o">.</span><span class="n">format</span> <span class="o">==</span> <span class="s1">&#39;lil&#39;</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">L_column_i_k</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">L_column_i_non_zero_mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L_column_i</span><span class="p">):</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">k</span>
+                        <span class="n">L_rows</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                        <span class="n">L_data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">L_column_i_k</span><span class="p">)</span>
+
+                <span class="c1"># update alpha</span>
+                <span class="n">alpha_add</span> <span class="o">=</span> <span class="n">L_column_i</span> <span class="o">*</span> <span class="n">L_column_i</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">*</span> <span class="n">d_i</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isreal</span><span class="p">(</span><span class="n">alpha_add</span><span class="p">))</span>
+                <span class="n">alpha_add</span> <span class="o">=</span> <span class="n">alpha_add</span><span class="o">.</span><span class="n">real</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">alpha_add</span><span class="p">),</span> <span class="n">alpha_add</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+                <span class="n">alpha_add</span><span class="p">[</span><span class="n">L_column_i</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+                <span class="n">alpha</span><span class="p">[</span><span class="n">p_after_i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">alpha_add</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span> <span class="n">alpha</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">L_column_i</span><span class="p">),</span> <span class="n">alpha</span><span class="p">[</span><span class="n">p_after_i</span><span class="p">]</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">))</span>
 
     <span class="c1"># prepare diagonal and upper triangle of L if needed</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">strict_lower_triangular_only_L</span><span class="p">:</span>
@@ -864,6 +907,14 @@
     <span class="k">assert</span> <span class="n">min_abs_value_D</span> <span class="o">&gt;</span> <span class="mi">0</span>
     <span class="k">assert</span> <span class="nb">max</span><span class="p">(</span><span class="n">min_diag_D</span><span class="p">,</span> <span class="n">min_abs_value_D</span><span class="p">,</span> <span class="n">min_diag_B</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">max_diag_D</span><span class="p">,</span> <span class="n">max_diag_B</span><span class="p">)</span>
 
+    <span class="c1"># ensure that alpha**2 is finite if alpha is finite (for np.roots)</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">&#39;overflow encountered in double_scalars&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alpha</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">except</span> <span class="ne">RuntimeWarning</span><span class="p">:</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
     <span class="c1"># define difference function</span>
     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">omega</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -962,7 +1013,25 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">matrix-decomposition</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../functions.html">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../decompositions.html">Matrix decompositions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../errors.html">Errors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+</ul>
+
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
@@ -991,7 +1060,7 @@
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
       
     </div>
