@@ -345,9 +345,9 @@ def _decomposition(
 
         # update d
         assert np.isfinite(d_i)
-        assert d_i >= min_diag_D
-        assert d_i <= max_diag_D
-        assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
+        assert min_diag_D is None or d_i >= min_diag_D
+        assert max_diag_D is None or d_i <= max_diag_D
+        assert min_abs_value_D is None or (d_i == 0 or np.abs(d_i) >= min_abs_value_D)
         d[i] = d_i
 
         # update omega
@@ -405,6 +405,7 @@ def _decomposition(
             else:
                 A_column_i = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
         else:
+            assert not overwrite_A
             if A.format in ('csr', 'lil'):
                 A_column_i = A[p_i, :].conj().T
             else:
@@ -516,6 +517,9 @@ def _decomposition(
             L[i, i + 1:] = 0
 
     # return values
+    assert min_diag_D is None or d.min() >= min_diag_D
+    assert max_diag_D is None or d.max() <= max_diag_D
+    assert min_abs_value_D is None or (np.all(np.logical_or(d == 0, np.abs(d) >= min_abs_value_D)))
     matrix.logger.debug('Approximation of LDL decomposition finished.')
     return L, d, p, omega, delta
 
@@ -779,6 +783,10 @@ def _matrix(
     # return B
     if not is_dense:
         B = B.asformat(A.format)
+
+    # return B
+    assert min_diag_B is None or np.all(B.diagonal() >= min_diag_B)
+    assert max_diag_B is None or np.all(B.diagonal() <= max_diag_B)
     matrix.logger.debug('Approximation matrix B calculated.')
     return B
 
