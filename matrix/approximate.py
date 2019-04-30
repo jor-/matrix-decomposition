@@ -217,7 +217,7 @@ def _decomposition(
 
     # check permutation method
     if permutation is None:
-        permutation = matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
+        permutation = matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD
 
     # name of permutation method passed
     if isinstance(permutation, str):
