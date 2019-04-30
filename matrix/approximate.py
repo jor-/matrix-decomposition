@@ -876,7 +876,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert alpha >= 0
     assert beta >= 0
     assert beta != 0 or alpha == 0
-    assert min_diag_D > 0
+    assert min_diag_D >= 0
     assert min_abs_value_D > 0
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
 
@@ -909,6 +909,9 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
 
     # solution at bounds
     else:
+        # prepare candidate set
+        C = []
+
         # alpha == 0 or alpha == inf or beta == inf
         if alpha == 0 or alpha == np.inf or beta == np.inf:
             d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
@@ -922,13 +925,10 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                 omega = 0
             else:
                 omega = 1
-            f_value = f(d, omega)
+            C.append((d, omega))
 
         # 0 < alpha < inf and 0 < beta < inf
         else:
-            # prepare candidate set
-            C = []
-
             # omega on bound
             assert alpha > 0
             assert beta > 0
@@ -961,11 +961,14 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     omega = min(max(omega, omega_lower), omega_upper)
                     C.append((d, omega))
 
-            # calculate function values for candidates
-            C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+        if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma <= min_abs_value_D:
+            C.append((0, 0))
 
-            # return best values
-            (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
+        # calculate function values for candidates
+        C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+
+        # return best values
+        (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
     # return value
     assert min_diag_D <= d <= max_diag_D
