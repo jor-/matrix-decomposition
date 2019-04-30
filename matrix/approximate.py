@@ -186,7 +186,7 @@ def _decomposition(
                                               minus_inf_okay=False, plus_inf_okay=True)
 
     min_diag_D = check_float_scalar(min_diag_D, f_name='min_diag_D',
-                                    default_value=d_eps**0.5, lower_bound=d_eps,
+                                    default_value=d_eps**0.5, lower_bound=0,
                                     minus_inf_okay=False, plus_inf_okay=False)
     max_diag_D = check_float_scalar(max_diag_D, f_name='max_diag_D',
                                     default_value=np.inf, lower_bound=None,
@@ -220,8 +220,7 @@ def _decomposition(
         permutation = matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
 
     # name of permutation method passed
-    use_permutation_method = isinstance(permutation, str)
-    if use_permutation_method:
+    if isinstance(permutation, str):
         # check permutation method
         permutation_method = permutation.lower()
         supported_permutation_methods = (matrix.UNIVERSAL_PERMUTATION_METHODS
@@ -240,11 +239,10 @@ def _decomposition(
         matrix.logger.debug('Calculating permutation vector with method "{}".'
                             .format(permutation_method))
 
-        use_minimal_difference_permutation_method = (
-            permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD)
-
-        if use_minimal_difference_permutation_method:
-            if min_diag_D <= 0:
+        if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
+                                  matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
+            if (permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
+                    and min_diag_D <= 0):
                 raise ValueError(('The permutation method {} is only available if min_diag_D is '
                                   'greater zero.'
                                   ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
@@ -257,6 +255,7 @@ def _decomposition(
         else:
             p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
     else:
+        permutation_method = None
         p = np.asanyarray(permutation)
         if p.ndim != 1 or p.shape[0] != n:
             error = ValueError(('Permutation vactor must have same length as the dimensions of A. '
@@ -264,7 +263,6 @@ def _decomposition(
                                 ).format(p.shape, A.shape))
             matrix.logger.error(error)
             raise error
-        use_minimal_difference_permutation_method = False
 
     # init L
     if overwrite_A:
@@ -312,15 +310,30 @@ def _decomposition(
     for i in range(n):
         matrix.logger.debug('Starting iteration {} of {}.'.format(i, n - 1))
 
-        # update p, d, omega
-        if use_minimal_difference_permutation_method:
-            all_minimal_changes = ((j, *_minimal_change(
-                alpha[p[j]], beta[p[j]], gamma[p[j]], min_diag_D, max_diag_D=max_diag_D,
-                min_diag_B=get_value_i(min_diag_B, p[j]), max_diag_B=get_value_i(max_diag_B, p[j]),
-                min_abs_value_D=min_abs_value_D))
-                for j in range(i, n))
-            (j, d_i, omega_i, f_value_i) = min(all_minimal_changes,
-                                               key=lambda x: (x[3], -x[1], x[2], x[0]))
+        # determine next value for p, d, omega
+        if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
+                                  matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
+            possible_indices = range(i, n)
+        else:
+            possible_indices = (i,)
+
+        all_minimal_changes = ((j, *_minimal_change(
+            alpha[p[j]], beta[p[j]], gamma[p[j]], min_diag_D, max_diag_D=max_diag_D,
+            min_diag_B=get_value_i(min_diag_B, p[j]), max_diag_B=get_value_i(max_diag_B, p[j]),
+            min_abs_value_D=min_abs_value_D))
+            for j in possible_indices)
+
+        if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
+                                  matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
+            if permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD:
+                def order(value):
+                    k, d_k, omega_k, f_value_k = value
+                    return f_value_k, -d_k, omega_k, k
+            else:
+                def order(value):
+                    k, d_k, omega_k, f_value_k = value
+                    return -d_k, f_value_k, omega_k, k
+            (j, d_i, omega_i, f_value_i) = min(all_minimal_changes, key=order)
             # swap p[i] and p[j]
             p_i = p[j]
             p[j] = p[i]
@@ -337,11 +350,9 @@ def _decomposition(
                         iterable[i] = iterable[j]
                         iterable[j] = tmp
         else:
+            (j, d_i, omega_i, f_value_i) = tuple(all_minimal_changes)[0]
+            assert i == j
             p_i = p[i]
-            d_i, omega_i, f_value_i = _minimal_change(
-                alpha[p_i], beta[p_i], gamma[p_i], min_diag_D, max_diag_D=max_diag_D,
-                min_diag_B=get_value_i(min_diag_B, p_i), max_diag_B=get_value_i(max_diag_B, p_i),
-                min_abs_value_D=min_abs_value_D)
 
         # update d
         assert np.isfinite(d_i)
@@ -520,6 +531,7 @@ def _decomposition(
     assert min_diag_D is None or d.min() >= min_diag_D
     assert max_diag_D is None or d.max() <= max_diag_D
     assert min_abs_value_D is None or (np.all(np.logical_or(d == 0, np.abs(d) >= min_abs_value_D)))
+    assert np.all(omega >= 0)
     matrix.logger.debug('Approximation of LDL decomposition finished.')
     return L, d, p, omega, delta
 
@@ -974,6 +986,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert min_diag_D <= d <= max_diag_D
     assert d >= min_abs_value_D or (d == 0 and min_diag_D <= 0 and max_diag_D >= 0)
     assert omega >= 0
+    assert d != 0 or omega == 0
     assert f_value >= 0
     assert np.isfinite(alpha) or alpha == np.inf
     assert alpha != np.inf or omega == 0
