@@ -244,9 +244,9 @@ def _decomposition(
             permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD)
 
         if use_minimal_difference_permutation_method:
-            if min_diag_D < 0:
-                raise ValueError(('The permutation method {} is only available if min_diag_D '
-                                  'greater or equal zero.'
+            if min_diag_D <= 0:
+                raise ValueError(('The permutation method {} is only available if min_diag_D is '
+                                  'greater zero.'
                                   ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
             if is_dense:
                 p = np.arange(n, dtype=np.min_scalar_type(n))
