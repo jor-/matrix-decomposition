@@ -869,6 +869,64 @@ def positive_definite_matrix(
         permutation=permutation, overwrite_A=overwrite_A)
 
 
+def positive_semidefinite_matrix(
+        A, min_diag_B=None, max_diag_B=None, max_diag_D=None,
+        permutation=None, overwrite_A=False):
+    """
+    Computes a positive semidefinite approximation of `A`.
+
+    Returns `A` if `A` is positive semidefinite and otherwise an approximation of `A`.
+
+    Parameters
+    ----------
+    A : numpy.ndarray or scipy.sparse.spmatrix
+        The matrix that should be approximated.
+        `A` must be Hermitian.
+    min_diag_B : numpy.ndarray or float
+        Each component of the diagonal of the returned matrix
+        is forced to be greater or equal to `min_diag_B`.
+        optional, default : No minimal value is forced.
+    max_diag_B : numpy.ndarray or float
+        Each component of the diagonal of the returned matrix
+        is forced to be lower or equal to `max_diag_B`.
+        optional, default : No maximal value is forced.
+    max_diag_D : float
+        Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
+        of the returned matrix is forced to be lower or equal to `max_diag_D`.
+        optional, default : No maximal value is forced.
+    permutation : str or numpy.ndarray
+        The symmetric permutation method that is applied to the matrix before it is decomposed.
+        It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
+        :const:`matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS`.
+        If `A` is sparse, it can also be a value in
+        :const:`matrix.SPARSE_ONLY_PERMUTATION_METHODS`.
+        It is also possible to directly pass a permutation vector.
+        optional, default: The permutation is chosen by the algorithm.
+    overwrite_A : bool
+        Whether it is allowed to overwrite `A`. Enabling may result in performance gain.
+        optional, default: False
+
+    Returns
+    -------
+    B : numpy.ndarray or scipy.sparse.spmatrix (same type as `A`)
+        An approximation of `A` which is positive semidefinite.
+
+    Raises
+    ------
+    matrix.errors.MatrixNotSquareError
+        If `A` is not a square matrix.
+    matrix.errors.MatrixComplexDiagonalValueError
+        If `A` has complex diagonal values.
+    """
+
+    min_diag_D = 0
+
+    return _matrix(
+        A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+        permutation=permutation, overwrite_A=overwrite_A)
+
+
 def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
 
