@@ -18,3 +18,4 @@ coverage:
     ignore:
         - "versioneer.py"
         - "versioneer_extended.py"
+        - "matrix/_version.py"
