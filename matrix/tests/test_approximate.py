@@ -14,10 +14,15 @@ import matrix.util
 # *** approximate *** #
 
 
-def supported_permutation_methods(dense):
-    methods = matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS + matrix.UNIVERSAL_PERMUTATION_METHODS
+def supported_permutation_methods(dense, min_diag_D):
+    methods = matrix.UNIVERSAL_PERMUTATION_METHODS
     if not dense:
         methods += matrix.SPARSE_ONLY_PERMUTATION_METHODS
+    if min_diag_D is None or min_diag_D > 0:
+        methods += matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS
+    else:
+        methods += tuple(method for method in matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS
+                         if method != matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD)
     return methods
 
 
@@ -27,12 +32,12 @@ test_overwrite_setups = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, 1)
     for max_diag_D in (None, 1)
     for min_abs_value_D in (None, 0.01, np.random.rand(1))
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -56,17 +61,23 @@ def test_overwrite(n, dense, complex_values, permutation, min_diag_B, max_diag_B
             min_diag_B=min_diag_B, max_diag_B=max_diag_B,
             min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
             overwrite_A=overwrite_A)
-
     assert matrix.util.is_equal(A, A_copy)
 
-    # check if A is not overwritten with in approximate matrix
+    # check if A is not overwritten with in approximate positive definite matrix
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
-        B = matrix.approximate.positive_definite_matrix(
-            A, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-            overwrite_A=overwrite_A)
+        if min_diag_D is None or min_diag_D > 0:
+            B = matrix.approximate.positive_definite_matrix(
+                A, permutation=permutation,
+                min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+                min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+                overwrite_A=overwrite_A)
+        else:
+            B = matrix.approximate.positive_semidefinite_matrix(
+                A, permutation=permutation,
+                min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+                max_diag_D=max_diag_D,
+                overwrite_A=overwrite_A)
 
     assert matrix.util.is_equal(A, A_copy)
 
@@ -75,12 +86,12 @@ test_dense_equals_sparse_setups = [
     (n, complex_values, permutation, min_diag_B, max_diag_B, min_diag_D, max_diag_D, min_abs_value_D)
     for n in (10,)
     for complex_values in (True, False)
-    for permutation in matrix.UNIVERSAL_PERMUTATION_METHODS + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
     for min_abs_value_D in (None, 0.01, np.random.rand(1))
+    for permutation in matrix.UNIVERSAL_PERMUTATION_METHODS + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -114,25 +125,23 @@ def test_dense_equals_sparse(n, complex_values, permutation, min_diag_B, max_dia
 
 
 test_decomposition_equals_matrix_setups = [
-    (n, dense, complex_values, permutation, min_diag_B, max_diag_B, min_diag_D, max_diag_D,
-     min_abs_value_D,)
+    (n, dense, complex_values, permutation, min_diag_B, max_diag_B, min_diag_D, max_diag_D)
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
-    for min_abs_value_D in (None, 0.01, np.random.rand(1))
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
 @pytest.mark.parametrize(('n, dense, complex_values, permutation, min_diag_B, max_diag_B,'
-                          'min_diag_D, max_diag_D, min_abs_value_D'),
+                          'min_diag_D, max_diag_D'),
                          test_decomposition_equals_matrix_setups)
 def test_decomposition_equals_matrix(n, dense, complex_values, permutation, min_diag_B, max_diag_B,
-                                     min_diag_D, max_diag_D, min_abs_value_D):
+                                     min_diag_D, max_diag_D):
     # create random hermitian matrix
     A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values) * 10
     if not dense:
@@ -143,19 +152,22 @@ def test_decomposition_equals_matrix(n, dense, complex_values, permutation, min_
     decomposition = matrix.approximate.decomposition(
         A, permutation=permutation,
         min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        overwrite_A=overwrite_A)
-
-    # create approximated positive definite matrix
-    try:
-        min_diag_D = max(v for v in (min_diag_D, min_abs_value_D) if v is not None)
-    except ValueError:
-        pass
-    B = matrix.approximate.positive_definite_matrix(
-        A, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D,
         overwrite_A=overwrite_A)
+
+    # create approximated matrix
+    if min_diag_D is None or min_diag_D > 0:
+        B = matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+    else:
+        B = matrix.approximate.positive_semidefinite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
 
     # check if approximations are the same
     assert matrix.util.is_almost_equal(decomposition.composed_matrix, B)
@@ -167,12 +179,12 @@ test_value_checks_setups = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
     for min_abs_value_D in (None, 0.01, np.random.rand(1))
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -213,11 +225,18 @@ def test_value_checks(n, dense, complex_values, permutation, min_diag_B, max_dia
         min_diag_D = max(v for v in (min_diag_D, min_abs_value_D) if v is not None)
     except ValueError:
         pass
-    B = matrix.approximate.positive_definite_matrix(
-        A, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-        overwrite_A=overwrite_A)
+    if min_diag_D is None or min_diag_D > 0:
+        B = matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+    else:
+        B = matrix.approximate.positive_semidefinite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
 
     # check values in approximation matrix
     if dense:
@@ -239,7 +258,7 @@ test_invariance_setups = [
     for complex_values in (True, False)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
 ]
 
@@ -253,21 +272,32 @@ def test_invariance(n, dense, complex_values, min_diag_B, max_diag_B, min_diag_D
     if not dense:
         A = A.tocsc(copy=False)
 
-    # approximate matrix
+    # approximate matrix twice
     permutation = 'none'
     overwrite_A = False
-    B = matrix.approximate.positive_definite_matrix(
-        A, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-        overwrite_A=overwrite_A)
 
-    # approximate again matrix
-    B_invariant = matrix.approximate.positive_definite_matrix(
-        B, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-        overwrite_A=overwrite_A)
+    if min_diag_D is None or min_diag_D > 0:
+        B = matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+        B_invariant = matrix.approximate.positive_definite_matrix(
+            B, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+    else:
+        B = matrix.approximate.positive_semidefinite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+        B_invariant = matrix.approximate.positive_semidefinite_matrix(
+            B, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
     assert matrix.util.is_almost_equal(B, B_invariant, rtol=1e-04, atol=1e-06)
 
 
@@ -277,7 +307,7 @@ test_infinity_values_setups = [
     for dense in (True, False)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
 ]
 
@@ -298,11 +328,18 @@ def test_infinity_values(n, dense, min_diag_B, max_diag_B, min_diag_D, max_diag_
     overwrite_A = False
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
-        matrix.approximate.positive_definite_matrix(
-            A, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-            overwrite_A=overwrite_A)
+        if min_diag_D is None or min_diag_D > 0:
+            matrix.approximate.positive_definite_matrix(
+                A, permutation=permutation,
+                min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+                min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+                overwrite_A=overwrite_A)
+        else:
+            matrix.approximate.positive_semidefinite_matrix(
+                A, permutation=permutation,
+                min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+                max_diag_D=max_diag_D,
+                overwrite_A=overwrite_A)
 
 
 def test_infinite_alpha_square():
@@ -317,11 +354,11 @@ test_hermitian_setup = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -335,11 +372,18 @@ def test_hermitian(n, dense, complex_values, permutation, min_diag_B, max_diag_B
 
     # approximate matrix
     overwrite_A = False
-    B = matrix.approximate.positive_definite_matrix(
-        A, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-        overwrite_A=overwrite_A)
+    if min_diag_D is None or min_diag_D > 0:
+        B = matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+    else:
+        B = matrix.approximate.positive_semidefinite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
 
     # test hermitian
     for i in range(n):
@@ -347,43 +391,54 @@ def test_hermitian(n, dense, complex_values, permutation, min_diag_B, max_diag_B
             assert B[i, j] == np.conjugate(B[j, i])
 
 
-test_positive_definitness_setup = [
+test_definitness_setup = [
     (n, dense, complex_values, permutation, min_diag_B, max_diag_B, min_diag_D, max_diag_D)
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1)
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
 @pytest.mark.parametrize(('n, dense, complex_values, permutation, min_diag_B, max_diag_B,'
                           'min_diag_D, max_diag_D'),
-                         test_positive_definitness_setup)
-def test_positive_definitness(n, dense, complex_values, permutation, min_diag_B, max_diag_B,
-                              min_diag_D, max_diag_D):
+                         test_definitness_setup)
+def test_definitness(n, dense, complex_values, permutation, min_diag_B, max_diag_B,
+                     min_diag_D, max_diag_D):
+
+    def get_min_eigenvalue(B):
+        if scipy.sparse.issparse(B):
+            min_eigenvalue = scipy.sparse.linalg.eigsh(B, k=1, which='SA', return_eigenvectors=False)
+        else:
+            eigenvalues = np.linalg.eigvalsh(B)
+            min_eigenvalue = eigenvalues.min()
+        return min_eigenvalue
+
     # create random hermitian matrix
     A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values) * 10
 
     # approximate matrix
     overwrite_A = False
-    B = matrix.approximate.positive_definite_matrix(
-        A, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-        overwrite_A=overwrite_A)
-
-    # test positive eigenvalues
-    if scipy.sparse.issparse(B):
-        min_eigenvalue = scipy.sparse.linalg.eigsh(B, k=1, which='SA', return_eigenvectors=False)
+    if min_diag_D is None or min_diag_D > 0:
+        B = matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+        min_eigenvalue = get_min_eigenvalue(B)
+        assert min_eigenvalue > 0 or np.abs(min_eigenvalue) <= np.finfo(B.dtype).resolution * 10**2
     else:
-        eigenvalues = np.linalg.eigvalsh(B)
-        min_eigenvalue = eigenvalues.min()
-
-    assert min_eigenvalue > 0 or np.abs(min_eigenvalue) <= np.finfo(B.dtype).resolution * 10**2
+        B = matrix.approximate.positive_semidefinite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+        min_eigenvalue = get_min_eigenvalue(B)
+        assert min_eigenvalue >= 0 or np.abs(min_eigenvalue) <= np.finfo(B.dtype).resolution * 10**2
 
 
 test_stability_matrix_setup = [
@@ -391,11 +446,11 @@ test_stability_matrix_setup = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n, np.random.rand(n))
     for max_diag_B in (1, np.arange(n) + 1, np.random.rand(n) + 1)
-    for min_diag_D in (None, 1, np.random.rand(1))
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1, np.random.rand(1) + 1)
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -411,11 +466,18 @@ def test_stability_matrix(n, dense, complex_values, permutation, min_diag_B, max
 
     # approximate matrix
     overwrite_A = False
-    B = matrix.approximate.positive_definite_matrix(
-        A, permutation=permutation,
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-        overwrite_A=overwrite_A)
+    if min_diag_D is None or min_diag_D > 0:
+        B = matrix.approximate.positive_definite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
+    else:
+        B = matrix.approximate.positive_semidefinite_matrix(
+            A, permutation=permutation,
+            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
+            max_diag_D=max_diag_D,
+            overwrite_A=overwrite_A)
 
     if scipy.sparse.issparse(B):
         B = B.tocsr(copy=False).data
@@ -431,11 +493,11 @@ test_stability_decomposition_setup = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n, np.random.rand(n))
     for max_diag_B in (1, np.arange(n) + 1, np.random.rand(n) + 1)
-    for min_diag_D in (None, 1, np.random.rand(1))
+    for min_diag_D in (None, 0, np.random.rand(1), 1)
     for max_diag_D in (None, 1, np.random.rand(1) + 1)
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
     for min_abs_value_D in (0.01, np.random.rand(1))
 ]
 
@@ -507,11 +569,11 @@ test_condition_number_matrix_setup = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n, np.random.rand(n))
     for max_diag_B in (1, np.arange(n) + 1, np.random.rand(n) + 1)
-    for min_diag_D in (1, np.random.rand(1))
+    for min_diag_D in (np.random.rand(1), 1)
     for max_diag_D in (1, np.random.rand(1) + 1)
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -555,12 +617,12 @@ test_condition_number_decomposition_setup = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n, np.random.rand(n))
     for max_diag_B in (1, np.arange(n) + 1, np.random.rand(n) + 1)
-    for min_diag_D in (1, np.random.rand(1))
+    for min_diag_D in (np.random.rand(1), 1)
     for max_diag_D in (1, np.random.rand(1) + 1)
     for min_abs_value_D in (0.01, np.random.rand(1))
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
@@ -601,11 +663,11 @@ test_delta_and_omega_setup = [
     for n in (10,)
     for dense in (True, False)
     for complex_values in (True, False)
-    for permutation in supported_permutation_methods(dense) + (matrix.tests.random.permutation_vector(n),)
     for min_diag_B in (None, 1, np.arange(n) / n)
     for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 1)
+    for min_diag_D in (np.random.rand(1), 1)
     for max_diag_D in (None, 1)
+    for permutation in supported_permutation_methods(dense, min_diag_D) + (matrix.tests.random.permutation_vector(n),)
 ]
 
 
