@@ -268,7 +268,7 @@ def _decomposition(
     if overwrite_A:
         L = A
     else:
-        L_dtype = np.promote_types(A.dtype, np.float16)
+        L_dtype = np.promote_types(A.dtype, np.float64)
         if is_dense:
             L = np.zeros((n, n), dtype=L_dtype)
         else:
