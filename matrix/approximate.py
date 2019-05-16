@@ -489,7 +489,7 @@ def _decomposition(
                 # devide by d_i
                 assert np.isfinite(d_i)
                 assert d_i != 0
-                L_column_i /= d_i
+                L_column_i = L_column_i / d_i
                 assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
 
                 # update i-th column of L
