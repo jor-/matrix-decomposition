@@ -87,17 +87,12 @@ def _decomposition(
     """
 
     # debug info
-    matrix.logger.debug(('Calculating approximated LDL decomposition with passed values: '
-                         'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                         'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                         'min_abs_value_D={min_abs_value_D}, '
-                         'permutation={permutation}, overwrite_A={overwrite_A}, '
-                         'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.'
-                         ).format(
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation=permutation, overwrite_A=overwrite_A,
-        strict_lower_triangular_only_L=strict_lower_triangular_only_L))
+    matrix.logger.debug(f'Calculating approximated LDL decomposition with passed values: '
+                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
+                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
+                        f'min_abs_value_D={min_abs_value_D}, '
+                        f'permutation={permutation}, overwrite_A={overwrite_A}, '
+                        f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
 
     # check A
     is_dense = not matrix.sparse.util.is_sparse(A)
@@ -126,17 +121,16 @@ def _decomposition(
             try:
                 f = np.asarray(f)
             except TypeError as original_error:
-                error = ValueError(('{} must a scalar value or a vector but it is {}.'
-                                    ).format(f_name, f))
+                error = ValueError(f'{f_name} must a scalar value or a vector but it is {f}.')
                 matrix.logger.error(error)
                 raise error from original_error
             if not (f.ndim == 0 or (f.ndim == 1 and f.shape[0] == n)):
-                error = ValueError(('{} must be a scalar or a vector with the same dimension as A '
-                                    'but its shape is {}.').format(f_name, f.shape))
+                error = ValueError(f'{f_name} must be a scalar or a vector with the same dimension '
+                                   f'as A but its shape is {f.shape}.')
                 matrix.logger.error(error)
                 raise error
             if not (np.all(np.isreal(f))):
-                error = ValueError(('{} must be real valued but it is {}.').format(f_name, f))
+                error = ValueError(f'{f_name} must be real valued but it is {f}.')
                 matrix.logger.error(error)
                 raise error
             if not np.all(np.logical_or(np.isfinite(f),
@@ -144,10 +138,10 @@ def _decomposition(
                                                                      f == np.inf),
                                                       np.logical_and(minus_inf_okay,
                                                                      f == -np.inf)))):
-                error = ValueError('{} must be finite'.format(f_name)
+                error = ValueError(f'{f_name} must be finite'
                                    + (' or minus infinity' if minus_inf_okay else '')
                                    + (' or plus infinity' if plus_inf_okay else '')
-                                   + ' but it is {}.'.format(f))
+                                   + f' but it is {f}.')
                 matrix.logger.error(error)
                 raise error
         else:
@@ -160,20 +154,20 @@ def _decomposition(
             try:
                 f = float(f)
             except TypeError as original_error:
-                error = ValueError('{} must a float value but it is {}.'.format(f_name, f))
+                error = ValueError(f'{f_name} must a float value but it is {f}.')
                 matrix.logger.error(error)
                 raise error from original_error
             if not (np.isfinite(f) or (minus_inf_okay and f == -np.inf)
                     or (plus_inf_okay and f == np.inf)):
-                error = ValueError('{} must be finite'.format(f_name)
+                error = ValueError(f'{f_name} must be finite'
                                    + (' or minus infinity' if minus_inf_okay else '')
                                    + (' or plus infinity' if plus_inf_okay else '')
-                                   + ' but it is {}.'.format(f))
+                                   + f' but it is {f}.')
                 matrix.logger.error(error)
                 raise error
             if lower_bound is not None and f < lower_bound:
-                error = ValueError(('{} must be finite and greater or equal to {} '
-                                    'but it is {}.').format(f_name, lower_bound, f))
+                error = ValueError(f'{f_name} must be finite and greater or equal to {lower_bound} '
+                                   f'but it is {f}.')
                 matrix.logger.error(error)
                 raise error
         else:
@@ -208,8 +202,8 @@ def _decomposition(
         overwrite_A = False
     if overwrite_A and np.issubdtype(A.dtype, np.integer):
         overwrite_A = False
-        matrix.logger.debug(('A has an integer dtype ({}) which can not be used to store the '
-                             'values of L. Thus L is not overwritten.').format(A.dtype))
+        matrix.logger.debug(f'A has an integer dtype ({A.dtype}) which can not be used to store '
+                            f'the values of L. Thus L is not overwritten.')
 
     # check strict_lower_triangular_only_L
     if strict_lower_triangular_only_L is None:
@@ -229,23 +223,21 @@ def _decomposition(
             supported_permutation_methods = (supported_permutation_methods
                                              + matrix.SPARSE_ONLY_PERMUTATION_METHODS)
         if permutation_method not in supported_permutation_methods:
-            error = ValueError(('Permutation method {} is unknown. Only the following methods are '
-                                'supported {}.'
-                                ).format(permutation_method, supported_permutation_methods))
+            error = ValueError(f'Permutation method {permutation_method} is unknown. Only the '
+                               f'following methods are supported {supported_permutation_methods}.')
             matrix.logger.error(error)
             raise error
 
         # calculate permutation vector
-        matrix.logger.debug('Calculating permutation vector with method "{}".'
-                            .format(permutation_method))
+        matrix.logger.debug(f'Calculating permutation vector with method "{permutation_method}".')
 
         if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
                                   matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
             if (permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
                     and min_diag_D <= 0):
-                raise ValueError(('The permutation method {} is only available if min_diag_D is '
-                                  'greater zero.'
-                                  ).format(matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD))
+                raise ValueError(f'The permutation method '
+                                 f'{matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD} is '
+                                 f'only available if min_diag_D is greater zero.')
             if is_dense:
                 p = np.arange(n, dtype=np.min_scalar_type(n))
             else:
@@ -258,9 +250,8 @@ def _decomposition(
         permutation_method = None
         p = np.asanyarray(permutation)
         if p.ndim != 1 or p.shape[0] != n:
-            error = ValueError(('Permutation vactor must have same length as the dimensions of A. '
-                                'Its shape is {} and the shape of A is {}.'
-                                ).format(p.shape, A.shape))
+            error = ValueError(f'Permutation vactor must have same length as the dimensions of A. '
+                               f'Its shape is {p.shape} and the shape of A is {A.shape}.')
             matrix.logger.error(error)
             raise error
 
@@ -285,17 +276,12 @@ def _decomposition(
     d = np.empty(n, dtype=DTYPE)
 
     # debug info
-    matrix.logger.debug(('Using the following values: '
-                         'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                         'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                         'min_abs_value_D={min_abs_value_D} '
-                         'permutation={permutation}, overwrite_A={overwrite_A}, '
-                         'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.'
-                         ).format(
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation=permutation, overwrite_A=overwrite_A,
-        strict_lower_triangular_only_L=strict_lower_triangular_only_L))
+    matrix.logger.debug(f'Using the following values: '
+                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
+                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
+                        f'min_abs_value_D={min_abs_value_D} '
+                        f'permutation={permutation}, overwrite_A={overwrite_A}, '
+                        f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
 
     # calculate values iteratively
     def get_value_i(v, i):
@@ -308,7 +294,7 @@ def _decomposition(
             return v
 
     for i in range(n):
-        matrix.logger.debug('Starting iteration {} of {}.'.format(i, n - 1))
+        matrix.logger.debug(f'Starting iteration {i} of {n - 1}.')
 
         # determine next value for p, d, omega
         if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
@@ -374,10 +360,9 @@ def _decomposition(
         delta[p_i] = delta_i
 
         # debug info
-        matrix.logger.debug(('Using permutation index {}, omega {}, delta {} and change value {} '
-                             'for iteration {} of {}. ({:.1%} done.)'
-                             ).format(p_i, omega[p_i], delta[p_i], f_value_i,
-                                      i, n - 1, (i + 1) / n))
+        matrix.logger.debug(f'Using permutation index {p_i}, d {d_i}, omega {omega[p_i]}, delta '
+                            f'{delta[p_i]} and additional approximation error {f_value_i} for '
+                            f'iteration {i} of {n - 1}. ({(i + 1) / n:.1%} done.)')
 
         # update i-th row of L with omega
         if i > 0:
@@ -602,21 +587,18 @@ def decomposition(
     """
 
     # debug info
-    matrix.logger.debug(('Calculating approximated decomposition with passed values: '
-                         'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                         'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                         'min_abs_value_D={min_abs_value_D}, '
-                         'permutation={permutation}, overwrite_A={overwrite_A}, '
-                         'return_type={return_type}.').format(
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation=permutation, overwrite_A=overwrite_A, return_type=return_type))
+    matrix.logger.debug(f'Calculating approximated decomposition with passed values: '
+                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
+                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
+                        f'min_abs_value_D={min_abs_value_D}, '
+                        f'permutation={permutation}, overwrite_A={overwrite_A}, '
+                        f'return_type={return_type}.')
 
     # check return type
     supported_return_types = matrix.constants.DECOMPOSITION_TYPES
     if return_type is not None and return_type not in supported_return_types:
-        error = ValueError(('Unkown return type {}. Only values in {} are supported.'
-                            ).format(return_type, supported_return_types))
+        error = ValueError(f'Unkown return type {return_type}. Only values in '
+                           f'{supported_return_types} are supported.')
         matrix.logger.error(error)
         raise error
 
@@ -635,7 +617,7 @@ def decomposition(
     decomposition.delta = delta
 
     # return decomposition
-    matrix.logger.debug('Approximation of decomposition {} finished.'.format(decomposition))
+    matrix.logger.debug(f'Approximation of decomposition {decomposition} finished.')
     return decomposition
 
 
@@ -700,15 +682,11 @@ def _matrix(
     """
 
     # debug info
-    matrix.logger.debug(('Calcualting approximation of a matrix with passed values: '
-                         'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                         'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                         'min_abs_value_D={min_abs_value_D}, '
-                         'permutation={permutation}, overwrite_A={overwrite_A}.'
-                         ).format(
-        min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
-        permutation=permutation, overwrite_A=overwrite_A))
+    matrix.logger.debug(f'Calculating approximation of a matrix with passed values: '
+                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
+                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
+                        f'min_abs_value_D={min_abs_value_D}, '
+                        f'permutation={permutation}, overwrite_A={overwrite_A}.')
 
     # calculate decomposition
     L, d, p, omega, delta = _decomposition(
@@ -931,11 +909,10 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
 
     # debug info
-    matrix.logger.debug(('Calculating best d and omega for alpha {}, beta {}, gamma {}, '
-                         'min_diag_D {}, max_diag_D {}, min_abs_value_D {} and '
-                         'min_diag_B {}, max_diag_B {}.'
-                         ).format(alpha, beta, gamma, min_diag_D, max_diag_D, min_abs_value_D,
-                                  min_diag_B, max_diag_B))
+    matrix.logger.debug(f'Calculating best d and omega for alpha {alpha}, beta {beta}, '
+                        f'gamma {gamma}, min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, min_diag_B {min_diag_B}, '
+                        f'max_diag_B {max_diag_B}.')
 
     # check input
     assert np.isfinite(alpha) or alpha == np.inf
@@ -1041,6 +1018,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
         (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
     # return value
+    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} and f = {f_value}.')
     assert min_diag_D <= d <= max_diag_D
     assert d >= min_abs_value_D or (d == 0 and min_diag_D <= 0 and max_diag_D >= 0)
     assert omega >= 0
