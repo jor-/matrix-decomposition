@@ -63,7 +63,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
 
     # dependencies
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     setup_requires=[
         'setuptools>=0.8',
         'pip>=1.4',
