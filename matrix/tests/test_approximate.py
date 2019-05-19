@@ -251,56 +251,6 @@ def test_value_checks(n, dense, complex_values, permutation, min_diag_B, max_dia
     assert max_diag_B is None or np.all(B_diagonal <= max_diag_B)
 
 
-test_invariance_setups = [
-    (n, dense, complex_values, min_diag_B, max_diag_B, min_diag_D, max_diag_D)
-    for n in (10,)
-    for dense in (True, False)
-    for complex_values in (True, False)
-    for min_diag_B in (None, 1, np.arange(n) / n)
-    for max_diag_B in (None, 1, np.arange(n) + 1)
-    for min_diag_D in (None, 0, np.random.rand(1), 1)
-    for max_diag_D in (None, 1)
-]
-
-
-@pytest.mark.parametrize(('n, dense, complex_values, min_diag_B, max_diag_B,'
-                          'min_diag_D, max_diag_D'),
-                         test_invariance_setups)
-def test_invariance(n, dense, complex_values, min_diag_B, max_diag_B, min_diag_D, max_diag_D):
-    # create random hermitian matrix
-    A = matrix.tests.random.hermitian_matrix(n, dense=dense, complex_values=complex_values) * 10
-    if not dense:
-        A = A.tocsc(copy=False)
-
-    # approximate matrix twice
-    permutation = 'none'
-    overwrite_A = False
-
-    if min_diag_D is None or min_diag_D > 0:
-        B = matrix.approximate.positive_definite_matrix(
-            A, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-            overwrite_A=overwrite_A)
-        B_invariant = matrix.approximate.positive_definite_matrix(
-            B, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            min_diag_D=min_diag_D, max_diag_D=max_diag_D,
-            overwrite_A=overwrite_A)
-    else:
-        B = matrix.approximate.positive_semidefinite_matrix(
-            A, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            max_diag_D=max_diag_D,
-            overwrite_A=overwrite_A)
-        B_invariant = matrix.approximate.positive_semidefinite_matrix(
-            B, permutation=permutation,
-            min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-            max_diag_D=max_diag_D,
-            overwrite_A=overwrite_A)
-    assert matrix.util.is_almost_equal(B, B_invariant, rtol=1e-04, atol=1e-06)
-
-
 test_infinity_values_setups = [
     (n, dense, min_diag_B, max_diag_B, min_diag_D, max_diag_D)
     for n in (4,)
