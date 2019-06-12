@@ -1,3 +1,7 @@
+"""
+This module provides the decompositions which this library can process.
+"""
+
 import abc
 import copy
 import os
