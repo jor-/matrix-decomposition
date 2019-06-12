@@ -237,7 +237,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Copying {}.'.format(self))
+        matrix.logger.debug('Copying {}.'.format(self))
         # make copy
         return copy.deepcopy(self)
 
@@ -283,7 +283,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Converting {} to type {type_str} with copy={copy}.'.format(self, type_str=type_str, copy=copy))
+        matrix.logger.debug('Converting {} to type {type_str} with copy={copy}.'.format(self, type_str=type_str, copy=copy))
 
         # convert
         if self.is_type(type_str):
@@ -314,7 +314,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Converting {} to any type of {type_strs} with copy={copy}.'.format(self, type_strs=type_strs, copy=copy))
+        matrix.logger.debug('Converting {} to any type of {type_strs} with copy={copy}.'.format(self, type_strs=type_strs, copy=copy))
 
         # convert
         if len(type_strs) == 0 or any(map(self.is_type, type_strs)):
@@ -483,7 +483,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Saving {} to {}.'.format(self, filename))
+        matrix.logger.debug('Saving {} to {}.'.format(self, filename))
 
         # check filename
         filename = DecompositionBase._check_decomposition_filename(filename)
@@ -574,7 +574,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Loading decomposition of type {} from {}.'.format(self.type_str, filename))
+        matrix.logger.debug('Loading decomposition of type {} from {}.'.format(self.type_str, filename))
 
         # check filename
         filename = DecompositionBase._check_decomposition_filename(filename)
@@ -720,7 +720,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
 
         # debug info
-        matrix.logging.debug('Solving linear system with {}.'.format(self))
+        matrix.logger.debug('Solving linear system with {}.'.format(self))
         # solve
         return self.inverse_matrix_right_side_multiplication(b)
 
@@ -1304,7 +1304,7 @@ def save(filename, decomposition):
     """
 
     # debug info
-    matrix.logging.debug('Saving decomposition to {}.'.format(filename))
+    matrix.logger.debug('Saving decomposition to {}.'.format(filename))
     # save
     decomposition.save(filename)
 
@@ -1319,7 +1319,7 @@ def load(filename):
     """
 
     # debug info
-    matrix.logging.debug('Loading decomposition from {}.'.format(filename))
+    matrix.logger.debug('Loading decomposition from {}.'.format(filename))
     # load
     type_str = DecompositionBase._load_type(filename)
     decomposition_classes = (LDL_Decomposition, LDL_DecompositionCompressed, LL_Decomposition, DecompositionBase)
