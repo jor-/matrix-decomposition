@@ -1,3 +1,6 @@
+"""
+This module provides exceptions that could be raised in this library.
+"""
 
 
 # *** base exceptions *** #
