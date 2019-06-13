@@ -575,6 +575,8 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         ----------
         FileNotFoundError
             If the files are not found in the passed directory.
+        DecompositionInvalidDecompositionTypeFile
+            If the files contains another decomposition type.
         """
 
         # debug info
@@ -1320,6 +1322,13 @@ def load(filename):
     ----------
     filename : str
         Where the decomposition is saved.
+
+    Raises
+    ----------
+    FileNotFoundError
+        If the files are not found in the passed directory.
+    DecompositionInvalidFile
+        If the files does not contain a stored decomposition.
     """
 
     # debug info
