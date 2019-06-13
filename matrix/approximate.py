@@ -11,6 +11,131 @@ import matrix.permute
 import matrix.sparse.util
 
 
+def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
+                    min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
+
+    # debug info
+    matrix.logger.debug(f'Calculating best d and omega for alpha {alpha}, beta {beta}, '
+                        f'gamma {gamma}, min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, min_diag_B {min_diag_B}, '
+                        f'max_diag_B {max_diag_B}.')
+
+    # check input
+    assert np.isfinite(alpha) or alpha == np.inf
+    assert np.isfinite(beta) or beta == np.inf
+    assert np.isfinite(gamma)
+    assert np.isfinite(min_diag_D)
+    assert np.isfinite(min_abs_value_D)
+    assert alpha >= 0
+    assert beta >= 0
+    assert beta != 0 or alpha == 0
+    assert min_diag_D >= 0
+    assert min_abs_value_D > 0
+    assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
+
+    # ensure that alpha**2 is finite if alpha is finite (for np.roots)
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars', category=RuntimeWarning)
+        try:
+            alpha**2
+        except RuntimeWarning:
+            alpha = np.inf
+
+    # define difference function
+    def f(d, omega):
+        if omega == 0:  # for case alpha == inf
+            f_value = (d - gamma)**2 + beta
+        elif omega == 1:  # for case beta == inf
+            f_value = (d + alpha - gamma)**2
+        else:
+            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
+        assert f_value >= 0
+        return f_value
+
+    # global solution
+    d = gamma - alpha
+    if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha):
+        assert alpha != np.inf
+        omega = 1
+        f_value = 0
+        assert np.isclose(f(d, omega), f_value)
+
+    # solution at bounds
+    else:
+        # prepare candidate set
+        C = []
+
+        # alpha == inf or beta == inf
+        if np.isfinite(alpha) and np.isfinite(beta):
+            a = max(min_diag_D, min_abs_value_D, min_diag_B - alpha)
+            b = min(max_diag_D, max_diag_B - alpha)
+            if a <= b:
+                d = min(max(a, gamma - alpha), b)
+                C.append((d, 1))
+
+            if alpha != 0:
+                # add feasible d values
+                d_values = []
+                if min_diag_B - alpha <= max(min_diag_D, min_abs_value_D):
+                    d_values.append(max(min_diag_D, min_abs_value_D))
+                if np.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
+                    d_values.append(max_diag_D)
+                for d in d_values:
+                    # calculate bounds
+                    omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
+                    assert 0 <= omega_lower <= 1
+                    omega_upper = min(((max_diag_B - d) / alpha)**0.5, 1)
+                    assert omega_lower <= omega_upper
+                    # get roots
+                    omegas = np.roots([2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta])
+                    assert len(omegas) == 3
+                    # use only real roots
+                    omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
+                    assert len(omegas) in (1, 3)
+                    # apply bounds and add to candidate list
+                    for omega in omegas:
+                        omega = min(max(omega, omega_lower), omega_upper)
+                        C.append((d, omega))
+        else:
+            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
+            if alpha == np.inf:
+                matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
+                                       'Maybe the datatype should be changed to a more accurate one.'))
+                omega = 0
+            elif beta == np.inf:
+                matrix.logger.warning(('Beta is infinity so omega is forced to be zero. '
+                                       'Maybe the datatype should be changed to a more accurate one.'))
+                omega = 0
+            else:
+                assert False
+            C.append((d, omega))
+
+        if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma <= min_abs_value_D:
+            C.append((0, 0))
+
+        # calculate function values for candidates
+        assert len(C) >= 1
+        C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+
+        # return best values
+        (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
+
+    # return value
+    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} and f = {f_value}.')
+    assert min_diag_D <= d <= max_diag_D
+    assert d >= min_abs_value_D or (d == 0 and min_diag_D <= 0 and max_diag_D >= 0)
+    assert 0 <= omega <= 1
+    assert d != 0 or omega == 0
+    assert f_value >= 0
+    assert np.isfinite(alpha) or alpha == np.inf
+    assert alpha != np.inf or omega == 0
+    assert alpha == np.inf or (min_diag_B <= d + omega**2 * alpha or np.isclose(min_diag_B, d + omega**2 * alpha))
+    assert alpha == np.inf or (max_diag_B >= d + omega**2 * alpha or np.isclose(max_diag_B, d + omega**2 * alpha))
+    assert alpha != np.inf or (min_diag_B <= d or np.isclose(min_diag_B, d))
+    assert alpha != np.inf or (max_diag_B >= d or np.isclose(max_diag_B, d))
+    return (d, omega, f_value)
+
+
 def _decomposition(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
         min_abs_value_D=None, permutation=None, overwrite_A=False,
@@ -903,128 +1028,3 @@ def positive_semidefinite_matrix(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
         min_diag_D=min_diag_D, max_diag_D=max_diag_D,
         permutation=permutation, overwrite_A=overwrite_A)
-
-
-def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
-                    min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
-
-    # debug info
-    matrix.logger.debug(f'Calculating best d and omega for alpha {alpha}, beta {beta}, '
-                        f'gamma {gamma}, min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
-                        f'min_abs_value_D {min_abs_value_D}, min_diag_B {min_diag_B}, '
-                        f'max_diag_B {max_diag_B}.')
-
-    # check input
-    assert np.isfinite(alpha) or alpha == np.inf
-    assert np.isfinite(beta) or beta == np.inf
-    assert np.isfinite(gamma)
-    assert np.isfinite(min_diag_D)
-    assert np.isfinite(min_abs_value_D)
-    assert alpha >= 0
-    assert beta >= 0
-    assert beta != 0 or alpha == 0
-    assert min_diag_D >= 0
-    assert min_abs_value_D > 0
-    assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
-
-    # ensure that alpha**2 is finite if alpha is finite (for np.roots)
-    with warnings.catch_warnings():
-        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars', category=RuntimeWarning)
-        try:
-            alpha**2
-        except RuntimeWarning:
-            alpha = np.inf
-
-    # define difference function
-    def f(d, omega):
-        if omega == 0:  # for case alpha == inf
-            f_value = (d - gamma)**2 + beta
-        elif omega == 1:  # for case beta == inf
-            f_value = (d + alpha - gamma)**2
-        else:
-            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
-        assert f_value >= 0
-        return f_value
-
-    # global solution
-    d = gamma - alpha
-    if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha):
-        assert alpha != np.inf
-        omega = 1
-        f_value = 0
-        assert np.isclose(f(d, omega), f_value)
-
-    # solution at bounds
-    else:
-        # prepare candidate set
-        C = []
-
-        # alpha == inf or beta == inf
-        if np.isfinite(alpha) and np.isfinite(beta):
-            a = max(min_diag_D, min_abs_value_D, min_diag_B - alpha)
-            b = min(max_diag_D, max_diag_B - alpha)
-            if a <= b:
-                d = min(max(a, gamma - alpha), b)
-                C.append((d, 1))
-
-            if alpha != 0:
-                # add feasible d values
-                d_values = []
-                if min_diag_B - alpha <= max(min_diag_D, min_abs_value_D):
-                    d_values.append(max(min_diag_D, min_abs_value_D))
-                if np.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
-                    d_values.append(max_diag_D)
-                for d in d_values:
-                    # calculate bounds
-                    omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
-                    assert 0 <= omega_lower <= 1
-                    omega_upper = min(((max_diag_B - d) / alpha)**0.5, 1)
-                    assert omega_lower <= omega_upper
-                    # get roots
-                    omegas = np.roots([2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta])
-                    assert len(omegas) == 3
-                    # use only real roots
-                    omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
-                    assert len(omegas) in (1, 3)
-                    # apply bounds and add to candidate list
-                    for omega in omegas:
-                        omega = min(max(omega, omega_lower), omega_upper)
-                        C.append((d, omega))
-        else:
-            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
-            if alpha == np.inf:
-                matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
-                                       'Maybe the datatype should be changed to a more accurate one.'))
-                omega = 0
-            elif beta == np.inf:
-                matrix.logger.warning(('Beta is infinity so omega is forced to be zero. '
-                                       'Maybe the datatype should be changed to a more accurate one.'))
-                omega = 0
-            else:
-                assert False
-            C.append((d, omega))
-
-        if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma <= min_abs_value_D:
-            C.append((0, 0))
-
-        # calculate function values for candidates
-        assert len(C) >= 1
-        C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
-
-        # return best values
-        (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
-
-    # return value
-    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} and f = {f_value}.')
-    assert min_diag_D <= d <= max_diag_D
-    assert d >= min_abs_value_D or (d == 0 and min_diag_D <= 0 and max_diag_D >= 0)
-    assert 0 <= omega <= 1
-    assert d != 0 or omega == 0
-    assert f_value >= 0
-    assert np.isfinite(alpha) or alpha == np.inf
-    assert alpha != np.inf or omega == 0
-    assert alpha == np.inf or (min_diag_B <= d + omega**2 * alpha or np.isclose(min_diag_B, d + omega**2 * alpha))
-    assert alpha == np.inf or (max_diag_B >= d + omega**2 * alpha or np.isclose(max_diag_B, d + omega**2 * alpha))
-    assert alpha != np.inf or (min_diag_B <= d or np.isclose(min_diag_B, d))
-    assert alpha != np.inf or (max_diag_B >= d or np.isclose(max_diag_B, d))
-    return (d, omega, f_value)
