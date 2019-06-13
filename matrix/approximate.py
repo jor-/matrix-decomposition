@@ -162,8 +162,8 @@ def _decomposition(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater than 0.
-        optional, default : The square root of the resolution of the underlying data type.
+        `min_diag_D` must be greater or equal to 0.
+        optional, default : Is chosen by the algorithm.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         :math:`LDL^H` decomposition is forced to be lower or equal to `max_diag_D`.
@@ -305,13 +305,14 @@ def _decomposition(
                                               minus_inf_okay=False, plus_inf_okay=True)
 
     min_diag_D = check_float_scalar(min_diag_D, f_name='min_diag_D',
-                                    default_value=d_eps**0.5, lower_bound=0,
+                                    default_value=None, lower_bound=0,
                                     minus_inf_okay=False, plus_inf_okay=False)
     max_diag_D = check_float_scalar(max_diag_D, f_name='max_diag_D',
                                     default_value=np.inf, lower_bound=None,
                                     minus_inf_okay=False, plus_inf_okay=True)
 
-    if not max(np.max(min_diag_B), min_diag_D) <= min(np.min(max_diag_B), max_diag_D):
+    if not (max(np.max(min_diag_B), min_diag_D if min_diag_D is not None else 0)
+            <= min(np.min(max_diag_B), max_diag_D)):
         error = ValueError(('The values of min_diag_B and min_diag_D must be lower or equal '
                             'to the values of max_diag_B and max_diag_D.'))
         matrix.logger.error(error)
@@ -359,7 +360,7 @@ def _decomposition(
         if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
                                   matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
             if (permutation_method == matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD
-                    and min_diag_D <= 0):
+                    and min_diag_D is not None and min_diag_D <= 0):
                 raise ValueError(f'The permutation method '
                                  f'{matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD} is '
                                  f'only available if min_diag_D is greater zero.')
@@ -421,18 +422,27 @@ def _decomposition(
     for i in range(n):
         matrix.logger.debug(f'Starting iteration {i} of {n - 1}.')
 
-        # determine next value for p, d, omega
+        # determine possible next indices
         if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
                                   matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
             possible_indices = range(i, n)
         else:
             possible_indices = (i,)
 
-        all_minimal_changes = ((j, *_minimal_change(
-            alpha[p[j]], beta[p[j]], gamma[p[j]], min_diag_D, max_diag_D=max_diag_D,
-            min_diag_B=get_value_i(min_diag_B, p[j]), max_diag_B=get_value_i(max_diag_B, p[j]),
-            min_abs_value_D=min_abs_value_D))
-            for j in possible_indices)
+        # choose current min d
+        def minimal_change_for_index(j):
+            min_diag_B_i = get_value_i(min_diag_B, p[j])
+            max_diag_B_i = get_value_i(max_diag_B, p[j])
+            if min_diag_D is not None:
+                min_diag_D_i = min_diag_D
+            else:
+                min_diag_D_i = min(0.5 * min(max(gamma[p[j]], min_diag_B_i), max_diag_B_i), max_diag_D)
+            return _minimal_change(
+                alpha[p[j]], beta[p[j]], gamma[p[j]], min_diag_D_i, max_diag_D=max_diag_D,
+                min_diag_B=min_diag_B_i, max_diag_B=max_diag_B_i, min_abs_value_D=min_abs_value_D)
+
+        # determine next value for p, d, omega
+        all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in possible_indices)
 
         if permutation_method in (matrix.constants.MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
                                   matrix.constants.MAXIMAL_STABILITY_PERMUTATION_METHOD):
@@ -467,9 +477,9 @@ def _decomposition(
 
         # update d
         assert np.isfinite(d_i)
-        assert min_diag_D is None or d_i >= min_diag_D
-        assert max_diag_D is None or d_i <= max_diag_D
-        assert min_abs_value_D is None or (d_i == 0 or np.abs(d_i) >= min_abs_value_D)
+        assert (min_diag_D is None and d_i >= 0) or d_i >= min_diag_D
+        assert d_i <= max_diag_D
+        assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
         d[i] = d_i
 
         # update omega
@@ -638,9 +648,9 @@ def _decomposition(
             L[i, i + 1:] = 0
 
     # return values
-    assert min_diag_D is None or d.min() >= min_diag_D
-    assert max_diag_D is None or d.max() <= max_diag_D
-    assert min_abs_value_D is None or (np.all(np.logical_or(d == 0, np.abs(d) >= min_abs_value_D)))
+    assert (min_diag_D is None and d.min() >= 0) or d.min() >= min_diag_D
+    assert d.max() <= max_diag_D
+    assert np.all(np.logical_or(d == 0, np.abs(d) >= min_abs_value_D))
     assert np.all(omega >= 0)
     matrix.logger.debug('Approximation of LDL decomposition finished.')
     return L, d, p, omega, delta
@@ -671,8 +681,8 @@ def decomposition(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         :math:`LDL^H` decomposition is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater than 0.
-        optional, default : The square root of the resolution of the underlying data type.
+        `min_diag_D` must be greater or equal to 0.
+        optional, default : Is chosen by the algorithm.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in an approximated
         :math:`LDL^H` decomposition is forced to be lower or equal to `max_diag_D`.
@@ -770,8 +780,8 @@ def _matrix(
     min_diag_D : float
         Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be greater or equal to `min_diag_D`.
-        `min_diag_D` must be greater than 0.
-        optional, default : The square root of the resolution of the underlying data type.
+        `min_diag_D` must be greater or equal to 0.
+        optional, default : Is chosen by the algorithm.
     max_diag_D : float
         Each component of the diagonal of the matrix `D` in a :math:`LDL^H` decomposition
         of the returned matrix is forced to be lower or equal to `max_diag_D`.
