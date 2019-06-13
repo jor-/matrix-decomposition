@@ -2,26 +2,33 @@ Changelog
 =========
 
 
+1.1
+---
+    * Positive semidefinite approximation algorithms of GMW and SE type have been added.
+    * Permutation method, with numerical stability as main focus, has been added to positive semidefinite approximation algorithm.
+    * Positive semidefinite approximation algorithm are moved into separate package.
+      (`matrix.approximate` to `matrix.approximation.positive_semidefinite`)
+
 1.0.1
 -----
     * Approximation functions now also work if an overflows occurs.
-    * NumPys matrix is avoided now because it is deprecated now.
+    * NumPys matrix is avoided because it is deprecated now.
 
 1.0
 ---
     * Approximation functions are slightly faster now.
-    * Better overflow handling in approximation functions.
-    * Prebuild html documentation included.
-    * Function for approximating a matrix by a positive semidefinite matrix (`matrix.approximate.positive_semidefinite_matrix`) removed.
+    * Better overflow handling is now used in approximation functions.
+    * Prebuild html documentation are now included.
+    * Function for approximating a matrix by a positive semidefinite matrix (`matrix.approximate.positive_semidefinite_matrix`) has been removed.
 
 0.8
 ---
-    * Approximation functions are replaced by more sophisticated approximation functions.
-    * Explicit function for approximating a matrix by a positive (semi)definite matrix is added.
-    * Universal save and load functions are added.
-    * Decompositions obtain is_equal and is_almost_equal methods.
-    * Functions to multiply the matrix represented by a decomposition or its inverse with a matrix or a vector are added.
-    * Allow to directly pass a permutation vector to approximate and decompose methods.
+    * Approximation functions have been replaced by more sophisticated approximation functions.
+    * Explicit function for approximating a matrix by a positive (semi)definite matrix has been added.
+    * Universal save and load functions have been added.
+    * Decompositions have obtained is_equal and is_almost_equal methods.
+    * Functions to multiply the matrix, represented by a decomposition, or its inverse with a matrix or a vector have been added.
+    * It is now possible to pass permutation vectors to approximate and decompose methods.
 
 
 0.7
@@ -59,6 +66,6 @@ Changelog
 
 0.1
 ---
-    * Several decompositions types are added (LL, LDL, LDL compressed).
-    * Several permutation capabilities added.
+    * Several decompositions types (LL, LDL, LDL compressed) have been added.
+    * Several permutation capabilities have been added.
 

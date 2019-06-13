@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Changelog &#8212; matrix-decomposition 1.0.post0.dev16+dirty.ge869d2b documentation</title>
+    <meta charset="utf-8" />
+    <title>Changelog &#8212; matrix-decomposition 1.0.1.post0.dev40+dirty.ge60ca81 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Errors" href="errors.html" />
@@ -36,95 +35,106 @@
   <div class="section" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>1.0.1<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>1.1<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Approximation functions now also work if an overflows occurs.</li>
-<li>NumPys matrix is avoided now because it is deprecated now.</li>
+<li><p>Positive semidefinite approximation algorithms of GMW and SE type have been added.</p></li>
+<li><p>Permutation method, with numerical stability as main focus, has been added to positive semidefinite approximation algorithm.</p></li>
+<li><p>Positive semidefinite approximation algorithm are moved into separate package.
+(<cite>matrix.approximate</cite> to <cite>matrix.approximation.positive_semidefinite</cite>)</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id2">
-<h2>1.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>1.0.1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Approximation functions are slightly faster now.</li>
-<li>Better overflow handling in approximation functions.</li>
-<li>Prebuild html documentation included.</li>
-<li>Function for approximating a matrix by a positive semidefinite matrix (<cite>matrix.approximate.positive_semidefinite_matrix</cite>) removed.</li>
+<li><p>Approximation functions now also work if an overflows occurs.</p></li>
+<li><p>NumPys matrix is avoided because it is deprecated now.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id3">
-<h2>0.8<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<h2>1.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Approximation functions are replaced by more sophisticated approximation functions.</li>
-<li>Explicit function for approximating a matrix by a positive (semi)definite matrix is added.</li>
-<li>Universal save and load functions are added.</li>
-<li>Decompositions obtain is_equal and is_almost_equal methods.</li>
-<li>Functions to multiply the matrix represented by a decomposition or its inverse with a matrix or a vector are added.</li>
-<li>Allow to directly pass a permutation vector to approximate and decompose methods.</li>
+<li><p>Approximation functions are slightly faster now.</p></li>
+<li><p>Better overflow handling is now used in approximation functions.</p></li>
+<li><p>Prebuild html documentation are now included.</p></li>
+<li><p>Function for approximating a matrix by a positive semidefinite matrix (<cite>matrix.approximate.positive_semidefinite_matrix</cite>) has been removed.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id4">
-<h2>0.7<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<h2>0.8<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Lineare systems associated to matrices or decompositions can now be solved.</li>
-<li>Invertibility of matrices and decompositions can now be examined.</li>
-<li>Decompositions can now be examined to see if they contain only finite values.</li>
+<li><p>Approximation functions have been replaced by more sophisticated approximation functions.</p></li>
+<li><p>Explicit function for approximating a matrix by a positive (semi)definite matrix has been added.</p></li>
+<li><p>Universal save and load functions have been added.</p></li>
+<li><p>Decompositions have obtained is_equal and is_almost_equal methods.</p></li>
+<li><p>Functions to multiply the matrix, represented by a decomposition, or its inverse with a matrix or a vector have been added.</p></li>
+<li><p>It is now possible to pass permutation vectors to approximate and decompose methods.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id5">
-<h2>0.6<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<h2>0.7<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Decompositions are now saveable and loadable.</li>
+<li><p>Lineare systems associated to matrices or decompositions can now be solved.</p></li>
+<li><p>Invertibility of matrices and decompositions can now be examined.</p></li>
+<li><p>Decompositions can now be examined to see if they contain only finite values.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id6">
-<h2>0.5<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<h2>0.6<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Matrices can now be approximated by decompositions.</li>
+<li><p>Decompositions are now saveable and loadable.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id7">
-<h2>0.4<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<h2>0.5<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Positive definiteness and positive semi-definiteness of matrices and decompositions can now be examined.</li>
+<li><p>Matrices can now be approximated by decompositions.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id8">
-<h2>0.3<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<h2>0.4<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Dense and sparse matrices are now decomposable into several types (LL, LDL, LDL compressed).</li>
+<li><p>Positive definiteness and positive semi-definiteness of matrices and decompositions can now be examined.</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id9">
-<h2>0.2<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<h2>0.3<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Decompositons are now convertable to other decompositon types.</li>
-<li>Decompositions are now comparable.</li>
+<li><p>Dense and sparse matrices are now decomposable into several types (LL, LDL, LDL compressed).</p></li>
 </ul>
 </div></blockquote>
 </div>
 <div class="section" id="id10">
-<h2>0.1<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
+<h2>0.2<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul class="simple">
-<li>Several decompositions types are added (LL, LDL, LDL compressed).</li>
-<li>Several permutation capabilities added.</li>
+<li><p>Decompositons are now convertable to other decompositon types.</p></li>
+<li><p>Decompositions are now comparable.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id11">
+<h2>0.1<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Several decompositions types (LL, LDL, LDL compressed) have been added.</p></li>
+<li><p>Several permutation capabilities have been added.</p></li>
 </ul>
 </div></blockquote>
 </div>
@@ -152,16 +162,17 @@
 <li class="toctree-l1"><a class="reference internal" href="decompositions.html">Matrix decompositions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="errors.html">Errors</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id1">1.0.1</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id2">1.0</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id3">0.8</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id4">0.7</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id5">0.6</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id6">0.5</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id7">0.4</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id8">0.3</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id9">0.2</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id10">0.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">1.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">1.0.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">0.8</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">0.7</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">0.6</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">0.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">0.4</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">0.3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">0.2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">0.1</a></li>
 </ul>
 </li>
 </ul>
@@ -180,12 +191,18 @@
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -194,8 +211,8 @@
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/changelog.rst.txt"

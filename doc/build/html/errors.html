@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Errors &#8212; matrix-decomposition 1.0.post0.dev16+dirty.ge869d2b documentation</title>
+    <meta charset="utf-8" />
+    <title>Errors &#8212; matrix-decomposition 1.0.1.post0.dev40+dirty.ge60ca81 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Changelog" href="changelog.html" />
@@ -36,54 +35,24 @@
             
   <div class="section" id="errors">
 <h1>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h1>
-<p>This is an overview about the exceptions that could arise in this package. They are available in <cite>matrix.errors</cite>:</p>
-<p>If a matrix should be decomposed with <cite>matrix.decompose</cite> and the desired decomposition is not computable, the following exceptions can be raised:</p>
-<div class="section" id="nodecompositionpossibleerror">
-<h2>NoDecompositionPossibleError<a class="headerlink" href="#nodecompositionpossibleerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="matrix.errors.NoDecompositionPossibleError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionPossibleError</code><span class="sig-paren">(</span><em>base</em>, <em>desired_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionPossibleError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionPossibleError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#matrix.errors.BaseError" title="matrix.errors.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.BaseError</span></code></a></p>
-<p>It is not possible to calculate a desired matrix decomposition.</p>
+<p>This is an overview about the exceptions that could arise in this library. They are available in <cite>matrix.errors</cite>:</p>
+<p>The following exception is the base exception from which all other exceptions in this package are derived:</p>
+<div class="section" id="baseerror">
+<h2>BaseError<a class="headerlink" href="#baseerror" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="matrix.errors.BaseError">
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">BaseError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#BaseError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.BaseError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>This is the base exception for all exceptions in this package.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="nodecompositionpossiblewithproblematicsubdecompositionerror">
-<h2>NoDecompositionPossibleWithProblematicSubdecompositionError<a class="headerlink" href="#nodecompositionpossiblewithproblematicsubdecompositionerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionPossibleWithProblematicSubdecompositionError</code><span class="sig-paren">(</span><em>base</em>, <em>desired_type</em>, <em>problematic_leading_principal_submatrix_index</em>, <em>subdecomposition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionPossibleWithProblematicSubdecompositionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a></p>
-<p>It is not possible to calculate a desired matrix decomposition. Only a subdecompostion could be calculated</p>
-</dd></dl>
-
-</div>
-<div class="section" id="nodecompositionpossibletoomanyentrieserror">
-<h2>NoDecompositionPossibleTooManyEntriesError<a class="headerlink" href="#nodecompositionpossibletoomanyentrieserror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="matrix.errors.NoDecompositionPossibleTooManyEntriesError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionPossibleTooManyEntriesError</code><span class="sig-paren">(</span><em>matrix</em>, <em>desired_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionPossibleTooManyEntriesError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionPossibleTooManyEntriesError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a></p>
-<p>The decomposition is not possible for this matrix because it would have too many entries.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="nodecompositionconversionimplementederror">
-<h2>NoDecompositionConversionImplementedError<a class="headerlink" href="#nodecompositionconversionimplementederror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="matrix.errors.NoDecompositionConversionImplementedError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionConversionImplementedError</code><span class="sig-paren">(</span><em>decomposition</em>, <em>desired_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionConversionImplementedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionConversionImplementedError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a></p>
-<p>A decomposition conversion is not implemented for this type.</p>
-</dd></dl>
-
-<p>If a matrix has an invalid characteristic, the following exceptions can occur:</p>
+<p>If a matrix has an invalid properties, the following exceptions can occur:</p>
 </div>
 <div class="section" id="matrixerror">
 <h2>MatrixError<a class="headerlink" href="#matrixerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.MatrixError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixError</code><span class="sig-paren">(</span><em>matrix</em>, <em>message=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixError</code><span class="sig-paren">(</span><em>matrix</em>, <em>message=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.BaseError" title="matrix.errors.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.BaseError</span></code></a></p>
 <p>An exception related to a matrix.</p>
 </dd></dl>
@@ -91,9 +60,9 @@
 </div>
 <div class="section" id="matrixnotsquareerror">
 <h2>MatrixNotSquareError<a class="headerlink" href="#matrixnotsquareerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.MatrixNotSquareError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixNotSquareError</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixNotSquareError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixNotSquareError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixNotSquareError</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixNotSquareError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixNotSquareError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.MatrixError" title="matrix.errors.MatrixError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.MatrixError</span></code></a></p>
 <p>A matrix is not a square matrix although a square matrix is required.</p>
 </dd></dl>
@@ -101,9 +70,9 @@
 </div>
 <div class="section" id="matrixnotfiniteerror">
 <h2>MatrixNotFiniteError<a class="headerlink" href="#matrixnotfiniteerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.MatrixNotFiniteError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixNotFiniteError</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixNotFiniteError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixNotFiniteError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixNotFiniteError</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixNotFiniteError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixNotFiniteError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.MatrixError" title="matrix.errors.MatrixError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.MatrixError</span></code></a></p>
 <p>A matrix has non-finite entries although a finite matrix is required.</p>
 </dd></dl>
@@ -111,9 +80,9 @@
 </div>
 <div class="section" id="matrixsingularerror">
 <h2>MatrixSingularError<a class="headerlink" href="#matrixsingularerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.MatrixSingularError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixSingularError</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixSingularError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixSingularError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixSingularError</code><span class="sig-paren">(</span><em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixSingularError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixSingularError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.MatrixError" title="matrix.errors.MatrixError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.MatrixError</span></code></a></p>
 <p>A matrix is singular although an invertible matrix is required.</p>
 </dd></dl>
@@ -121,9 +90,9 @@
 </div>
 <div class="section" id="matrixnothermitianerror">
 <h2>MatrixNotHermitianError<a class="headerlink" href="#matrixnothermitianerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.MatrixNotHermitianError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixNotHermitianError</code><span class="sig-paren">(</span><em>matrix</em>, <em>i=None</em>, <em>j=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixNotHermitianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixNotHermitianError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixNotHermitianError</code><span class="sig-paren">(</span><em>matrix</em>, <em>i=None</em>, <em>j=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixNotHermitianError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixNotHermitianError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.MatrixError" title="matrix.errors.MatrixError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.MatrixError</span></code></a></p>
 <p>A matrix is not Hermitian although a Hermitian matrix is required.</p>
 </dd></dl>
@@ -131,20 +100,61 @@
 </div>
 <div class="section" id="matrixcomplexdiagonalvalueerror">
 <h2>MatrixComplexDiagonalValueError<a class="headerlink" href="#matrixcomplexdiagonalvalueerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.MatrixComplexDiagonalValueError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixComplexDiagonalValueError</code><span class="sig-paren">(</span><em>matrix</em>, <em>i=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixComplexDiagonalValueError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixComplexDiagonalValueError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">MatrixComplexDiagonalValueError</code><span class="sig-paren">(</span><em>matrix</em>, <em>i=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#MatrixComplexDiagonalValueError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.MatrixComplexDiagonalValueError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.MatrixNotHermitianError" title="matrix.errors.MatrixNotHermitianError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotHermitianError</span></code></a></p>
 <p>A matrix has complex diagonal values although real diagonal values are required.</p>
 </dd></dl>
 
-<p>If the matrix represented by a decomposition has an invalid characteristic, the following exceptions can occur:</p>
+<p>If a desired decomposition is not computable, the following exceptions can be raised:</p>
+</div>
+<div class="section" id="nodecompositionpossibleerror">
+<h2>NoDecompositionPossibleError<a class="headerlink" href="#nodecompositionpossibleerror" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="matrix.errors.NoDecompositionPossibleError">
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionPossibleError</code><span class="sig-paren">(</span><em>base</em>, <em>desired_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionPossibleError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionPossibleError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#matrix.errors.BaseError" title="matrix.errors.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.BaseError</span></code></a></p>
+<p>It is not possible to calculate a desired matrix decomposition.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="nodecompositionpossiblewithproblematicsubdecompositionerror">
+<h2>NoDecompositionPossibleWithProblematicSubdecompositionError<a class="headerlink" href="#nodecompositionpossiblewithproblematicsubdecompositionerror" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError">
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionPossibleWithProblematicSubdecompositionError</code><span class="sig-paren">(</span><em>base</em>, <em>desired_type</em>, <em>problematic_leading_principal_submatrix_index</em>, <em>subdecomposition=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionPossibleWithProblematicSubdecompositionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a></p>
+<p>It is not possible to calculate a desired matrix decomposition. Only a subdecompostion could be calculated</p>
+</dd></dl>
+
+</div>
+<div class="section" id="nodecompositionpossibletoomanyentrieserror">
+<h2>NoDecompositionPossibleTooManyEntriesError<a class="headerlink" href="#nodecompositionpossibletoomanyentrieserror" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="matrix.errors.NoDecompositionPossibleTooManyEntriesError">
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionPossibleTooManyEntriesError</code><span class="sig-paren">(</span><em>matrix</em>, <em>desired_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionPossibleTooManyEntriesError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionPossibleTooManyEntriesError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a></p>
+<p>The decomposition is not possible for this matrix because it would have too many entries.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="nodecompositionconversionimplementederror">
+<h2>NoDecompositionConversionImplementedError<a class="headerlink" href="#nodecompositionconversionimplementederror" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="matrix.errors.NoDecompositionConversionImplementedError">
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">NoDecompositionConversionImplementedError</code><span class="sig-paren">(</span><em>decomposition</em>, <em>desired_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#NoDecompositionConversionImplementedError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.NoDecompositionConversionImplementedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a></p>
+<p>A decomposition conversion is not implemented for this type.</p>
+</dd></dl>
+
+<p>If the matrix, represented by a decomposition, has an invalid characteristic, the following exceptions can occur:</p>
 </div>
 <div class="section" id="decompositionerror">
 <h2>DecompositionError<a class="headerlink" href="#decompositionerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.DecompositionError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionError</code><span class="sig-paren">(</span><em>decomposition</em>, <em>message=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionError</code><span class="sig-paren">(</span><em>decomposition</em>, <em>message=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.BaseError" title="matrix.errors.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.BaseError</span></code></a></p>
 <p>An exception related to a decomposition.</p>
 </dd></dl>
@@ -152,9 +162,9 @@
 </div>
 <div class="section" id="decompositionnotfiniteerror">
 <h2>DecompositionNotFiniteError<a class="headerlink" href="#decompositionnotfiniteerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.DecompositionNotFiniteError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionNotFiniteError</code><span class="sig-paren">(</span><em>decomposition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionNotFiniteError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionNotFiniteError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionNotFiniteError</code><span class="sig-paren">(</span><em>decomposition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionNotFiniteError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionNotFiniteError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.DecompositionError" title="matrix.errors.DecompositionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.DecompositionError</span></code></a></p>
 <p>A decomposition of a matrix has non-finite entries although a finite matrix is required.</p>
 </dd></dl>
@@ -162,44 +172,43 @@
 </div>
 <div class="section" id="decompositionsingularerror">
 <h2>DecompositionSingularError<a class="headerlink" href="#decompositionsingularerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.DecompositionSingularError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionSingularError</code><span class="sig-paren">(</span><em>decomposition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionSingularError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionSingularError" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionSingularError</code><span class="sig-paren">(</span><em>decomposition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionSingularError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionSingularError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.DecompositionError" title="matrix.errors.DecompositionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.DecompositionError</span></code></a></p>
 <p>A decomposition represents a singular matrix although a non-singular matrix is required.</p>
 </dd></dl>
 
-<p>If a decomposition should be loaded from a file which is not a valid decomposition file, the following exception is raised:</p>
+<p>If a decomposition could not be loaded from a file, the following exceptions can be raised:</p>
 </div>
 <div class="section" id="decompositioninvalidfile">
 <h2>DecompositionInvalidFile<a class="headerlink" href="#decompositioninvalidfile" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.DecompositionInvalidFile">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionInvalidFile</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionInvalidFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionInvalidFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionInvalidFile</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionInvalidFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionInvalidFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.DecompositionError" title="matrix.errors.DecompositionError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.DecompositionError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#OSError" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSError</span></code></a></p>
 <p>An attempt was made to load a decomposition from an invalid file.</p>
 </dd></dl>
 
-<p>If a decomposition should be loaded from a file which caontains a type which does not fit to the type of the decomposition where it should be loaded into, the following exception is raised:</p>
 </div>
 <div class="section" id="decompositioninvaliddecompositiontypefile">
 <h2>DecompositionInvalidDecompositionTypeFile<a class="headerlink" href="#decompositioninvaliddecompositiontypefile" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="exception">
 <dt id="matrix.errors.DecompositionInvalidDecompositionTypeFile">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionInvalidDecompositionTypeFile</code><span class="sig-paren">(</span><em>filename</em>, <em>type_file</em>, <em>type_needed</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionInvalidDecompositionTypeFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionInvalidDecompositionTypeFile" title="Permalink to this definition">¶</a></dt>
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">DecompositionInvalidDecompositionTypeFile</code><span class="sig-paren">(</span><em>filename</em>, <em>type_file</em>, <em>type_needed</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#DecompositionInvalidDecompositionTypeFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.DecompositionInvalidDecompositionTypeFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#matrix.errors.DecompositionInvalidFile" title="matrix.errors.DecompositionInvalidFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.DecompositionInvalidFile</span></code></a></p>
 <p>An attempt was made to load a decomposition from an file in which another decomposition type is stored.</p>
 </dd></dl>
 
-<p>The following exception is the base exception from which all other exceptions in this package are derived:</p>
+<p>If the computation needs more iterations than the maximal number of iterations, the following exception occurs:</p>
 </div>
-<div class="section" id="baseerror">
-<h2>BaseError<a class="headerlink" href="#baseerror" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="matrix.errors.BaseError">
-<em class="property">class </em><code class="descclassname">matrix.errors.</code><code class="descname">BaseError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#BaseError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.BaseError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
-<p>This is the base exception for all exceptions in this package.</p>
+<div class="section" id="toomanyiterationserror">
+<h2>TooManyIterationsError<a class="headerlink" href="#toomanyiterationserror" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="matrix.errors.TooManyIterationsError">
+<em class="property">exception </em><code class="descclassname">matrix.errors.</code><code class="descname">TooManyIterationsError</code><span class="sig-paren">(</span><em>message=None</em>, <em>iteration=None</em>, <em>result=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/errors.html#TooManyIterationsError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.errors.TooManyIterationsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#matrix.errors.BaseError" title="matrix.errors.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">matrix.errors.BaseError</span></code></a></p>
+<p>Too many iterations are needed for the calculation.</p>
 </dd></dl>
 
 </div>
@@ -226,22 +235,23 @@
 <li class="toctree-l1"><a class="reference internal" href="functions.html">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="decompositions.html">Matrix decompositions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Errors</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#nodecompositionpossibleerror">NoDecompositionPossibleError</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nodecompositionpossiblewithproblematicsubdecompositionerror">NoDecompositionPossibleWithProblematicSubdecompositionError</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nodecompositionpossibletoomanyentrieserror">NoDecompositionPossibleTooManyEntriesError</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#nodecompositionconversionimplementederror">NoDecompositionConversionImplementedError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#baseerror">BaseError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#matrixerror">MatrixError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#matrixnotsquareerror">MatrixNotSquareError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#matrixnotfiniteerror">MatrixNotFiniteError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#matrixsingularerror">MatrixSingularError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#matrixnothermitianerror">MatrixNotHermitianError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#matrixcomplexdiagonalvalueerror">MatrixComplexDiagonalValueError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodecompositionpossibleerror">NoDecompositionPossibleError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodecompositionpossiblewithproblematicsubdecompositionerror">NoDecompositionPossibleWithProblematicSubdecompositionError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodecompositionpossibletoomanyentrieserror">NoDecompositionPossibleTooManyEntriesError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodecompositionconversionimplementederror">NoDecompositionConversionImplementedError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decompositionerror">DecompositionError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decompositionnotfiniteerror">DecompositionNotFiniteError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decompositionsingularerror">DecompositionSingularError</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decompositioninvalidfile">DecompositionInvalidFile</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decompositioninvaliddecompositiontypefile">DecompositionInvalidDecompositionTypeFile</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#baseerror">BaseError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#toomanyiterationserror">TooManyIterationsError</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
@@ -262,12 +272,18 @@
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -276,8 +292,8 @@
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/errors.rst.txt"

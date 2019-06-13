@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Functions &#8212; matrix-decomposition 1.0.post0.dev16+dirty.ge869d2b documentation</title>
+    <meta charset="utf-8" />
+    <title>Functions &#8212; matrix-decomposition 1.0.1.post0.dev40+dirty.ge60ca81 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Matrix decompositions" href="decompositions.html" />
@@ -38,57 +37,590 @@
 <h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
 <p>Several functions are included in this package.
 The most important ones are summarized here.</p>
+<div class="section" id="positive-semidefinite-approximation-of-a-matrix">
+<h2>Positive semidefinite approximation of a matrix<a class="headerlink" href="#positive-semidefinite-approximation-of-a-matrix" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.positive_semidefinite_matrix">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">positive_semidefinite_matrix</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>max_diag_D=None</em>, <em>min_abs_value_D=None</em>, <em>permutation=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/Reimer.html#positive_semidefinite_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.positive_semidefinite_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes an approximation of <cite>A</cite> which has a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition with the specified properties.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> has such a decomposition and otherwise an approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be greater or equal to 0.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>max_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition
+of the returned matrix is forced to be lower or equal to <cite>max_diag_D</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_abs_value_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Absolute values below <cite>min_abs_value_D</cite> are considered as zero
+in the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition of the returned matrix.
+<cite>min_abs_value_D</cite> must be greater or equal to 0.
+optional, default : The square root of the resolution of the underlying data type.</p></li>
+<li><p><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The symmetric permutation method that is applied to the matrix before it is decomposed.
+It has to be a value in <a class="reference internal" href="#matrix.UNIVERSAL_PERMUTATION_METHODS" title="matrix.UNIVERSAL_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.UNIVERSAL_PERMUTATION_METHODS</span></code></a> or
+<a class="reference internal" href="#matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS" title="matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">APPROXIMATION_ONLY_PERMUTATION_METHODS</span></code></a>.
+If <cite>A</cite> is sparse, it can also be a value in
+<a class="reference internal" href="#matrix.SPARSE_ONLY_PERMUTATION_METHODS" title="matrix.SPARSE_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.SPARSE_ONLY_PERMUTATION_METHODS</span></code></a>.
+It is also possible to directly pass a permutation vector.
+optional, default: The permutation is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which has a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.ndarray or scipy.sparse.spmatrix (same type as <cite>A</cite>)</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p></li>
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixComplexDiagonalValueError" title="matrix.errors.MatrixComplexDiagonalValueError"><strong>matrix.errors.MatrixComplexDiagonalValueError</strong></a> – If <cite>A</cite> has complex diagonal values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.decomposition">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">decomposition</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>max_diag_D=None</em>, <em>min_abs_value_D=None</em>, <em>permutation=None</em>, <em>overwrite_A=False</em>, <em>return_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/Reimer.html#decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.decomposition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes an approximative decomposition of a matrix with the specified properties.</p>
+<p>Returns a decomposition of <cite>A</cite> if has such a decomposition and
+otherwise  a decomposition of an approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be approximated by a decomposition.
+<cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the composed matrix <cite>B</cite> of an approximated
+<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the composed matrix <cite>B</cite> of an approximated
+<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in an approximated
+<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be greater or equal to 0.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>max_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in an approximated
+<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be lower or equal to <cite>max_diag_D</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_abs_value_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Absolute values below <cite>min_abs_value_D</cite> are considered as zero
+in the matrix <cite>D</cite> of an approximated <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition.
+<cite>min_abs_value_D</cite> must be greater or equal to 0.
+optional, default : The square root of the resolution of the underlying data type.</p></li>
+<li><p><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The symmetric permutation method that is applied to the matrix before it is decomposed.
+It has to be a value in <a class="reference internal" href="#matrix.UNIVERSAL_PERMUTATION_METHODS" title="matrix.UNIVERSAL_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.UNIVERSAL_PERMUTATION_METHODS</span></code></a> or
+<a class="reference internal" href="#matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS" title="matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">APPROXIMATION_ONLY_PERMUTATION_METHODS</span></code></a>.
+If <cite>A</cite> is sparse, it can also be a value in
+<a class="reference internal" href="#matrix.SPARSE_ONLY_PERMUTATION_METHODS" title="matrix.SPARSE_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.SPARSE_ONLY_PERMUTATION_METHODS</span></code></a>.
+It is also possible to directly pass a permutation vector.
+optional, default: The permutation is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+<li><p><strong>return_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The type of the decomposition that should be returned.
+It has to be a value in <a class="reference internal" href="#matrix.DECOMPOSITION_TYPES" title="matrix.DECOMPOSITION_TYPES"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.DECOMPOSITION_TYPES</span></code></a>.
+optional, default : The type of the decomposition is chosen by the function itself.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An (approximative) decomposition of <cite>A</cite> of type <cite>return_type</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="decompositions.html#matrix.decompositions.DecompositionBase" title="matrix.decompositions.DecompositionBase">matrix.decompositions.DecompositionBase</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p></li>
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixComplexDiagonalValueError" title="matrix.errors.MatrixComplexDiagonalValueError"><strong>matrix.errors.MatrixComplexDiagonalValueError</strong></a> – If <cite>A</cite> has complex diagonal values.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="data">
+<dt id="matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">APPROXIMATION_ONLY_PERMUTATION_METHODS</code><em class="property"> = ('minimal_difference', 'maximal_stability')</em><a class="headerlink" href="#matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permutation methods supported only by the decomposition and the positive_semidefinite_matrix algorithm.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.GMW_81">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">GMW_81</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/GMW_SE.html#GMW_81"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.GMW_81" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and meets the constrains and otherwise a positive
+definite approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be symmetric.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^T\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be positive.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The algorithm is introduced in [1].
+Is is also described in [2].
+This discription has been used for this implementation.
+The implementation has been extended to allow restrictions on the diagonal values.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Gill, P. E.; Murray, W. &amp; Wright, M. H.,</dt><dd><p>Practical optimization,
+Academic press, 1981</p>
+</dd>
+<dt>[2] Fang, H.-r. &amp; O’Leary, D. P.,</dt><dd><p>Modified Cholesky algorithms: a catalog with new approaches,
+Mathematical Programming, 2008, 115, 319-349</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.GMW_T1">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">GMW_T1</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/GMW_SE.html#GMW_T1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.GMW_T1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and meets the constrains and otherwise a positive
+definite approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be symmetric.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^T\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be positive.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The algorithm is introduced in [1].
+This discription has been used for this implementation.
+The algorithm is based on [2].
+The implementation has been extended to allow restrictions on the diagonal values.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Fang, H.-r. &amp; O’Leary, D. P.,</dt><dd><p>Modified Cholesky algorithms: a catalog with new approaches,
+Mathematical Programming, 2008, 115, 319-349</p>
+</dd>
+<dt>[2] Gill, P. E.; Murray, W. &amp; Wright, M. H.,</dt><dd><p>Practical optimization,
+Academic press, 1981</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.GMW_T2">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">GMW_T2</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/GMW_SE.html#GMW_T2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.GMW_T2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and meets the constrains and otherwise a positive
+definite approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be symmetric.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^T\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be positive.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The algorithm is introduced in [1].
+This discription has been used for this implementation.
+The algorithm is based on [2].
+The implementation has been extended to allow restrictions on the diagonal values.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Fang, H.-r. &amp; O’Leary, D. P.,</dt><dd><p>Modified Cholesky algorithms: a catalog with new approaches,
+Mathematical Programming, 2008, 115, 319-349</p>
+</dd>
+<dt>[2] Gill, P. E.; Murray, W. &amp; Wright, M. H.,</dt><dd><p>Practical optimization,
+Academic press, 1981</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.SE_90">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">SE_90</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/GMW_SE.html#SE_90"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.SE_90" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and meets the constrains and otherwise a positive
+definite approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be symmetric.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^T\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be positive.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The algorithm is introduced in [1].
+Is is also described in [2].
+This discription has been used for this implementation.
+The implementation has been extended to allow restrictions on the diagonal values.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Schnabel, R. &amp; Eskow, E.,</dt><dd><p>A New Modified Cholesky Factorization,
+SIAM Journal on Scientific and Statistical Computing, 1990, 11, 1136-1158</p>
+</dd>
+<dt>[2] Fang, H.-r. &amp; O’Leary, D. P.,</dt><dd><p>Modified Cholesky algorithms: a catalog with new approaches,
+Mathematical Programming, 2008, 115, 319-349</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.SE_99">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">SE_99</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/GMW_SE.html#SE_99"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.SE_99" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and meets the constrains and otherwise a positive
+definite approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be symmetric.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^T\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be positive.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The algorithm is introduced in [1].
+Is is also described in [2].
+This discription has been used for this implementation.
+The algorithm is based on [3].
+The implementation has been extended to allow restrictions on the diagonal values.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Schnabel, R. &amp; Eskow, E.,</dt><dd><p>A Revised Modified Cholesky Factorization Algorithm,
+SIAM Journal on Optimization, 1999, 9, 1135-1148</p>
+</dd>
+<dt>[2] Fang, H.-r. &amp; O’Leary, D. P.,</dt><dd><p>Modified Cholesky algorithms: a catalog with new approaches,
+Mathematical Programming, 2008, 115, 319-349</p>
+</dd>
+<dt>[3] Schnabel, R. &amp; Eskow, E.,</dt><dd><p>A New Modified Cholesky Factorization,
+SIAM Journal on Scientific and Statistical Computing, 1990, 11, 1136-1158</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.approximation.positive_semidefinite.SE_T1">
+<code class="descclassname">matrix.approximation.positive_semidefinite.</code><code class="descname">SE_T1</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximation/positive_semidefinite/GMW_SE.html#SE_T1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximation.positive_semidefinite.SE_T1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
+<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and meets the constrains and otherwise a positive
+definite approximation of <cite>A</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The matrix that should be approximated.
+<cite>A</cite> must be symmetric.</p></li>
+<li><p><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be greater or equal to <cite>min_diag_B</cite>.
+optional, default : No minimal value is forced.</p></li>
+<li><p><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
+is forced to be lower or equal to <cite>max_diag_B</cite>.
+optional, default : No maximal value is forced.</p></li>
+<li><p><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^T\)</span> decomposition
+of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
+<cite>min_diag_D</cite> must be positive.
+optional, default : Is chosen by the algorithm.</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The algorithm is introduced in [1].
+This discription has been used for this implementation.
+The algorithm is based on [2].
+The implementation has been extended to allow restrictions on the diagonal values.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Fang, H.-r. &amp; O’Leary, D. P.,</dt><dd><p>Modified Cholesky algorithms: a catalog with new approaches,
+Mathematical Programming, 2008, 115, 319-349</p>
+</dd>
+<dt>[2] Schnabel, R. &amp; Eskow, E.,</dt><dd><p>A Revised Modified Cholesky Factorization Algorithm,
+SIAM Journal on Optimization, 1999, 9, 1135-1148</p>
+</dd>
+<dt>[3] Schnabel, R. &amp; Eskow, E.,</dt><dd><p>A New Modified Cholesky Factorization,
+SIAM Journal on Scientific and Statistical Computing, 1990, 11, 1136-1158</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-matrix.nearest">
+<span id="nearest-matrix-with-specific-properties"></span><h2>Nearest matrix with specific properties<a class="headerlink" href="#module-matrix.nearest" title="Permalink to this headline">¶</a></h2>
+<p>This module provides functions to compute matrices with minimal difference to an input matrix and
+specific properties.</p>
+<dl class="function">
+<dt id="matrix.nearest.correlation_matrix">
+<code class="descclassname">matrix.nearest.</code><code class="descname">correlation_matrix</code><span class="sig-paren">(</span><em>A</em>, <em>max_iterations=1000</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/nearest.html#correlation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.nearest.correlation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a correlation matrix closest to <cite>A</cite> in the Frobenius norm.
+A correlation matrix is a positive semidefinite matrix with ones on the diagonal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – <cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>max_iterations</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The maximal number of iterations used for the calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – A correlation matrix closest to <cite>A</cite> in the Frobenius norm.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.TooManyIterationsError" title="matrix.errors.TooManyIterationsError"><strong>TooManyIterationsError</strong></a> – If the computation needs more iterations than the maximal number of iterations.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The optimality and the method for calculation is presented in [1].
+For the computation some code of Michael Croucher is used. See this source code for the license.</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Higham, N. J.</dt><dd><p>Computing a nearest symmetric positive semidefinite matrix
+Linear Algebra and its Applications, 1988, 103, 103-118</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.nearest.positive_semidefinite_matrix">
+<code class="descclassname">matrix.nearest.</code><code class="descname">positive_semidefinite_matrix</code><span class="sig-paren">(</span><em>A</em>, <em>symmetric=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/nearest.html#positive_semidefinite_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.nearest.positive_semidefinite_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a symmetric positive semidefinite matrix with minimal difference to <cite>A</cite>
+in the Frobenius norm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – <cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>symmetric</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether <cite>A</cite> can be assumed to be symmetric or not.
+optional, default: False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – A symmetric positive semidefinite Hermitian matrix with minimal difference to <cite>A</cite>
+in the Frobenius norm.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.nearest.skew_symmetric_matrix">
+<code class="descclassname">matrix.nearest.</code><code class="descname">skew_symmetric_matrix</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/nearest.html#skew_symmetric_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.nearest.skew_symmetric_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a skew-symmetric matrix with minimal difference to <cite>A</cite>
+for any unitarily invariant norm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – <cite>A</cite> must be a square matrix.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – A skew-symmetric matrix with minimal difference to <cite>A</cite> for any unitarily invariant norm.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="matrix.nearest.symmetric_matrix">
+<code class="descclassname">matrix.nearest.</code><code class="descname">symmetric_matrix</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/nearest.html#symmetric_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.nearest.symmetric_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes a symmetric matrix with minimal difference to <cite>A</cite>
+for any unitarily invariant norm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – <cite>A</cite> must be a square matrix.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>B</strong> – A symmetric matrix with minimal difference to <cite>A</cite> for any unitarily invariant norm.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The optimality is proven in [1].</p>
+<p class="rubric">References</p>
+<dl class="simple">
+<dt>[1] Fan, K., &amp; Hoffman, A. (1955).</dt><dd><p>Some Metric Inequalities in the Space of Matrices.
+Proceedings of the American Mathematical Society, 6(1), 111-116. doi:10.2307/2032662</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 <div class="section" id="decompose-a-matrix">
 <h2>Decompose a matrix<a class="headerlink" href="#decompose-a-matrix" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="matrix.decompose">
 <code class="descclassname">matrix.</code><code class="descname">decompose</code><span class="sig-paren">(</span><em>A</em>, <em>permutation=None</em>, <em>return_type=None</em>, <em>check_finite=True</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/calculate.html#decompose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.decompose" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes a decomposition of a matrix.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – Matrix to be decomposed.
-<cite>A</cite> must be Hermitian.</li>
-<li><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a>) – The symmetric permutation method that is applied to the matrix before
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – Matrix to be decomposed.
+<cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – The symmetric permutation method that is applied to the matrix before
 it is decomposed. It has to be a value in
 <a class="reference internal" href="#matrix.UNIVERSAL_PERMUTATION_METHODS" title="matrix.UNIVERSAL_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.UNIVERSAL_PERMUTATION_METHODS</span></code></a>.
 If <cite>A</cite> is sparse, it can also be a value in
 <a class="reference internal" href="#matrix.SPARSE_ONLY_PERMUTATION_METHODS" title="matrix.SPARSE_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.SPARSE_ONLY_PERMUTATION_METHODS</span></code></a>.
 It is also possible to directly pass a permutation vector.
-optional, default: no permutation</li>
-<li><strong>return_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The type of the decomposition that should be calculated.
+optional, default: no permutation</p></li>
+<li><p><strong>return_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The type of the decomposition that should be calculated.
 It has to be a value in <a class="reference internal" href="#matrix.DECOMPOSITION_TYPES" title="matrix.DECOMPOSITION_TYPES"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.DECOMPOSITION_TYPES</span></code></a>.
 If return_type is None the type of the returned decomposition is
 chosen by the function itself.
-optional, default: the type of the decomposition is chosen by the function itself</li>
-<li><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contains only finite numbers.
+optional, default: the type of the decomposition is chosen by the function itself</p></li>
+<li><p><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contains only finite numbers.
 Disabling may result in problems (crashes, non-termination)
 if the inputs do contain infinities or NaNs.
 Disabling gives a performance gain.
-optional, default: True</li>
-<li><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>.
+optional, default: True</p></li>
+<li><p><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>.
 Enabling may result in performance gain.
-optional, default: False</li>
+optional, default: False</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A decomposition of <cite>A</cite> of type <cite>return_type</cite>.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="decompositions.html#matrix.decompositions.DecompositionBase" title="matrix.decompositions.DecompositionBase">matrix.decompositions.DecompositionBase</a></p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="errors.html#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.NoDecompositionPossibleError</span></code></a> – If the decomposition of <cite>A</cite> is not possible.</li>
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotSquareError</span></code></a> – If <cite>A</cite> is not a square matrix.</li>
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotFiniteError</span></code></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</li>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A decomposition of <cite>A</cite> of type <cite>return_type</cite>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="decompositions.html#matrix.decompositions.DecompositionBase" title="matrix.decompositions.DecompositionBase">matrix.decompositions.DecompositionBase</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="errors.html#matrix.errors.NoDecompositionPossibleError" title="matrix.errors.NoDecompositionPossibleError"><strong>matrix.errors.NoDecompositionPossibleError</strong></a> – If the decomposition of <cite>A</cite> is not possible.</p></li>
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p></li>
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><strong>matrix.errors.MatrixNotFiniteError</strong></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="data">
@@ -110,225 +642,90 @@ optional, default: False</li>
 </dd></dl>
 
 </div>
-<div class="section" id="approximate-a-matrix">
-<h2>Approximate a matrix<a class="headerlink" href="#approximate-a-matrix" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="matrix.approximate.decomposition">
-<code class="descclassname">matrix.approximate.</code><code class="descname">decomposition</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>max_diag_D=None</em>, <em>min_abs_value_D=None</em>, <em>permutation=None</em>, <em>overwrite_A=False</em>, <em>return_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximate.html#decomposition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximate.decomposition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes an approximative decomposition of a matrix with the specified properties.</p>
-<p>Returns a decomposition of <cite>A</cite> if has such a decomposition and
-otherwise  a decomposition of an approximation of <cite>A</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be approximated by a decomposition.
-<cite>A</cite> must be Hermitian.</li>
-<li><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the composed matrix <cite>B</cite> of an approximated
-<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be greater or equal to <cite>min_diag_B</cite>.
-optional, default : No minimal value is forced.</li>
-<li><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the composed matrix <cite>B</cite> of an approximated
-<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be lower or equal to <cite>max_diag_B</cite>.
-optional, default : No maximal value is forced.</li>
-<li><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in an approximated
-<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be greater or equal to <cite>min_diag_D</cite>.
-<cite>min_diag_D</cite> must be greater than 0.
-optional, default : The square root of the resolution of the underlying data type.</li>
-<li><strong>max_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in an approximated
-<span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition is forced to be lower or equal to <cite>max_diag_D</cite>.
-optional, default : No maximal value is forced.</li>
-<li><strong>min_abs_value_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Absolute values below <cite>min_abs_value_D</cite> are considered as zero
-in the matrix <cite>D</cite> of an approximated <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition.
-<cite>min_abs_value_D</cite> must be greater or equal to 0.
-optional, default : The square root of the resolution of the underlying data type.</li>
-<li><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a>) – The symmetric permutation method that is applied to the matrix before it is decomposed.
-It has to be a value in <a class="reference internal" href="#matrix.UNIVERSAL_PERMUTATION_METHODS" title="matrix.UNIVERSAL_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.UNIVERSAL_PERMUTATION_METHODS</span></code></a> or
-<a class="reference internal" href="#matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS" title="matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS</span></code></a>.
-If <cite>A</cite> is sparse, it can also be a value in
-<a class="reference internal" href="#matrix.SPARSE_ONLY_PERMUTATION_METHODS" title="matrix.SPARSE_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.SPARSE_ONLY_PERMUTATION_METHODS</span></code></a>.
-It is also possible to directly pass a permutation vector.
-optional, default: The permutation is chosen by the algorithm.</li>
-<li><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
-optional, default: False</li>
-<li><strong>return_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The type of the decomposition that should be returned.
-It has to be a value in <a class="reference internal" href="#matrix.DECOMPOSITION_TYPES" title="matrix.DECOMPOSITION_TYPES"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.DECOMPOSITION_TYPES</span></code></a>.
-optional, default : The type of the decomposition is chosen by the function itself.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">An (approximative) decomposition of <cite>A</cite> of type <cite>return_type</cite>.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="decompositions.html#matrix.decompositions.DecompositionBase" title="matrix.decompositions.DecompositionBase">matrix.decompositions.DecompositionBase</a></p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotSquareError</span></code></a> – If <cite>A</cite> is not a square matrix.</li>
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixComplexDiagonalValueError" title="matrix.errors.MatrixComplexDiagonalValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixComplexDiagonalValueError</span></code></a> – If <cite>A</cite> has complex diagonal values.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="matrix.approximate.positive_definite_matrix">
-<code class="descclassname">matrix.approximate.</code><code class="descname">positive_definite_matrix</code><span class="sig-paren">(</span><em>A</em>, <em>min_diag_B=None</em>, <em>max_diag_B=None</em>, <em>min_diag_D=None</em>, <em>max_diag_D=None</em>, <em>permutation=None</em>, <em>overwrite_A=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/approximate.html#positive_definite_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.approximate.positive_definite_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes a positive definite approximation of <cite>A</cite>.</p>
-<p>Returns <cite>A</cite> if <cite>A</cite> is positive definite and otherwise an approximation of <cite>A</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be approximated.
-<cite>A</cite> must be Hermitian.</li>
-<li><strong>min_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
-is forced to be greater or equal to <cite>min_diag_B</cite>.
-optional, default : No minimal value is forced.</li>
-<li><strong>max_diag_B</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the returned matrix
-is forced to be lower or equal to <cite>max_diag_B</cite>.
-optional, default : No maximal value is forced.</li>
-<li><strong>min_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition
-of the returned matrix is forced to be greater or equal to <cite>min_diag_D</cite>.
-<cite>min_diag_D</cite> must be greater than 0.
-optional, default : The square root of the resolution of the underlying data type.</li>
-<li><strong>max_diag_D</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Each component of the diagonal of the matrix <cite>D</cite> in a <span class="math notranslate nohighlight">\(LDL^H\)</span> decomposition
-of the returned matrix is forced to be lower or equal to <cite>max_diag_D</cite>.
-optional, default : No maximal value is forced.</li>
-<li><strong>permutation</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a>) – The symmetric permutation method that is applied to the matrix before it is decomposed.
-It has to be a value in <a class="reference internal" href="#matrix.UNIVERSAL_PERMUTATION_METHODS" title="matrix.UNIVERSAL_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.UNIVERSAL_PERMUTATION_METHODS</span></code></a> or
-<a class="reference internal" href="#matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS" title="matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS</span></code></a>.
-If <cite>A</cite> is sparse, it can also be a value in
-<a class="reference internal" href="#matrix.SPARSE_ONLY_PERMUTATION_METHODS" title="matrix.SPARSE_ONLY_PERMUTATION_METHODS"><code class="xref py py-const docutils literal notranslate"><span class="pre">matrix.SPARSE_ONLY_PERMUTATION_METHODS</span></code></a>.
-It is also possible to directly pass a permutation vector.
-optional, default: The permutation is chosen by the algorithm.</li>
-<li><strong>overwrite_A</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether it is allowed to overwrite <cite>A</cite>. Enabling may result in performance gain.
-optional, default: False</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>B</strong> – An approximation of <cite>A</cite> which is positive definite.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">numpy.ndarray or scipy.sparse.spmatrix (same type as <cite>A</cite>)</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotSquareError</span></code></a> – If <cite>A</cite> is not a square matrix.</li>
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixComplexDiagonalValueError" title="matrix.errors.MatrixComplexDiagonalValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixComplexDiagonalValueError</span></code></a> – If <cite>A</cite> has complex diagonal values.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="data">
-<dt id="matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS">
-<code class="descclassname">matrix.</code><code class="descname">APPROXIMATION_ONLY_PERMUTATION_METHODS</code><em class="property"> = ('minimal_difference',)</em><a class="headerlink" href="#matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Supported permutation methods only for approximate dense and sparse matrices.</p>
-</dd></dl>
-
-</div>
 <div class="section" id="examine-a-matrix">
 <h2>Examine a matrix<a class="headerlink" href="#examine-a-matrix" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="matrix.is_positive_semidefinite">
 <code class="descclassname">matrix.</code><code class="descname">is_positive_semidefinite</code><span class="sig-paren">(</span><em>A</em>, <em>check_finite=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/calculate.html#is_positive_semidefinite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.is_positive_semidefinite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the passed matrix is positive semi-definite.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
-<cite>A</cite> must be Hermitian.</li>
-<li><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contain only finite numbers.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
+<cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contain only finite numbers.
 Disabling may result in problems (crashes, non-termination)
 if they contain infinities or NaNs.
 Disabling gives a performance gain.
-optional, default: True</li>
+optional, default: True</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Whether <cite>A</cite> is positive semi-definite.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotFiniteError</span></code></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whether <cite>A</cite> is positive semi-definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><strong>matrix.errors.MatrixNotFiniteError</strong></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="matrix.is_positive_definite">
 <code class="descclassname">matrix.</code><code class="descname">is_positive_definite</code><span class="sig-paren">(</span><em>A</em>, <em>check_finite=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/calculate.html#is_positive_definite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.is_positive_definite" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the passed matrix is positive definite.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
-<cite>A</cite> must be Hermitian.</li>
-<li><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contain only finite numbers.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
+<cite>A</cite> must be Hermitian.</p></li>
+<li><p><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contain only finite numbers.
 Disabling may result in problems (crashes, non-termination)
 if they contain infinities or NaNs.
 Disabling gives a performance gain.
-optional, default: True</li>
+optional, default: True</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Whether <cite>A</cite> is positive definite.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotFiniteError</span></code></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whether <cite>A</cite> is positive definite.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><strong>matrix.errors.MatrixNotFiniteError</strong></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="matrix.is_invertible">
 <code class="descclassname">matrix.</code><code class="descname">is_invertible</code><span class="sig-paren">(</span><em>A</em>, <em>check_finite=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/calculate.html#is_invertible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.is_invertible" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns whether the passed matrix is an invertible matrix.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
-<cite>A</cite> must be Hermitian and positive semidefinite.</li>
-<li><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contain only finite numbers.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
+<cite>A</cite> must be Hermitian and positive semidefinite.</p></li>
+<li><p><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> contain only finite numbers.
 Disabling may result in problems (crashes, non-termination)
 if they contain infinities or NaNs.
 Disabling gives a performance gain.
-optional, default: True</li>
+optional, default: True</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Whether <cite>A</cite> is invertible.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotFiniteError</span></code></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whether <cite>A</cite> is invertible.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><strong>matrix.errors.MatrixNotFiniteError</strong></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -338,42 +735,38 @@ optional, default: True</li>
 <dt id="matrix.solve">
 <code class="descclassname">matrix.</code><code class="descname">solve</code><span class="sig-paren">(</span><em>A</em>, <em>b</em>, <em>overwrite_b=False</em>, <em>check_finite=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matrix/calculate.html#solve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matrix.solve" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solves the equation <cite>A x = b</cite> regarding <cite>x</cite>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.1.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
-<cite>A</cite> must be Hermitian and positive definite.</li>
-<li><strong>b</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)"><em>numpy.ndarray</em></a>) – Right-hand side vector or matrix in equation <cite>A x = b</cite>.
-It must hold <cite>b.shape[0] == A.shape[0]</cite>.</li>
-<li><strong>overwrite_b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Allow overwriting data in <cite>b</cite>.
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>A</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a><em> or </em><a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.spmatrix.html#scipy.sparse.spmatrix" title="(in SciPy v1.3.0)"><em>scipy.sparse.spmatrix</em></a>) – The matrix that should be checked.
+<cite>A</cite> must be Hermitian and positive definite.</p></li>
+<li><p><strong>b</strong> (<a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)"><em>numpy.ndarray</em></a>) – Right-hand side vector or matrix in equation <cite>A x = b</cite>.
+It must hold <cite>b.shape[0] == A.shape[0]</cite>.</p></li>
+<li><p><strong>overwrite_b</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Allow overwriting data in <cite>b</cite>.
 Enabling gives a performance gain.
-optional, default: False</li>
-<li><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> and b` contain only finite numbers.
+optional, default: False</p></li>
+<li><p><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to check that <cite>A</cite> and b` contain only finite numbers.
 Disabling may result in problems (crashes, non-termination)
 if they contain infinities or NaNs.
 Disabling gives a performance gain.
-optional, default: True</li>
+optional, default: True</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">An <cite>x</cite> so that <cite>A x = b</cite>.
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An <cite>x</cite> so that <cite>A x = b</cite>.
 The shape of <cite>x</cite> matches the shape of <cite>b</cite>.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.15)">numpy.ndarray</a></p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotSquareError</span></code></a> – If <cite>A</cite> is not a square matrix.</li>
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixNotFiniteError</span></code></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</li>
-<li><a class="reference internal" href="errors.html#matrix.errors.MatrixSingularError" title="matrix.errors.MatrixSingularError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">matrix.errors.MatrixSingularError</span></code></a> – If <cite>A</cite> is singular.</li>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.16)">numpy.ndarray</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotSquareError" title="matrix.errors.MatrixNotSquareError"><strong>matrix.errors.MatrixNotSquareError</strong></a> – If <cite>A</cite> is not a square matrix.</p></li>
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixNotFiniteError" title="matrix.errors.MatrixNotFiniteError"><strong>matrix.errors.MatrixNotFiniteError</strong></a> – If <cite>A</cite> is not a finite matrix and <cite>check_finite</cite> is True.</p></li>
+<li><p><a class="reference internal" href="errors.html#matrix.errors.MatrixSingularError" title="matrix.errors.MatrixSingularError"><strong>matrix.errors.MatrixSingularError</strong></a> – If <cite>A</cite> is singular.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -398,8 +791,9 @@ The shape of <cite>x</cite> matches the shape of <cite>b</cite>.</p>
 <h3>Navigation</h3>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#positive-semidefinite-approximation-of-a-matrix">Positive semidefinite approximation of a matrix</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-matrix.nearest">Nearest matrix with specific properties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#decompose-a-matrix">Decompose a matrix</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#approximate-a-matrix">Approximate a matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#examine-a-matrix">Examine a matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#solve-system-of-linear-equations">Solve system of linear equations</a></li>
 </ul>
@@ -424,12 +818,18 @@ The shape of <cite>x</cite> matches the shape of <cite>b</cite>.</p>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -438,8 +838,8 @@ The shape of <cite>x</cite> matches the shape of <cite>b</cite>.</p>
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/functions.rst.txt"

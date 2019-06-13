@@ -1,19 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>matrix.decompositions &#8212; matrix-decomposition 1.0.post0.dev16+dirty.ge869d2b documentation</title>
+    <meta charset="utf-8" />
+    <title>matrix.decompositions &#8212; matrix-decomposition 1.0.1.post0.dev40+dirty.ge60ca81 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -33,7 +32,11 @@
           <div class="body" role="main">
             
   <h1>Source code for matrix.decompositions</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">abc</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module provides the decompositions which this library can process.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">tarfile</span>
@@ -272,7 +275,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># debug info</span>
-        <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Copying </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Copying </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="c1"># make copy</span>
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
@@ -318,7 +321,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># debug info</span>
-        <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Converting </span><span class="si">{}</span><span class="s1"> to type </span><span class="si">{type_str}</span><span class="s1"> with copy=</span><span class="si">{copy}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_str</span><span class="o">=</span><span class="n">type_str</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">))</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Converting </span><span class="si">{}</span><span class="s1"> to type </span><span class="si">{type_str}</span><span class="s1"> with copy=</span><span class="si">{copy}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_str</span><span class="o">=</span><span class="n">type_str</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">))</span>
 
         <span class="c1"># convert</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_type</span><span class="p">(</span><span class="n">type_str</span><span class="p">):</span>
@@ -349,7 +352,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># debug info</span>
-        <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Converting </span><span class="si">{}</span><span class="s1"> to any type of </span><span class="si">{type_strs}</span><span class="s1"> with copy=</span><span class="si">{copy}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_strs</span><span class="o">=</span><span class="n">type_strs</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">))</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Converting </span><span class="si">{}</span><span class="s1"> to any type of </span><span class="si">{type_strs}</span><span class="s1"> with copy=</span><span class="si">{copy}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_strs</span><span class="o">=</span><span class="n">type_strs</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">))</span>
 
         <span class="c1"># convert</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_strs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_type</span><span class="p">,</span> <span class="n">type_strs</span><span class="p">)):</span>
@@ -518,7 +521,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># debug info</span>
-        <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Saving </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Saving </span><span class="si">{}</span><span class="s1"> to </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
 
         <span class="c1"># check filename</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">DecompositionBase</span><span class="o">.</span><span class="n">_check_decomposition_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -606,10 +609,12 @@
 <span class="sd">        ----------</span>
 <span class="sd">        FileNotFoundError</span>
 <span class="sd">            If the files are not found in the passed directory.</span>
+<span class="sd">        DecompositionInvalidDecompositionTypeFile</span>
+<span class="sd">            If the files contains another decomposition type.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># debug info</span>
-        <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading decomposition of type </span><span class="si">{}</span><span class="s1"> from </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_str</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading decomposition of type </span><span class="si">{}</span><span class="s1"> from </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_str</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
 
         <span class="c1"># check filename</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">DecompositionBase</span><span class="o">.</span><span class="n">_check_decomposition_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -755,7 +760,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># debug info</span>
-        <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Solving linear system with </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Solving linear system with </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="c1"># solve</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div></div>
 
@@ -1339,7 +1344,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># debug info</span>
-    <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Saving decomposition to </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Saving decomposition to </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
     <span class="c1"># save</span>
     <span class="n">decomposition</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
@@ -1351,10 +1356,17 @@
 <span class="sd">    ----------</span>
 <span class="sd">    filename : str</span>
 <span class="sd">        Where the decomposition is saved.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ----------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the files are not found in the passed directory.</span>
+<span class="sd">    DecompositionInvalidFile</span>
+<span class="sd">        If the files does not contain a stored decomposition.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># debug info</span>
-    <span class="n">matrix</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading decomposition from </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Loading decomposition from </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
     <span class="c1"># load</span>
     <span class="n">type_str</span> <span class="o">=</span> <span class="n">DecompositionBase</span><span class="o">.</span><span class="n">_load_type</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">decomposition_classes</span> <span class="o">=</span> <span class="p">(</span><span class="n">LDL_Decomposition</span><span class="p">,</span> <span class="n">LDL_DecompositionCompressed</span><span class="p">,</span> <span class="n">LL_Decomposition</span><span class="p">,</span> <span class="n">DecompositionBase</span><span class="p">)</span>
@@ -1404,12 +1416,18 @@
     <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -1418,8 +1436,8 @@
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.8</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 
