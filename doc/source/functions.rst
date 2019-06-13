@@ -5,6 +5,14 @@ Several functions are included in this package.
 The most important ones are summarized here.
 
 
+Positive semidefinite approximation of a matrix
+-----------------------------------------------
+
+.. autofunction:: matrix.approximation.positive_semidefinite.positive_semidefinite_matrix
+.. autofunction:: matrix.approximation.positive_semidefinite.decomposition
+.. autodata:: matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS
+
+
 Decompose a matrix
 ------------------
 
@@ -15,16 +23,6 @@ Decompose a matrix
 .. autodata:: matrix.SPARSE_ONLY_PERMUTATION_METHODS
 
 .. autodata:: matrix.DECOMPOSITION_TYPES
-
-
-Approximate a matrix
---------------------
-
-.. autofunction:: matrix.approximate.decomposition
-
-.. autofunction:: matrix.approximate.positive_definite_matrix
-
-.. autodata:: matrix.APPROXIMATION_ONLY_PERMUTATION_METHODS
 
 
 Examine a matrix

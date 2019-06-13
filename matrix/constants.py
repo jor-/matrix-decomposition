@@ -24,9 +24,6 @@ DIAGONAL_VALUES_PERMUTATION_METHODS = (
 UNIVERSAL_PERMUTATION_METHODS = (NO_PERMUTATION_METHOD,) + DIAGONAL_VALUES_PERMUTATION_METHODS
 """ Supported permutation methods for decompose dense and sparse matrices. """
 
-MINIMAL_DIFFERENCE_PERMUTATION_METHOD = 'minimal_difference'
-MAXIMAL_STABILITY_PERMUTATION_METHOD = 'maximal_stability'
-APPROXIMATION_ONLY_PERMUTATION_METHODS = (MINIMAL_DIFFERENCE_PERMUTATION_METHOD, MAXIMAL_STABILITY_PERMUTATION_METHOD)
 from matrix.sparse.constants import SPARSE_ONLY_PERMUTATION_METHODS, BEST_FILL_REDUCE_PERMUTATION_METHOD, DEFAULT_FILL_REDUCE_PERMUTATION_METHOD
 
 # *** save and load *** #
@@ -36,3 +33,15 @@ DECOMPOSITION_ATTRIBUTE_DENSE_FILE_EXTENSION = 'dense.npz'
 DECOMPOSITION_ATTRIBUTE_SPARSE_FILE_EXTENSION = 'sparse.npz'
 DECOMPOSITION_TYPE_FILENAME = 'type.txt'
 DECOMPOSITION_FILENAME_EXTENSION = 'dec'
+
+
+# ** deprecated *** #
+
+def __getattr__(name):
+    deprecated_names = ['MINIMAL_DIFFERENCE_PERMUTATION_METHOD', 'MAXIMAL_STABILITY_PERMUTATION_METHOD', 'APPROXIMATION_ONLY_PERMUTATION_METHODS']
+    if name in deprecated_names:
+        import warnings
+        warnings.warn(f'"matrix.constants.{name}"" is deprecated. Use "matrix.approximation.positive_semidefinite.{name}" instead.', DeprecationWarning, stacklevel=2)
+        import matrix.approximation.positive_semidefinite
+        return matrix.approximation.positive_semidefinite.__getattribute__(name)
+    raise AttributeError(f'Module {__name__} has no attribute {name}.')
