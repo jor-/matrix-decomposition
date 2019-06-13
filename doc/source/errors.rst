@@ -99,3 +99,10 @@ DecompositionInvalidDecompositionTypeFile
     :show-inheritance:
 
 
+If the computation needs more iterations than the maximal number of iterations, the following exception occurs:
+
+TooManyIterationsError
+----------------------
+.. autoexception:: matrix.errors.TooManyIterationsError
+    :show-inheritance:
+

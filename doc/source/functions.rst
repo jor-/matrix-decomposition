@@ -19,6 +19,13 @@ Positive semidefinite approximation of a matrix
 .. autofunction:: matrix.approximation.positive_semidefinite.SE_T1
 
 
+Nearest matrix with specific properties
+---------------------------------------
+
+.. automodule:: matrix.nearest
+    :members:
+
+
 Decompose a matrix
 ------------------
 

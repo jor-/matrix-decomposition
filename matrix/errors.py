@@ -155,3 +155,22 @@ class NoDecompositionConversionImplementedError(NoDecompositionPossibleError):
 
     def __init__(self, decomposition, desired_type):
         super().__init__(decomposition, desired_type)
+
+
+# *** other exceptions *** #
+
+class TooManyIterationsError(BaseError):
+    """ Too many iterations are needed for the calculation. """
+
+    def __init__(self, message=None, iteration=None, result=None):
+        if message is None:
+            if iteration is None:
+                message = 'No solution found in maximal number of iterations.'
+            else:
+                message = f'No solution found in {iteration} iterations.'
+        self.message = message
+        super(message)
+        if iteration is not None:
+            self.iteration = iteration
+        if result is not None:
+            self.result = result

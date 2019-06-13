@@ -1,6 +1,6 @@
 # *** submodules *** #
 
-from matrix import constants, decompositions, errors, approximation
+from matrix import constants, decompositions, errors, approximation, nearest
 
 # *** functions *** #
 
