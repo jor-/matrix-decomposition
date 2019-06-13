@@ -27,15 +27,7 @@ UNIVERSAL_PERMUTATION_METHODS = (NO_PERMUTATION_METHOD,) + DIAGONAL_VALUES_PERMU
 MINIMAL_DIFFERENCE_PERMUTATION_METHOD = 'minimal_difference'
 MAXIMAL_STABILITY_PERMUTATION_METHOD = 'maximal_stability'
 APPROXIMATION_ONLY_PERMUTATION_METHODS = (MINIMAL_DIFFERENCE_PERMUTATION_METHOD, MAXIMAL_STABILITY_PERMUTATION_METHOD)
-""" Supported permutation methods only for approximate dense and sparse matrices. """
-
-from matrix.sparse.constants import SPARSE_ONLY_PERMUTATION_METHODS
-""" Supported permutation methods only for sparse matrices. """
-
-from matrix.sparse.constants import BEST_FILL_REDUCE_PERMUTATION_METHOD
-""" Supported permutation method to best reduce fill of decomposed sparse matrices. """
-from matrix.sparse.constants import DEFAULT_FILL_REDUCE_PERMUTATION_METHOD
-""" Supported permutation method to default reduce fill of decomposed sparse matrices. """
+from matrix.sparse.constants import SPARSE_ONLY_PERMUTATION_METHODS, BEST_FILL_REDUCE_PERMUTATION_METHOD, DEFAULT_FILL_REDUCE_PERMUTATION_METHOD
 
 # *** save and load *** #
 
