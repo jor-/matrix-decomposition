@@ -11,6 +11,12 @@ Positive semidefinite approximation of a matrix
 .. autofunction:: matrix.approximation.positive_semidefinite.positive_semidefinite_matrix
 .. autofunction:: matrix.approximation.positive_semidefinite.decomposition
 .. autodata:: matrix.approximation.positive_semidefinite.APPROXIMATION_ONLY_PERMUTATION_METHODS
+.. autofunction:: matrix.approximation.positive_semidefinite.GMW_81
+.. autofunction:: matrix.approximation.positive_semidefinite.GMW_T1
+.. autofunction:: matrix.approximation.positive_semidefinite.GMW_T2
+.. autofunction:: matrix.approximation.positive_semidefinite.SE_90
+.. autofunction:: matrix.approximation.positive_semidefinite.SE_99
+.. autofunction:: matrix.approximation.positive_semidefinite.SE_T1
 
 
 Decompose a matrix
