@@ -57,8 +57,7 @@ install:
 script:
     - if [ "${CODE_TEST}" == "1" ]; then
           if [ "${COVERAGE}" == "1" ]; then
-              pytest -W error --cov=matrix;
-              codecov;
+              pytest -W error --cov=matrix && codecov;
           else
               pytest -W error;
           fi
