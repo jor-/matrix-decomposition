@@ -86,6 +86,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     d_values.append(max(min_diag_D, min_abs_value_D))
                 if np.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
                     d_values.append(max_diag_D)
+                # add feasible d and omega values
                 for d in d_values:
                     # calculate bounds
                     omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
@@ -99,9 +100,19 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
                     assert len(omegas) in (1, 3)
                     # apply bounds and add to candidate list
+                    add_omega_lower = False
+                    add_omega_upper = False
                     for omega in omegas:
-                        omega = min(max(omega, omega_lower), omega_upper)
-                        C.append((d, omega))
+                        if omega <= omega_lower:
+                            add_omega_lower = True
+                        elif omega >= omega_upper:
+                            add_omega_upper = True
+                        else:
+                            C.append((d, omega))
+                    if add_omega_lower:
+                        C.append((d, omega_lower))
+                    if add_omega_upper:
+                        C.append((d, omega_upper))
         else:
             d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
             if alpha == np.inf:
