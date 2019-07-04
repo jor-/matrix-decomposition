@@ -89,8 +89,7 @@ def permutation_vector(A, permutation_method=None):
 
 def invert_permutation_vector(p):
     p_inverse = np.empty_like(p)
-    for i, p_i in enumerate(p):
-        p_inverse[p_i] = i
+    p_inverse[p] = np.arange(len(p))
     return p_inverse
 
 
