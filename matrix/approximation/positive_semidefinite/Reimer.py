@@ -19,6 +19,17 @@ APPROXIMATION_ONLY_PERMUTATION_METHODS = (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
 """ Permutation methods supported only by the decomposition and the positive_semidefinite_matrix algorithm. """
 
 
+def _difference_frobenius_norm(d, omega, alpha, beta, gamma):
+    if omega == 0:  # for case alpha == inf
+        f_value = (d - gamma)**2 + beta
+    elif omega == 1:  # for case beta == inf
+        f_value = (d + alpha - gamma)**2
+    else:
+        f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
+    assert f_value >= 0
+    return f_value
+
+
 def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
 
@@ -47,24 +58,13 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     except RuntimeWarning:
         alpha = np.inf
 
-    # define difference function
-    def f(d, omega):
-        if omega == 0:  # for case alpha == inf
-            f_value = (d - gamma)**2 + beta
-        elif omega == 1:  # for case beta == inf
-            f_value = (d + alpha - gamma)**2
-        else:
-            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
-        assert f_value >= 0
-        return f_value
-
     # global solution
     d = gamma - alpha
     if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha):
         assert alpha != np.inf
         omega = 1
         f_value = 0
-        assert np.isclose(f(d, omega), f_value)
+        assert np.isclose(_difference_frobenius_norm(d, omega, alpha, beta, gamma), f_value)
 
     # solution at bounds
     else:
@@ -121,7 +121,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
 
         # calculate function values for candidates
         assert len(C) >= 1
-        C_with_f_value = ((d, omega, f(d, omega)) for (d, omega) in C)
+        C_with_f_value = ((d, omega, _difference_frobenius_norm(d, omega, alpha, beta, gamma)) for (d, omega) in C)
 
         # return best values
         (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
