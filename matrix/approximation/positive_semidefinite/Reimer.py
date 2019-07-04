@@ -42,12 +42,10 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
 
     # ensure that alpha**2 is finite if alpha is finite (for np.roots)
-    with warnings.catch_warnings():
-        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars', category=RuntimeWarning)
-        try:
-            alpha**2
-        except RuntimeWarning:
-            alpha = np.inf
+    try:
+        alpha**2
+    except RuntimeWarning:
+        alpha = np.inf
 
     # define difference function
     def f(d, omega):
@@ -227,443 +225,447 @@ def _decomposition(
                         f'permutation={permutation}, overwrite_A={overwrite_A}, '
                         f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
 
-    # check A
-    is_dense = not matrix.sparse.util.is_sparse(A)
-    if is_dense:
-        A = np.asarray(A)
-    elif A.format not in ('csc', 'csr', 'lil', 'dok'):
-        A = A.tocsc(copy=False)
-    if A.ndim != 2 or A.shape[0] != A.shape[1]:
-        raise matrix.errors.MatrixNotSquareError(A)
-    n = A.shape[0]
+    # raise error at overflow
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars', category=RuntimeWarning)
 
-    # calculate gamma
-    gamma = A.diagonal()
-    if np.issubdtype(A.dtype, np.complexfloating):
-        if not np.all(np.isreal(gamma)):
-            index_with_complex_value = np.where(~np.isreal(gamma))[0][0]
-            raise matrix.errors.MatrixComplexDiagonalValueError(A, i=index_with_complex_value)
-        gamma = gamma.real
-
-    # data type to use for calculations
-    DTYPE = np.float64
-    d_eps = np.finfo(DTYPE).eps
-
-    # check diag values
-    def check_float_scalar_or_vector(f, f_name='variable', default_value=None,
-                                     minus_inf_okay=False, plus_inf_okay=False):
-        if f is not None:
-            try:
-                f = np.asarray(f)
-            except TypeError as original_error:
-                error = ValueError(f'{f_name} must a scalar value or a vector but it is {f}.')
-                matrix.logger.error(error)
-                raise error from original_error
-            if not (f.ndim == 0 or (f.ndim == 1 and f.shape[0] == n)):
-                error = ValueError(f'{f_name} must be a scalar or a vector with the same dimension '
-                                   f'as A but its shape is {f.shape}.')
-                matrix.logger.error(error)
-                raise error
-            if not (np.all(np.isreal(f))):
-                error = ValueError(f'{f_name} must be real valued but it is {f}.')
-                matrix.logger.error(error)
-                raise error
-            if not np.all(np.logical_or(np.isfinite(f),
-                                        np.logical_or(np.logical_and(plus_inf_okay,
-                                                                     f == np.inf),
-                                                      np.logical_and(minus_inf_okay,
-                                                                     f == -np.inf)))):
-                error = ValueError(f'{f_name} must be finite'
-                                   + (' or minus infinity' if minus_inf_okay else '')
-                                   + (' or plus infinity' if plus_inf_okay else '')
-                                   + f' but it is {f}.')
-                matrix.logger.error(error)
-                raise error
-        else:
-            f = np.asarray(default_value)
-        return f
-
-    def check_float_scalar(f, f_name='variable', default_value=None, lower_bound=-np.inf,
-                           minus_inf_okay=False, plus_inf_okay=False):
-        if f is not None:
-            try:
-                f = float(f)
-            except TypeError as original_error:
-                error = ValueError(f'{f_name} must a float value but it is {f}.')
-                matrix.logger.error(error)
-                raise error from original_error
-            if not (np.isfinite(f) or (minus_inf_okay and f == -np.inf)
-                    or (plus_inf_okay and f == np.inf)):
-                error = ValueError(f'{f_name} must be finite'
-                                   + (' or minus infinity' if minus_inf_okay else '')
-                                   + (' or plus infinity' if plus_inf_okay else '')
-                                   + f' but it is {f}.')
-                matrix.logger.error(error)
-                raise error
-            if lower_bound is not None and f < lower_bound:
-                error = ValueError(f'{f_name} must be finite and greater or equal to {lower_bound} '
-                                   f'but it is {f}.')
-                matrix.logger.error(error)
-                raise error
-        else:
-            f = default_value
-        return f
-
-    min_diag_B = check_float_scalar_or_vector(min_diag_B, 'min_diag_B', default_value=-np.inf,
-                                              minus_inf_okay=True, plus_inf_okay=False)
-    max_diag_B = check_float_scalar_or_vector(max_diag_B, 'max_diag_B', default_value=np.inf,
-                                              minus_inf_okay=False, plus_inf_okay=True)
-
-    min_diag_D = check_float_scalar(min_diag_D, f_name='min_diag_D',
-                                    default_value=None, lower_bound=0,
-                                    minus_inf_okay=False, plus_inf_okay=False)
-    max_diag_D = check_float_scalar(max_diag_D, f_name='max_diag_D',
-                                    default_value=np.inf, lower_bound=None,
-                                    minus_inf_okay=False, plus_inf_okay=True)
-
-    if not (max(np.max(min_diag_B), min_diag_D if min_diag_D is not None else 0)
-            <= min(np.min(max_diag_B), max_diag_D)):
-        error = ValueError(('The values of min_diag_B and min_diag_D must be lower or equal '
-                            'to the values of max_diag_B and max_diag_D.'))
-        matrix.logger.error(error)
-        raise error
-
-    min_abs_value_D = check_float_scalar(min_abs_value_D, f_name='min_abs_value_D',
-                                         default_value=d_eps**0.5, lower_bound=0,
-                                         minus_inf_okay=False, plus_inf_okay=False)
-    min_abs_value_D = max(min_abs_value_D, d_eps)
-
-    # check overwrite_A
-    if overwrite_A is None or not is_dense:
-        overwrite_A = False
-    if overwrite_A and np.issubdtype(A.dtype, np.integer):
-        overwrite_A = False
-        matrix.logger.debug(f'A has an integer dtype ({A.dtype}) which can not be used to store '
-                            f'the values of L. Thus L is not overwritten.')
-
-    # check strict_lower_triangular_only_L
-    if strict_lower_triangular_only_L is None:
-        strict_lower_triangular_only_L = False
-
-    # check permutation method
-    if permutation is None:
-        permutation = MAXIMAL_STABILITY_PERMUTATION_METHOD
-
-    # name of permutation method passed
-    if isinstance(permutation, str):
-        # check permutation method
-        permutation_method = permutation.lower()
-        supported_permutation_methods = (matrix.UNIVERSAL_PERMUTATION_METHODS
-                                         + APPROXIMATION_ONLY_PERMUTATION_METHODS)
-        if not is_dense:
-            supported_permutation_methods = (supported_permutation_methods
-                                             + matrix.SPARSE_ONLY_PERMUTATION_METHODS)
-        if permutation_method not in supported_permutation_methods:
-            error = ValueError(f'Permutation method {permutation_method} is unknown. Only the '
-                               f'following methods are supported {supported_permutation_methods}.')
-            matrix.logger.error(error)
-            raise error
-
-        # calculate permutation vector
-        matrix.logger.debug(f'Calculating permutation vector with method "{permutation_method}".')
-
-        if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
-                                  MAXIMAL_STABILITY_PERMUTATION_METHOD):
-            if (permutation_method == MINIMAL_DIFFERENCE_PERMUTATION_METHOD
-                    and min_diag_D is not None and min_diag_D <= 0):
-                raise ValueError(f'The permutation method '
-                                 f'{MINIMAL_DIFFERENCE_PERMUTATION_METHOD} is '
-                                 f'only available if min_diag_D is greater zero.')
-            if is_dense:
-                p = np.arange(n, dtype=np.min_scalar_type(n))
-            else:
-                p = matrix.permute.permutation_vector(
-                    A,
-                    permutation_method=matrix.sparse.constants.DEFAULT_FILL_REDUCE_PERMUTATION_METHOD)
-        else:
-            p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
-    else:
-        permutation_method = None
-        p = np.asanyarray(permutation)
-        if p.ndim != 1 or p.shape[0] != n:
-            error = ValueError(f'Permutation vactor must have same length as the dimensions of A. '
-                               f'Its shape is {p.shape} and the shape of A is {A.shape}.')
-            matrix.logger.error(error)
-            raise error
-
-    # init L
-    if overwrite_A:
-        L = A
-    else:
-        L_dtype = np.promote_types(A.dtype, np.float64)
+        # check A
+        is_dense = not matrix.sparse.util.is_sparse(A)
         if is_dense:
-            L = np.zeros((n, n), dtype=L_dtype)
-        else:
-            L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
-            L_rows = L.rows
-            L_data = L.data
-    L_eps = np.finfo(L.dtype).eps
+            A = np.asarray(A)
+        elif A.format not in ('csc', 'csr', 'lil', 'dok'):
+            A = A.tocsc(copy=False)
+        if A.ndim != 2 or A.shape[0] != A.shape[1]:
+            raise matrix.errors.MatrixNotSquareError(A)
+        n = A.shape[0]
 
-    # init other values
-    alpha = np.zeros(n, dtype=DTYPE)
-    beta = np.zeros(n, dtype=DTYPE)
-    delta = np.empty(n, dtype=DTYPE)
-    omega = np.empty(n, dtype=DTYPE)
-    d = np.empty(n, dtype=DTYPE)
+        # calculate gamma
+        gamma = A.diagonal()
+        if np.issubdtype(A.dtype, np.complexfloating):
+            if not np.all(np.isreal(gamma)):
+                index_with_complex_value = np.where(~np.isreal(gamma))[0][0]
+                raise matrix.errors.MatrixComplexDiagonalValueError(A, i=index_with_complex_value)
+            gamma = gamma.real
 
-    # debug info
-    matrix.logger.debug(f'Using the following values: '
-                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                        f'min_abs_value_D={min_abs_value_D} '
-                        f'permutation={permutation}, overwrite_A={overwrite_A}, '
-                        f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
+        # data type to use for calculations
+        DTYPE = np.float64
+        d_eps = np.finfo(DTYPE).eps
 
-    # calculate values iteratively
-    def get_value_i(v, i):
-        try:
-            return v[i]
-        except TypeError:
-            return v
-        except IndexError:
-            assert v.ndim == 0
-            return v
-
-    for i in range(n):
-        matrix.logger.debug(f'Starting iteration {i} of {n - 1}.')
-
-        # determine possible next indices
-        if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
-                                  MAXIMAL_STABILITY_PERMUTATION_METHOD):
-            possible_indices = range(i, n)
-        else:
-            possible_indices = (i,)
-
-        # choose current min d
-        def minimal_change_for_index(j):
-            min_diag_B_i = get_value_i(min_diag_B, p[j])
-            max_diag_B_i = get_value_i(max_diag_B, p[j])
-            if min_diag_D is not None:
-                min_diag_D_i = min_diag_D
+        # check diag values
+        def check_float_scalar_or_vector(f, f_name='variable', default_value=None,
+                                         minus_inf_okay=False, plus_inf_okay=False):
+            if f is not None:
+                try:
+                    f = np.asarray(f)
+                except TypeError as original_error:
+                    error = ValueError(f'{f_name} must a scalar value or a vector but it is {f}.')
+                    matrix.logger.error(error)
+                    raise error from original_error
+                if not (f.ndim == 0 or (f.ndim == 1 and f.shape[0] == n)):
+                    error = ValueError(f'{f_name} must be a scalar or a vector with the same dimension '
+                                       f'as A but its shape is {f.shape}.')
+                    matrix.logger.error(error)
+                    raise error
+                if not (np.all(np.isreal(f))):
+                    error = ValueError(f'{f_name} must be real valued but it is {f}.')
+                    matrix.logger.error(error)
+                    raise error
+                if not np.all(np.logical_or(np.isfinite(f),
+                                            np.logical_or(np.logical_and(plus_inf_okay,
+                                                                         f == np.inf),
+                                                          np.logical_and(minus_inf_okay,
+                                                                         f == -np.inf)))):
+                    error = ValueError(f'{f_name} must be finite'
+                                       + (' or minus infinity' if minus_inf_okay else '')
+                                       + (' or plus infinity' if plus_inf_okay else '')
+                                       + f' but it is {f}.')
+                    matrix.logger.error(error)
+                    raise error
             else:
-                min_diag_D_i = min(0.5 * min(max(gamma[p[j]], min_diag_B_i), max_diag_B_i), max_diag_D)
-            return _minimal_change(
-                alpha[p[j]], beta[p[j]], gamma[p[j]], min_diag_D_i, max_diag_D=max_diag_D,
-                min_diag_B=min_diag_B_i, max_diag_B=max_diag_B_i, min_abs_value_D=min_abs_value_D)
+                f = np.asarray(default_value)
+            return f
 
-        # determine next value for p, d, omega
-        all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in possible_indices)
-
-        if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
-                                  MAXIMAL_STABILITY_PERMUTATION_METHOD):
-            if permutation_method == MINIMAL_DIFFERENCE_PERMUTATION_METHOD:
-                def order(value):
-                    k, d_k, omega_k, f_value_k = value
-                    return f_value_k, -d_k, omega_k, k
+        def check_float_scalar(f, f_name='variable', default_value=None, lower_bound=-np.inf,
+                               minus_inf_okay=False, plus_inf_okay=False):
+            if f is not None:
+                try:
+                    f = float(f)
+                except TypeError as original_error:
+                    error = ValueError(f'{f_name} must a float value but it is {f}.')
+                    matrix.logger.error(error)
+                    raise error from original_error
+                if not (np.isfinite(f) or (minus_inf_okay and f == -np.inf)
+                        or (plus_inf_okay and f == np.inf)):
+                    error = ValueError(f'{f_name} must be finite'
+                                       + (' or minus infinity' if minus_inf_okay else '')
+                                       + (' or plus infinity' if plus_inf_okay else '')
+                                       + f' but it is {f}.')
+                    matrix.logger.error(error)
+                    raise error
+                if lower_bound is not None and f < lower_bound:
+                    error = ValueError(f'{f_name} must be finite and greater or equal to {lower_bound} '
+                                       f'but it is {f}.')
+                    matrix.logger.error(error)
+                    raise error
             else:
-                def order(value):
-                    k, d_k, omega_k, f_value_k = value
-                    return -d_k, f_value_k, omega_k, k
-            (j, d_i, omega_i, f_value_i) = min(all_minimal_changes, key=order)
-            # swap p[i] and p[j]
-            p_i = p[j]
-            p[j] = p[i]
-            p[i] = p_i
-            # swap L[i, :] and L[j, :]
-            if i > 0:
-                if is_dense or L.format != 'lil':
-                    L_j = L[j, :i].copy()
-                    L[j, :i] = L[i, :i]
-                    L[i, :i] = L_j
+                f = default_value
+            return f
+
+        min_diag_B = check_float_scalar_or_vector(min_diag_B, 'min_diag_B', default_value=-np.inf,
+                                                  minus_inf_okay=True, plus_inf_okay=False)
+        max_diag_B = check_float_scalar_or_vector(max_diag_B, 'max_diag_B', default_value=np.inf,
+                                                  minus_inf_okay=False, plus_inf_okay=True)
+
+        min_diag_D = check_float_scalar(min_diag_D, f_name='min_diag_D',
+                                        default_value=None, lower_bound=0,
+                                        minus_inf_okay=False, plus_inf_okay=False)
+        max_diag_D = check_float_scalar(max_diag_D, f_name='max_diag_D',
+                                        default_value=np.inf, lower_bound=None,
+                                        minus_inf_okay=False, plus_inf_okay=True)
+
+        if not (max(np.max(min_diag_B), min_diag_D if min_diag_D is not None else 0)
+                <= min(np.min(max_diag_B), max_diag_D)):
+            error = ValueError(('The values of min_diag_B and min_diag_D must be lower or equal '
+                                'to the values of max_diag_B and max_diag_D.'))
+            matrix.logger.error(error)
+            raise error
+
+        min_abs_value_D = check_float_scalar(min_abs_value_D, f_name='min_abs_value_D',
+                                             default_value=d_eps**0.5, lower_bound=0,
+                                             minus_inf_okay=False, plus_inf_okay=False)
+        min_abs_value_D = max(min_abs_value_D, d_eps)
+
+        # check overwrite_A
+        if overwrite_A is None or not is_dense:
+            overwrite_A = False
+        if overwrite_A and np.issubdtype(A.dtype, np.integer):
+            overwrite_A = False
+            matrix.logger.debug(f'A has an integer dtype ({A.dtype}) which can not be used to store '
+                                f'the values of L. Thus L is not overwritten.')
+
+        # check strict_lower_triangular_only_L
+        if strict_lower_triangular_only_L is None:
+            strict_lower_triangular_only_L = False
+
+        # check permutation method
+        if permutation is None:
+            permutation = MAXIMAL_STABILITY_PERMUTATION_METHOD
+
+        # name of permutation method passed
+        if isinstance(permutation, str):
+            # check permutation method
+            permutation_method = permutation.lower()
+            supported_permutation_methods = (matrix.UNIVERSAL_PERMUTATION_METHODS
+                                             + APPROXIMATION_ONLY_PERMUTATION_METHODS)
+            if not is_dense:
+                supported_permutation_methods = (supported_permutation_methods
+                                                 + matrix.SPARSE_ONLY_PERMUTATION_METHODS)
+            if permutation_method not in supported_permutation_methods:
+                error = ValueError(f'Permutation method {permutation_method} is unknown. Only the '
+                                   f'following methods are supported {supported_permutation_methods}.')
+                matrix.logger.error(error)
+                raise error
+
+            # calculate permutation vector
+            matrix.logger.debug(f'Calculating permutation vector with method "{permutation_method}".')
+
+            if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
+                                      MAXIMAL_STABILITY_PERMUTATION_METHOD):
+                if (permutation_method == MINIMAL_DIFFERENCE_PERMUTATION_METHOD
+                        and min_diag_D is not None and min_diag_D <= 0):
+                    raise ValueError(f'The permutation method '
+                                     f'{MINIMAL_DIFFERENCE_PERMUTATION_METHOD} is '
+                                     f'only available if min_diag_D is greater zero.')
+                if is_dense:
+                    p = np.arange(n, dtype=np.min_scalar_type(n))
                 else:
-                    for iterable in (L_rows, L_data):
-                        tmp = iterable[i]
-                        iterable[i] = iterable[j]
-                        iterable[j] = tmp
+                    p = matrix.permute.permutation_vector(
+                        A,
+                        permutation_method=matrix.sparse.constants.DEFAULT_FILL_REDUCE_PERMUTATION_METHOD)
+            else:
+                p = matrix.permute.permutation_vector(A, permutation_method=permutation_method)
         else:
-            (j, d_i, omega_i, f_value_i) = tuple(all_minimal_changes)[0]
-            assert i == j
-            p_i = p[i]
+            permutation_method = None
+            p = np.asanyarray(permutation)
+            if p.ndim != 1 or p.shape[0] != n:
+                error = ValueError(f'Permutation vactor must have same length as the dimensions of A. '
+                                   f'Its shape is {p.shape} and the shape of A is {A.shape}.')
+                matrix.logger.error(error)
+                raise error
 
-        # update d
-        assert np.isfinite(d_i)
-        assert (min_diag_D is None and d_i >= 0) or d_i >= min_diag_D
-        assert d_i <= max_diag_D
-        assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
-        d[i] = d_i
+        # init L
+        if overwrite_A:
+            L = A
+        else:
+            L_dtype = np.promote_types(A.dtype, np.float64)
+            if is_dense:
+                L = np.zeros((n, n), dtype=L_dtype)
+            else:
+                L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
+                L_rows = L.rows
+                L_data = L.data
+        L_eps = np.finfo(L.dtype).eps
 
-        # update omega
-        assert np.isfinite(omega_i)
-        assert omega_i >= 0
-        omega[p_i] = omega_i
-
-        # update delta
-        delta_i = d_i - gamma[p_i]
-        if omega_i != 0:
-            delta_i += omega_i**2 * alpha[p_i]
-        assert np.isfinite(delta_i)
-        delta[p_i] = delta_i
+        # init other values
+        alpha = np.zeros(n, dtype=DTYPE)
+        beta = np.zeros(n, dtype=DTYPE)
+        delta = np.empty(n, dtype=DTYPE)
+        omega = np.empty(n, dtype=DTYPE)
+        d = np.empty(n, dtype=DTYPE)
 
         # debug info
-        matrix.logger.debug(f'Using permutation index {p_i}, d {d_i}, omega {omega[p_i]}, delta '
-                            f'{delta[p_i]} and additional approximation error {f_value_i} for '
-                            f'iteration {i} of {n - 1}. ({(i + 1) / n:.1%} done.)')
+        matrix.logger.debug(f'Using the following values: '
+                            f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
+                            f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
+                            f'min_abs_value_D={min_abs_value_D} '
+                            f'permutation={permutation}, overwrite_A={overwrite_A}, '
+                            f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
 
-        # update i-th row of L with omega
-        if i > 0:
-            if is_dense:
-                if omega_i != 0:
-                    if omega_i != 1:
-                        L[i, :i] *= omega_i
-                    L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
+        # calculate values iteratively
+        def get_value_i(v, i):
+            try:
+                return v[i]
+            except TypeError:
+                return v
+            except IndexError:
+                assert v.ndim == 0
+                return v
+
+        for i in range(n):
+            matrix.logger.debug(f'Starting iteration {i} of {n - 1}.')
+
+            # determine possible next indices
+            if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
+                                      MAXIMAL_STABILITY_PERMUTATION_METHOD):
+                possible_indices = range(i, n)
+            else:
+                possible_indices = (i,)
+
+            # choose current min d
+            def minimal_change_for_index(j):
+                min_diag_B_i = get_value_i(min_diag_B, p[j])
+                max_diag_B_i = get_value_i(max_diag_B, p[j])
+                if min_diag_D is not None:
+                    min_diag_D_i = min_diag_D
                 else:
-                    L[i, :i] = 0
-            else:
-                assert L.format == 'lil'
+                    min_diag_D_i = min(0.5 * min(max(gamma[p[j]], min_diag_B_i), max_diag_B_i), max_diag_D)
+                return _minimal_change(
+                    alpha[p[j]], beta[p[j]], gamma[p[j]], min_diag_D_i, max_diag_D=max_diag_D,
+                    min_diag_B=min_diag_B_i, max_diag_B=max_diag_B_i, min_abs_value_D=min_abs_value_D)
 
-                if omega_i != 0:
-                    L_i_rows = L_rows[i]
-                    L_i_data_array = np.asarray(L_data[i])
-                    if omega_i != 1:
-                        L_i_data_array *= omega_i
-                    L_i_nonzero_mask = np.abs(L_i_data_array) >= L_eps
-                    L_rows[i] = [L_i_rows[i] for i in range(len(L_i_nonzero_mask))
-                                 if L_i_nonzero_mask[i]]
-                    L_data[i] = [L_i_data_array[i] for i in range(len(L_i_nonzero_mask))
-                                 if L_i_nonzero_mask[i]]
+            # determine next value for p, d, omega
+            all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in possible_indices)
+
+            if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
+                                      MAXIMAL_STABILITY_PERMUTATION_METHOD):
+                if permutation_method == MINIMAL_DIFFERENCE_PERMUTATION_METHOD:
+                    def order(value):
+                        k, d_k, omega_k, f_value_k = value
+                        return f_value_k, -d_k, omega_k, k
                 else:
-                    L_rows[i] = []
-                    L_data[i] = []
-
-            assert not is_dense or np.all(np.isfinite(L[i, :i]))
-            assert is_dense or np.all(np.isfinite(L_data[i]))
-
-        # get i-th column of A
-        p_after_i = p[i + 1:]
-        if is_dense:
-            if not overwrite_A:
-                A_column_i = A[:, p_i]
-            else:
-                A_column_i = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
-        else:
-            assert not overwrite_A
-            if A.format in ('csr', 'lil'):
-                A_column_i = A[p_i, :].conj().T
-            else:
-                A_column_i = A[:, p_i]
-            A_column_i = A_column_i.toarray().reshape(-1)
-        A_column_i = A_column_i[p_after_i]
-        assert np.all(np.isfinite(A_column_i))
-
-        # update beta
-        beta_add = 2 * A_column_i * A_column_i.conj()
-        assert np.all(np.isreal(beta_add))
-        beta[p_after_i] += beta_add.real
-
-        # update alpha and i-th column of L
-        if d_i != 0:
-            # get auxiliary variables for calculation of i-th column of L
-            if is_dense:
+                    def order(value):
+                        k, d_k, omega_k, f_value_k = value
+                        return -d_k, f_value_k, omega_k, k
+                (j, d_i, omega_i, f_value_i) = min(all_minimal_changes, key=order)
+                # swap p[i] and p[j]
+                p_i = p[j]
+                p[j] = p[i]
+                p[i] = p_i
+                # swap L[i, :] and L[j, :]
                 if i > 0:
-                    L_row_i_mul_d = L[i, :i].conj() * d[:i]
-                    assert np.all(np.isfinite(L_row_i_mul_d))
-                    L_below_row_i = L[i + 1:, :i]
-                    assert np.all(np.logical_or(np.isfinite(L_below_row_i),
-                                                np.isinf(L_below_row_i)))
+                    if is_dense or L.format != 'lil':
+                        L_j = L[j, :i].copy()
+                        L[j, :i] = L[i, :i]
+                        L[i, :i] = L_j
+                    else:
+                        for iterable in (L_rows, L_data):
+                            tmp = iterable[i]
+                            iterable[i] = iterable[j]
+                            iterable[j] = tmp
             else:
-                assert L.format == 'lil'
-                if len(L_rows[i]) > 0:
-                    L_row_i_mul_d = L[i, :].conj().multiply(d).toarray().reshape(-1)
-                    assert np.all(np.isfinite(L_row_i_mul_d))
-                    L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
-                    L_below_row_i.rows = L_rows[i + 1:]
-                    L_below_row_i.data = L_data[i + 1:]
-                    L_below_row_i._shape = (n - (i + 1), n)
-                    assert np.all((np.all(np.logical_or(np.isfinite(l), np.isinf(l)))
-                                   for l in L_below_row_i.data))
+                (j, d_i, omega_i, f_value_i) = tuple(all_minimal_changes)[0]
+                assert i == j
+                p_i = p[i]
 
-            # calculate i-th column of L
-            if (is_dense and i > 0) or (not is_dense and len(L_rows[i]) > 0):
-                L_column_i = L_below_row_i @ L_row_i_mul_d
+            # update d
+            assert np.isfinite(d_i)
+            assert (min_diag_D is None and d_i >= 0) or d_i >= min_diag_D
+            assert d_i <= max_diag_D
+            assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
+            d[i] = d_i
 
-                # recalculate values where inf * 0 is involved (inf * 0 is nan and should be 0)
-                L_column_i_nan_mask = np.where(np.isnan(L_column_i))[0]
-                assert np.all(np.logical_or(
-                    np.isfinite(L_column_i[np.logical_not(np.isnan(L_column_i))]),
-                    np.isinf(L_column_i[np.logical_not(np.isnan(L_column_i))])))
-                if np.any(L_column_i_nan_mask):
-                    L_row_i_mul_d_zero_mask = L_row_i_mul_d == 0
-                    for j in L_column_i_nan_mask:
-                        L_row_i_j = L_below_row_i[j, :].toarray().reshape(-1)
-                        L_row_i_j[L_row_i_mul_d_zero_mask] = 0
-                        L_coulmn_i_j = np.inner(L_row_i_j, L_row_i_mul_d)
-                        assert np.logical_or(np.isfinite(L_coulmn_i_j), np.isinf(L_coulmn_i_j))
-                        L_column_i[j] = L_coulmn_i_j
+            # update omega
+            assert np.isfinite(omega_i)
+            assert omega_i >= 0
+            omega[p_i] = omega_i
+
+            # update delta
+            delta_i = d_i - gamma[p_i]
+            if omega_i != 0:
+                delta_i += omega_i**2 * alpha[p_i]
+            assert np.isfinite(delta_i)
+            delta[p_i] = delta_i
+
+            # debug info
+            matrix.logger.debug(f'Using permutation index {p_i}, d {d_i}, omega {omega[p_i]}, delta '
+                                f'{delta[p_i]} and additional approximation error {f_value_i} for '
+                                f'iteration {i} of {n - 1}. ({(i + 1) / n:.1%} done.)')
+
+            # update i-th row of L with omega
+            if i > 0:
+                if is_dense:
+                    if omega_i != 0:
+                        if omega_i != 1:
+                            L[i, :i] *= omega_i
+                        L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
+                    else:
+                        L[i, :i] = 0
+                else:
+                    assert L.format == 'lil'
+
+                    if omega_i != 0:
+                        L_i_rows = L_rows[i]
+                        L_i_data_array = np.asarray(L_data[i])
+                        if omega_i != 1:
+                            L_i_data_array *= omega_i
+                        L_i_nonzero_mask = np.abs(L_i_data_array) >= L_eps
+                        L_rows[i] = [L_i_rows[i] for i in range(len(L_i_nonzero_mask))
+                                     if L_i_nonzero_mask[i]]
+                        L_data[i] = [L_i_data_array[i] for i in range(len(L_i_nonzero_mask))
+                                     if L_i_nonzero_mask[i]]
+                    else:
+                        L_rows[i] = []
+                        L_data[i] = []
+
+                assert not is_dense or np.all(np.isfinite(L[i, :i]))
+                assert is_dense or np.all(np.isfinite(L_data[i]))
+
+            # get i-th column of A
+            p_after_i = p[i + 1:]
+            if is_dense:
+                if not overwrite_A:
+                    A_column_i = A[:, p_i]
+                else:
+                    A_column_i = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
+            else:
+                assert not overwrite_A
+                if A.format in ('csr', 'lil'):
+                    A_column_i = A[p_i, :].conj().T
+                else:
+                    A_column_i = A[:, p_i]
+                A_column_i = A_column_i.toarray().reshape(-1)
+            A_column_i = A_column_i[p_after_i]
+            assert np.all(np.isfinite(A_column_i))
+
+            # update beta
+            beta_add = 2 * A_column_i * A_column_i.conj()
+            assert np.all(np.isreal(beta_add))
+            beta[p_after_i] += beta_add.real
+
+            # update alpha and i-th column of L
+            if d_i != 0:
+                # get auxiliary variables for calculation of i-th column of L
+                if is_dense:
+                    if i > 0:
+                        L_row_i_mul_d = L[i, :i].conj() * d[:i]
+                        assert np.all(np.isfinite(L_row_i_mul_d))
+                        L_below_row_i = L[i + 1:, :i]
+                        assert np.all(np.logical_or(np.isfinite(L_below_row_i),
+                                                    np.isinf(L_below_row_i)))
+                else:
+                    assert L.format == 'lil'
+                    if len(L_rows[i]) > 0:
+                        L_row_i_mul_d = L[i, :].conj().multiply(d).toarray().reshape(-1)
+                        assert np.all(np.isfinite(L_row_i_mul_d))
+                        L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
+                        L_below_row_i.rows = L_rows[i + 1:]
+                        L_below_row_i.data = L_data[i + 1:]
+                        L_below_row_i._shape = (n - (i + 1), n)
+                        assert np.all((np.all(np.logical_or(np.isfinite(l), np.isinf(l)))
+                                       for l in L_below_row_i.data))
+
+                # calculate i-th column of L
+                if (is_dense and i > 0) or (not is_dense and len(L_rows[i]) > 0):
+                    L_column_i = L_below_row_i @ L_row_i_mul_d
+
+                    # recalculate values where inf * 0 is involved (inf * 0 is nan and should be 0)
+                    L_column_i_nan_mask = np.where(np.isnan(L_column_i))[0]
+                    assert np.all(np.logical_or(
+                        np.isfinite(L_column_i[np.logical_not(np.isnan(L_column_i))]),
+                        np.isinf(L_column_i[np.logical_not(np.isnan(L_column_i))])))
+                    if np.any(L_column_i_nan_mask):
+                        L_row_i_mul_d_zero_mask = L_row_i_mul_d == 0
+                        for j in L_column_i_nan_mask:
+                            L_row_i_j = L_below_row_i[j, :].toarray().reshape(-1)
+                            L_row_i_j[L_row_i_mul_d_zero_mask] = 0
+                            L_coulmn_i_j = np.inner(L_row_i_j, L_row_i_mul_d)
+                            assert np.logical_or(np.isfinite(L_coulmn_i_j), np.isinf(L_coulmn_i_j))
+                            L_column_i[j] = L_coulmn_i_j
+                    assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
+
+                    L_column_i = A_column_i - L_column_i
+                else:
+                    L_column_i = A_column_i
+
                 assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
 
-                L_column_i = A_column_i - L_column_i
-            else:
-                L_column_i = A_column_i
-
-            assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
-
-            # remove zero entries if sparse
-            if not is_dense:
-                L_column_i_non_zero_mask = L_column_i != 0
-                L_column_i = L_column_i[L_column_i_non_zero_mask]
-                p_after_i = p_after_i[L_column_i_non_zero_mask]
-            assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
-
-            # update i-th column of L
-            if len(L_column_i) > 0:
-                # devide by d_i
-                assert np.isfinite(d_i)
-                assert d_i != 0
-                L_column_i = L_column_i / d_i
+                # remove zero entries if sparse
+                if not is_dense:
+                    L_column_i_non_zero_mask = L_column_i != 0
+                    L_column_i = L_column_i[L_column_i_non_zero_mask]
+                    p_after_i = p_after_i[L_column_i_non_zero_mask]
                 assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
 
                 # update i-th column of L
-                if is_dense:
-                    L[i + 1:, i] = L_column_i
-                else:
-                    assert L.format == 'lil'
-                    for k, L_column_i_k in zip(np.where(L_column_i_non_zero_mask)[0], L_column_i):
-                        j = i + 1 + k
-                        L_rows[j].append(i)
-                        L_data[j].append(L_column_i_k)
+                if len(L_column_i) > 0:
+                    # devide by d_i
+                    assert np.isfinite(d_i)
+                    assert d_i != 0
+                    L_column_i = L_column_i / d_i
+                    assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
 
-                # update alpha
-                alpha_add = L_column_i * L_column_i.conj() * d_i
-                assert np.all(np.isreal(alpha_add))
-                alpha_add = alpha_add.real
-                assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == np.inf))
-                alpha_add[L_column_i == np.inf] = np.inf
-                alpha[p_after_i] += alpha_add
-                assert np.all(np.logical_or(np.isfinite(alpha), alpha == np.inf))
-                assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
+                    # update i-th column of L
+                    if is_dense:
+                        L[i + 1:, i] = L_column_i
+                    else:
+                        assert L.format == 'lil'
+                        for k, L_column_i_k in zip(np.where(L_column_i_non_zero_mask)[0], L_column_i):
+                            j = i + 1 + k
+                            L_rows[j].append(i)
+                            L_data[j].append(L_column_i_k)
 
-    # prepare diagonal and upper triangle of L if needed
-    if not strict_lower_triangular_only_L:
-        if is_dense:
+                    # update alpha
+                    alpha_add = L_column_i * L_column_i.conj() * d_i
+                    assert np.all(np.isreal(alpha_add))
+                    alpha_add = alpha_add.real
+                    assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == np.inf))
+                    alpha_add[L_column_i == np.inf] = np.inf
+                    alpha[p_after_i] += alpha_add
+                    assert np.all(np.logical_or(np.isfinite(alpha), alpha == np.inf))
+                    assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
+
+        # prepare diagonal and upper triangle of L if needed
+        if not strict_lower_triangular_only_L:
+            if is_dense:
+                for i in range(n):
+                    L[i, i] = 1
+            else:
+                for i in range(n):
+                    L_rows[i].append(i)
+                    L_data[i].append(1)
+
+        if not strict_lower_triangular_only_L and overwrite_A:
+            assert is_dense
             for i in range(n):
-                L[i, i] = 1
-        else:
-            for i in range(n):
-                L_rows[i].append(i)
-                L_data[i].append(1)
+                L[i, i + 1:] = 0
 
-    if not strict_lower_triangular_only_L and overwrite_A:
-        assert is_dense
-        for i in range(n):
-            L[i, i + 1:] = 0
-
-    # return values
-    assert (min_diag_D is None and d.min() >= 0) or d.min() >= min_diag_D
-    assert d.max() <= max_diag_D
-    assert np.all(np.logical_or(d == 0, np.abs(d) >= min_abs_value_D))
-    assert np.all(omega >= 0)
-    matrix.logger.debug('Approximation of LDL decomposition finished.')
-    return L, d, p, omega, delta
+        # return values
+        assert (min_diag_D is None and d.min() >= 0) or d.min() >= min_diag_D
+        assert d.max() <= max_diag_D
+        assert np.all(np.logical_or(d == 0, np.abs(d) >= min_abs_value_D))
+        assert np.all(omega >= 0)
+        matrix.logger.debug('Approximation of LDL decomposition finished.')
+        return L, d, p, omega, delta
 
 
 def decomposition(
