@@ -231,6 +231,8 @@ def _decomposition(
     is_dense = not matrix.sparse.util.is_sparse(A)
     if is_dense:
         A = np.asarray(A)
+    elif A.format not in ('csc', 'csr', 'lil', 'dok'):
+        A = A.tocsc(copy=False)
     if A.ndim != 2 or A.shape[0] != A.shape[1]:
         raise matrix.errors.MatrixNotSquareError(A)
     n = A.shape[0]
