@@ -32,13 +32,6 @@ def _difference_frobenius_norm(d, omega, alpha, beta, gamma):
 
 def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
-
-    # debug info
-    matrix.logger.debug(f'Calculating best d and omega for alpha {alpha}, beta {beta}, '
-                        f'gamma {gamma}, min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
-                        f'min_abs_value_D {min_abs_value_D}, min_diag_B {min_diag_B}, '
-                        f'max_diag_B {max_diag_B}.')
-
     # check input
     assert np.isfinite(alpha) or alpha == np.inf
     assert np.isfinite(beta) or beta == np.inf
@@ -137,8 +130,13 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
         # return best values
         (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
+    # debug info
+    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} and f = {f_value} for '
+                        f'alpha {alpha}, beta {beta}, gamma {gamma}, min_diag_D {min_diag_D}, '
+                        f'max_diag_D {max_diag_D}, min_abs_value_D {min_abs_value_D}, '
+                        f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}.')
+
     # return value
-    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} and f = {f_value}.')
     assert min_diag_D <= d <= max_diag_D
     assert d >= min_abs_value_D or (d == 0 and min_diag_D <= 0 and max_diag_D >= 0)
     assert 0 <= omega <= 1
@@ -434,8 +432,6 @@ def _decomposition(
 
         # calculate values iteratively
         for i in range(n):
-            matrix.logger.debug(f'Starting iteration {i} of {n - 1}.')
-
             # determine possible next indices
             if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
                                       MAXIMAL_STABILITY_PERMUTATION_METHOD):
