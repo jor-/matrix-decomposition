@@ -433,15 +433,6 @@ def _decomposition(
                             f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
 
         # calculate values iteratively
-        def get_value_i(v, i):
-            try:
-                return v[i]
-            except TypeError:
-                return v
-            except IndexError:
-                assert v.ndim == 0
-                return v
-
         for i in range(n):
             matrix.logger.debug(f'Starting iteration {i} of {n - 1}.')
 
@@ -454,8 +445,14 @@ def _decomposition(
 
             # choose current min d
             def minimal_change_for_index(j):
-                min_diag_B_i = get_value_i(min_diag_B, p[j])
-                max_diag_B_i = get_value_i(max_diag_B, p[j])
+                if min_diag_B.ndim == 0:
+                    min_diag_B_i = min_diag_B
+                else:
+                    min_diag_B_i = min_diag_B[p[j]]
+                if max_diag_B.ndim == 0:
+                    max_diag_B_i = max_diag_B
+                else:
+                    max_diag_B_i = max_diag_B[p[j]]
                 if min_diag_D is not None:
                     min_diag_D_i = min_diag_D
                 else:
@@ -871,26 +868,33 @@ def positive_semidefinite_matrix(
     # populate B
     q = matrix.permute.invert_permutation_vector(p)
 
-    def get_value_i(v, i):
-        try:
-            return v[i]
-        except TypeError:
-            return v
-        except IndexError:
-            assert v.ndim == 0
-            return v
+    if min_diag_B is not None:
+        min_diag_B = np.asarray(min_diag_B)
+    if max_diag_B is not None:
+        max_diag_B = np.asarray(max_diag_B)
 
     for i in range(n):
         # set diagonal entries
         B_i_i = A[i, i] + delta[i]
-        min_B_i_i = get_value_i(min_diag_B, i)
-        if min_B_i_i is not None and B_i_i < min_B_i_i:
-            assert np.isclose(B_i_i, min_B_i_i)
-            B_i_i = min_B_i_i
-        max_B_i_i = get_value_i(max_diag_B, i)
-        if max_B_i_i is not None and B_i_i > max_B_i_i:
-            assert np.isclose(B_i_i, max_B_i_i)
-            B_i_i = max_B_i_i
+
+        if min_diag_B is not None:
+            if min_diag_B.ndim == 0:
+                min_diag_B_i = min_diag_B
+            else:
+                min_diag_B_i = min_diag_B[i]
+            if B_i_i < min_diag_B_i:
+                assert np.isclose(B_i_i, min_diag_B_i)
+                B_i_i = min_diag_B_i
+
+        if max_diag_B is not None:
+            if max_diag_B.ndim == 0:
+                max_diag_B_i = max_diag_B
+            else:
+                max_diag_B_i = max_diag_B[i]
+            if B_i_i > max_diag_B_i:
+                assert np.isclose(B_i_i, max_diag_B_i)
+                B_i_i = max_diag_B_i
+
         assert np.isfinite(B_i_i)
         assert np.isreal(B_i_i)
         B[i, i] = B_i_i
