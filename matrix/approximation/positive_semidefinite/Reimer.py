@@ -397,7 +397,7 @@ def _decomposition(
             permutation_method = None
             p = np.asanyarray(permutation)
             if p.ndim != 1 or p.shape[0] != n:
-                error = ValueError(f'Permutation vactor must have same length as the dimensions of A. '
+                error = ValueError(f'Permutation vector must have same length as the dimensions of A. '
                                    f'Its shape is {p.shape} and the shape of A is {A.shape}.')
                 matrix.logger.error(error)
                 raise error
