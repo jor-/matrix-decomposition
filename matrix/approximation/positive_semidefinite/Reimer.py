@@ -64,78 +64,78 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
         # prepare candidate set
         C = []
 
-        # alpha == inf or beta == inf
-        if np.isfinite(alpha) and np.isfinite(beta):
+        # alpha is finite
+        add_best_d_omega_zero = False
+        if np.isfinite(alpha):
             a = max(min_diag_D, min_abs_value_D, min_diag_B - alpha)
             b = min(max_diag_D, max_diag_B - alpha)
             if a <= b:
                 d = min(max(a, gamma - alpha), b)
                 C.append((d, 1))
 
-            if alpha != 0:
-                # add feasible d values
-                d_values = []
-                if min_diag_B - alpha <= max(min_diag_D, min_abs_value_D):
-                    d_values.append(max(min_diag_D, min_abs_value_D))
-                if np.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
-                    d_values.append(max_diag_D)
-                # add feasible d and omega values
-                for d in d_values:
-                    # ensure that coefficients for np.roots are finite
-                    try:
-                        coefficients = [2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta]
-                    except RuntimeWarning as e:
-                        if e.args[0] == 'overflow encountered in double_scalars':
-                            d = max(min_diag_D, min_abs_value_D, min_diag_B,
-                                    min(gamma, max_diag_D, max_diag_B))
-                            matrix.logger.warning(('Alpha squared is infinity so omega is forced '
-                                                   'to be zero. Maybe the datatype should be '
-                                                   'changed to a more accurate one.'))
-                            omega = 0
-                            C.append((d, omega))
-                        else:
-                            raise e
-                    else:
-                        # get roots
-                        omegas = np.roots(coefficients)
-                        assert len(omegas) == 3
-                        # use only real roots
-                        omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
-                        assert len(omegas) in (1, 3)
-                        # calculate bounds
-                        omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
-                        assert 0 <= omega_lower <= 1
-                        omega_upper = min(((max_diag_B - d) / alpha)**0.5, 1)
-                        assert omega_lower <= omega_upper
-                        # apply bounds and add to candidate list
-                        add_omega_lower = False
-                        add_omega_upper = False
-                        for omega in omegas:
-                            if omega <= omega_lower:
-                                add_omega_lower = True
-                            elif omega >= omega_upper:
-                                add_omega_upper = True
+            # alpha and beta are finite
+            if np.isfinite(beta):
+                if alpha != 0:
+                    # add feasible d values
+                    d_values = []
+                    if min_diag_B - alpha <= max(min_diag_D, min_abs_value_D):
+                        d_values.append(max(min_diag_D, min_abs_value_D))
+                    if np.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
+                        d_values.append(max_diag_D)
+                    # add feasible d and omega values
+                    for d in d_values:
+                        # ensure that coefficients for np.roots are finite
+                        try:
+                            coefficients = [2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta]
+                        except RuntimeWarning as e:
+                            if e.args[0] == 'overflow encountered in double_scalars':
+                                matrix.logger.warning(('Alpha squared is infinity. Maybe the '
+                                                       'datatype should be changed to a more '
+                                                       'accurate one.'))
+                                add_best_d_omega_zero = True
                             else:
-                                C.append((d, omega))
-                        if add_omega_lower:
-                            C.append((d, omega_lower))
-                        if add_omega_upper:
-                            C.append((d, omega_upper))
-        else:
-            d = max(min_diag_D, min_abs_value_D, min_diag_B,
-                    min(gamma, max_diag_D, max_diag_B))
-            if alpha == np.inf:
-                matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. Maybe '
-                                       'the datatype should be changed to a more accurate one.'))
-                omega = 0
-            elif beta == np.inf:
-                matrix.logger.warning(('Beta is infinity so omega is forced to be zero. Maybe '
-                                       'the datatype should be changed to a more accurate one.'))
-                omega = 0
+                                raise e
+                        else:
+                            # get roots
+                            omegas = np.roots(coefficients)
+                            assert len(omegas) == 3
+                            # use only real roots
+                            omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
+                            assert len(omegas) in (1, 3)
+                            # calculate bounds
+                            omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
+                            assert 0 <= omega_lower <= 1
+                            omega_upper = min(((max_diag_B - d) / alpha)**0.5, 1)
+                            assert omega_lower <= omega_upper
+                            # apply bounds and add to candidate list
+                            add_omega_lower = False
+                            add_omega_upper = False
+                            for omega in omegas:
+                                if omega <= omega_lower:
+                                    add_omega_lower = True
+                                elif omega >= omega_upper:
+                                    add_omega_upper = True
+                                else:
+                                    C.append((d, omega))
+                            if add_omega_lower:
+                                C.append((d, omega_lower))
+                            if add_omega_upper:
+                                C.append((d, omega_upper))
             else:
-                assert False
-            C.append((d, omega))
+                matrix.logger.warning(('Beta is infinity. Maybe the datatype should be changed to '
+                                       'a more accurate one.'))
+                add_best_d_omega_zero = True
+        else:
+            matrix.logger.warning(('Alpha is infinity. Maybe the datatype should be changed to '
+                                   'a more accurate one.'))
+            add_best_d_omega_zero = True
 
+        # add (d, 0) where d is best if omega is zero
+        if add_best_d_omega_zero:
+            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
+            C.append((d, 0))
+
+        # add (0, 0)
         if min_diag_D == 0 and min_diag_B <= 0 and 2 * gamma <= min_abs_value_D:
             C.append((0, 0))
 
