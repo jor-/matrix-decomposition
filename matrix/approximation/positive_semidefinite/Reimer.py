@@ -20,12 +20,18 @@ APPROXIMATION_ONLY_PERMUTATION_METHODS = (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
 
 
 def _difference_frobenius_norm(d, omega, alpha, beta, gamma):
-    if omega == 0:  # for case alpha == inf
-        f_value = (d - gamma)**2 + beta
-    elif omega == 1:  # for case beta == inf
-        f_value = (d + alpha - gamma)**2
-    else:
-        f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
+    try:
+        if omega == 0:  # for case alpha == inf
+            f_value = (d - gamma)**2 + beta
+        elif omega == 1:  # for case beta == inf
+            f_value = (d + alpha - gamma)**2
+        else:
+            f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
+    except RuntimeWarning as e:
+        if e.args[0] == 'overflow encountered in double_scalars':
+            f_value = np.inf
+        else:
+            raise e
     assert f_value >= 0
     return f_value
 
@@ -44,12 +50,6 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert min_diag_D >= 0
     assert min_abs_value_D > 0
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
-
-    # ensure that alpha**2 is finite if alpha is finite (for np.roots)
-    try:
-        alpha**2
-    except RuntimeWarning:
-        alpha = np.inf
 
     # global solution
     d = gamma - alpha
@@ -81,40 +81,56 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     d_values.append(max_diag_D)
                 # add feasible d and omega values
                 for d in d_values:
-                    # calculate bounds
-                    omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
-                    assert 0 <= omega_lower <= 1
-                    omega_upper = min(((max_diag_B - d) / alpha)**0.5, 1)
-                    assert omega_lower <= omega_upper
-                    # get roots
-                    omegas = np.roots([2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta])
-                    assert len(omegas) == 3
-                    # use only real roots
-                    omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
-                    assert len(omegas) in (1, 3)
-                    # apply bounds and add to candidate list
-                    add_omega_lower = False
-                    add_omega_upper = False
-                    for omega in omegas:
-                        if omega <= omega_lower:
-                            add_omega_lower = True
-                        elif omega >= omega_upper:
-                            add_omega_upper = True
-                        else:
+                    # ensure that coefficients for np.roots are finite
+                    try:
+                        coefficients = [2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta]
+                    except RuntimeWarning as e:
+                        if e.args[0] == 'overflow encountered in double_scalars':
+                            d = max(min_diag_D, min_abs_value_D, min_diag_B,
+                                    min(gamma, max_diag_D, max_diag_B))
+                            matrix.logger.warning(('Alpha squared is infinity so omega is forced '
+                                                   'to be zero. Maybe the datatype should be '
+                                                   'changed to a more accurate one.'))
+                            omega = 0
                             C.append((d, omega))
-                    if add_omega_lower:
-                        C.append((d, omega_lower))
-                    if add_omega_upper:
-                        C.append((d, omega_upper))
+                        else:
+                            raise e
+                    else:
+                        # get roots
+                        omegas = np.roots(coefficients)
+                        assert len(omegas) == 3
+                        # use only real roots
+                        omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
+                        assert len(omegas) in (1, 3)
+                        # calculate bounds
+                        omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
+                        assert 0 <= omega_lower <= 1
+                        omega_upper = min(((max_diag_B - d) / alpha)**0.5, 1)
+                        assert omega_lower <= omega_upper
+                        # apply bounds and add to candidate list
+                        add_omega_lower = False
+                        add_omega_upper = False
+                        for omega in omegas:
+                            if omega <= omega_lower:
+                                add_omega_lower = True
+                            elif omega >= omega_upper:
+                                add_omega_upper = True
+                            else:
+                                C.append((d, omega))
+                        if add_omega_lower:
+                            C.append((d, omega_lower))
+                        if add_omega_upper:
+                            C.append((d, omega_upper))
         else:
-            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
+            d = max(min_diag_D, min_abs_value_D, min_diag_B,
+                    min(gamma, max_diag_D, max_diag_B))
             if alpha == np.inf:
-                matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. '
-                                       'Maybe the datatype should be changed to a more accurate one.'))
+                matrix.logger.warning(('Alpha is infinity so omega is forced to be zero. Maybe '
+                                       'the datatype should be changed to a more accurate one.'))
                 omega = 0
             elif beta == np.inf:
-                matrix.logger.warning(('Beta is infinity so omega is forced to be zero. '
-                                       'Maybe the datatype should be changed to a more accurate one.'))
+                matrix.logger.warning(('Beta is infinity so omega is forced to be zero. Maybe '
+                                       'the datatype should be changed to a more accurate one.'))
                 omega = 0
             else:
                 assert False
@@ -125,7 +141,8 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
 
         # calculate function values for candidates
         assert len(C) >= 1
-        C_with_f_value = ((d, omega, _difference_frobenius_norm(d, omega, alpha, beta, gamma)) for (d, omega) in C)
+        C_with_f_value = ((d, omega, _difference_frobenius_norm(d, omega, alpha, beta, gamma))
+                          for (d, omega) in C)
 
         # return best values
         (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
