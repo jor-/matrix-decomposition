@@ -9,6 +9,7 @@ import matrix.decompositions
 import matrix.errors
 import matrix.permute
 import matrix.sparse.util
+import matrix._util.roots
 
 
 MINIMAL_DIFFERENCE_PERMUTATION_METHOD = 'minimal_difference'
@@ -86,7 +87,8 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                     for d in d_values:
                         # ensure that coefficients for np.roots are finite
                         try:
-                            coefficients = [2 * alpha**2, 0, 2 * alpha * (d - gamma) + beta, - beta]
+                            q = (- 0.5 * beta / alpha) / alpha
+                            p = (d - gamma) / alpha - q
                         except RuntimeWarning as e:
                             if e.args[0] == 'overflow encountered in double_scalars':
                                 matrix.logger.warning(('Alpha squared is infinity. Maybe the '
@@ -97,11 +99,8 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                                 raise e
                         else:
                             # get roots
-                            omegas = np.roots(coefficients)
-                            assert len(omegas) == 3
-                            # use only real roots
-                            omegas = tuple(omega.real for omega in omegas if np.isreal(omega))
-                            assert len(omegas) in (1, 3)
+                            omegas = matrix._util.roots.solver_depressed_cubic(p, q, include_complex_values=False)
+                            assert 1 <= len(omegas) <= 3
                             # calculate bounds
                             omega_lower = (max(min_diag_B - d, 0) / alpha)**0.5
                             assert 0 <= omega_lower <= 1
