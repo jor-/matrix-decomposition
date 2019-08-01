@@ -1,3 +1,5 @@
+import math
+import cmath
 import warnings
 
 import numpy as np
@@ -30,21 +32,21 @@ def _difference_frobenius_norm(d, omega, alpha, beta, gamma):
             f_value = (d + omega**2 * alpha - gamma)**2 + (omega - 1)**2 * beta
     except RuntimeWarning as e:
         if e.args[0] == 'overflow encountered in double_scalars':
-            f_value = np.inf
+            f_value = math.inf
         else:
             raise e
     assert f_value >= 0
     return f_value
 
 
-def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
-                    min_diag_B=-np.inf, max_diag_B=np.inf, min_abs_value_D=0):
+def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
+                    min_diag_B=-math.inf, max_diag_B=math.inf, min_abs_value_D=0):
     # check input
-    assert np.isfinite(alpha) or alpha == np.inf
-    assert np.isfinite(beta) or beta == np.inf
-    assert np.isfinite(gamma)
-    assert np.isfinite(min_diag_D)
-    assert np.isfinite(min_abs_value_D)
+    assert math.isfinite(alpha) or alpha == math.inf
+    assert math.isfinite(beta) or beta == math.inf
+    assert math.isfinite(gamma)
+    assert math.isfinite(min_diag_D)
+    assert math.isfinite(min_abs_value_D)
     assert alpha >= 0
     assert beta >= 0
     assert beta != 0 or alpha == 0
@@ -55,10 +57,10 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     # global solution
     d = gamma - alpha
     if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha):
-        assert alpha != np.inf
+        assert alpha != math.inf
         omega = 1
         f_value = 0
-        assert np.isclose(_difference_frobenius_norm(d, omega, alpha, beta, gamma), f_value)
+        assert math.isclose(_difference_frobenius_norm(d, omega, alpha, beta, gamma), f_value)
 
     # solution at bounds
     else:
@@ -67,7 +69,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
 
         # alpha is finite
         add_best_d_omega_zero = False
-        if np.isfinite(alpha):
+        if math.isfinite(alpha):
             a = max(min_diag_D, min_abs_value_D, min_diag_B - alpha)
             b = min(max_diag_D, max_diag_B - alpha)
             if a <= b:
@@ -75,13 +77,13 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
                 C.append((d, 1))
 
             # alpha and beta are finite
-            if np.isfinite(beta):
+            if math.isfinite(beta):
                 if alpha != 0:
                     # add feasible d values
                     d_values = []
                     if min_diag_B - alpha <= max(min_diag_D, min_abs_value_D):
                         d_values.append(max(min_diag_D, min_abs_value_D))
-                    if np.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
+                    if math.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
                         d_values.append(max_diag_D)
                     # add feasible d and omega values
                     for d in d_values:
@@ -158,12 +160,12 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=np.inf,
     assert 0 <= omega <= 1
     assert d != 0 or omega == 0
     assert f_value >= 0
-    assert np.isfinite(alpha) or alpha == np.inf
-    assert alpha != np.inf or omega == 0
-    assert alpha == np.inf or (min_diag_B <= d + omega**2 * alpha or np.isclose(min_diag_B, d + omega**2 * alpha))
-    assert alpha == np.inf or (max_diag_B >= d + omega**2 * alpha or np.isclose(max_diag_B, d + omega**2 * alpha))
-    assert alpha != np.inf or (min_diag_B <= d or np.isclose(min_diag_B, d))
-    assert alpha != np.inf or (max_diag_B >= d or np.isclose(max_diag_B, d))
+    assert math.isfinite(alpha) or alpha == math.inf
+    assert alpha != math.inf or omega == 0
+    assert alpha == math.inf or (min_diag_B <= d + omega**2 * alpha or math.isclose(min_diag_B, d + omega**2 * alpha))
+    assert alpha == math.inf or (max_diag_B >= d + omega**2 * alpha or math.isclose(max_diag_B, d + omega**2 * alpha))
+    assert alpha != math.inf or (min_diag_B <= d or math.isclose(min_diag_B, d))
+    assert alpha != math.inf or (max_diag_B >= d or math.isclose(max_diag_B, d))
     return (d, omega, f_value)
 
 
@@ -297,9 +299,9 @@ def _decomposition(
                     raise error
                 if not np.all(np.logical_or(np.isfinite(f),
                                             np.logical_or(np.logical_and(plus_inf_okay,
-                                                                         f == np.inf),
+                                                                         f == math.inf),
                                                           np.logical_and(minus_inf_okay,
-                                                                         f == -np.inf)))):
+                                                                         f == -math.inf)))):
                     error = ValueError(f'{f_name} must be finite'
                                        + (' or minus infinity' if minus_inf_okay else '')
                                        + (' or plus infinity' if plus_inf_okay else '')
@@ -310,7 +312,7 @@ def _decomposition(
                 f = np.asarray(default_value)
             return f
 
-        def check_float_scalar(f, f_name='variable', default_value=None, lower_bound=-np.inf,
+        def check_float_scalar(f, f_name='variable', default_value=None, lower_bound=-math.inf,
                                minus_inf_okay=False, plus_inf_okay=False):
             if f is not None:
                 try:
@@ -319,8 +321,8 @@ def _decomposition(
                     error = ValueError(f'{f_name} must a float value but it is {f}.')
                     matrix.logger.error(error)
                     raise error from original_error
-                if not (np.isfinite(f) or (minus_inf_okay and f == -np.inf)
-                        or (plus_inf_okay and f == np.inf)):
+                if not (math.isfinite(f) or (minus_inf_okay and f == -math.inf)
+                        or (plus_inf_okay and f == math.inf)):
                     error = ValueError(f'{f_name} must be finite'
                                        + (' or minus infinity' if minus_inf_okay else '')
                                        + (' or plus infinity' if plus_inf_okay else '')
@@ -336,16 +338,16 @@ def _decomposition(
                 f = default_value
             return f
 
-        min_diag_B = check_float_scalar_or_vector(min_diag_B, 'min_diag_B', default_value=-np.inf,
+        min_diag_B = check_float_scalar_or_vector(min_diag_B, 'min_diag_B', default_value=-math.inf,
                                                   minus_inf_okay=True, plus_inf_okay=False)
-        max_diag_B = check_float_scalar_or_vector(max_diag_B, 'max_diag_B', default_value=np.inf,
+        max_diag_B = check_float_scalar_or_vector(max_diag_B, 'max_diag_B', default_value=math.inf,
                                                   minus_inf_okay=False, plus_inf_okay=True)
 
         min_diag_D = check_float_scalar(min_diag_D, f_name='min_diag_D',
                                         default_value=None, lower_bound=0,
                                         minus_inf_okay=False, plus_inf_okay=False)
         max_diag_D = check_float_scalar(max_diag_D, f_name='max_diag_D',
-                                        default_value=np.inf, lower_bound=None,
+                                        default_value=math.inf, lower_bound=None,
                                         minus_inf_okay=False, plus_inf_okay=True)
 
         if not (max(np.max(min_diag_B), min_diag_D if min_diag_D is not None else 0)
@@ -508,14 +510,14 @@ def _decomposition(
                 p_i = p[i]
 
             # update d
-            assert np.isfinite(d_i)
+            assert math.isfinite(d_i)
             assert (min_diag_D is None and d_i >= 0) or d_i >= min_diag_D
             assert d_i <= max_diag_D
             assert d_i == 0 or np.abs(d_i) >= min_abs_value_D
             d[i] = d_i
 
             # update omega
-            assert np.isfinite(omega_i)
+            assert math.isfinite(omega_i)
             assert omega_i >= 0
             omega[p_i] = omega_i
 
@@ -523,7 +525,7 @@ def _decomposition(
             delta_i = d_i - gamma[p_i]
             if omega_i != 0:
                 delta_i += omega_i**2 * alpha[p_i]
-            assert np.isfinite(delta_i)
+            assert math.isfinite(delta_i)
             delta[p_i] = delta_i
 
             # debug info
@@ -639,7 +641,7 @@ def _decomposition(
                 # update i-th column of L
                 if len(L_column_i) > 0:
                     # devide by d_i
-                    assert np.isfinite(d_i)
+                    assert math.isfinite(d_i)
                     assert d_i != 0
                     L_column_i = L_column_i / d_i
                     assert np.all(np.logical_or(np.isfinite(L_column_i), np.isinf(L_column_i)))
@@ -658,11 +660,11 @@ def _decomposition(
                     alpha_add = L_column_i * L_column_i.conj() * d_i
                     assert np.all(np.isreal(alpha_add))
                     alpha_add = alpha_add.real
-                    assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == np.inf))
-                    alpha_add[L_column_i == np.inf] = np.inf
+                    assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == math.inf))
+                    alpha_add[L_column_i == math.inf] = math.inf
                     alpha[p_after_i] += alpha_add
-                    assert np.all(np.logical_or(np.isfinite(alpha), alpha == np.inf))
-                    assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == np.inf))
+                    assert np.all(np.logical_or(np.isfinite(alpha), alpha == math.inf))
+                    assert np.all(np.logical_or(np.isfinite(L_column_i), alpha[p_after_i] == math.inf))
 
         # prepare diagonal and upper triangle of L if needed
         if not strict_lower_triangular_only_L:
@@ -895,7 +897,7 @@ def positive_semidefinite_matrix(
             else:
                 min_diag_B_i = min_diag_B[i]
             if B_i_i < min_diag_B_i:
-                assert np.isclose(B_i_i, min_diag_B_i)
+                assert cmath.isclose(B_i_i, min_diag_B_i)
                 B_i_i = min_diag_B_i
 
         if max_diag_B is not None:
@@ -904,11 +906,10 @@ def positive_semidefinite_matrix(
             else:
                 max_diag_B_i = max_diag_B[i]
             if B_i_i > max_diag_B_i:
-                assert np.isclose(B_i_i, max_diag_B_i)
+                assert cmath.isclose(B_i_i, max_diag_B_i)
                 B_i_i = max_diag_B_i
 
-        assert np.isfinite(B_i_i)
-        assert np.isreal(B_i_i)
+        assert cmath.isfinite(B_i_i)
         B[i, i] = B_i_i
 
         # set upper diagonal entries
@@ -936,7 +937,7 @@ def positive_semidefinite_matrix(
                         B_i_j = B_i_j[0, 0]
                 else:
                     B_i_j = 0
-            assert np.isfinite(B_i_j)
+            assert cmath.isfinite(B_i_j)
             B[i, j] = B_i_j
 
     # set lower diagonal entries
