@@ -633,7 +633,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         Returns
         -------
         numpy.ndarray or scipy.sparse.spmatrix
-            The result of `x.H @ A @ y`.
+            The result of `y.H @ A @ x`.
         """
 
         x = matrix.util.as_matrix_or_vector(x)
@@ -641,7 +641,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             y = x
         else:
             y = matrix.util.as_matrix_or_vector(y)
-        y = y.transpose().conj()
+        y = matrix.util.conjugate_transpose(y)
         return y @ self.matrix_right_side_multiplication(x)
 
     @abc.abstractmethod
@@ -685,7 +685,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         Returns
         -------
         numpy.ndarray or scipy.sparse.spmatrix
-            The result of `x.H @ A @ y`.
+            The result of `y.H @ A @ x`.
 
         Raises
         ------
@@ -698,7 +698,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             y = x
         else:
             y = matrix.util.as_matrix_or_vector(y)
-        y = y.transpose().conj()
+        y = matrix.util.conjugate_transpose(y)
         return y @ self.inverse_matrix_right_side_multiplication(x)
 
     # *** solve systems of linear equations *** #
@@ -769,7 +769,7 @@ class LDL_Decomposition(DecompositionBase):
 
     @property
     def composed_matrix(self):
-        A = self.L @ self.D @ self.L.transpose().conj()
+        A = self.L @ self.D @ matrix.util.conjugate_transpose(self.L)
         A = self.unpermute_matrix(A)
         return A
 
@@ -905,8 +905,8 @@ class LDL_Decomposition(DecompositionBase):
     def matrix_right_side_multiplication(self, x):
         x = matrix.util.as_matrix_or_vector(x)
         x = x[self.p]
-        x = self.L.transpose().conj() @ x
-        x = self.D @ x
+        x = matrix.util.conjugate_transpose(self.L) @ x
+        x = (self.d * x.transpose()).transpose()
         x = self.L @ x
         x = x[self.p_inverse]
         return x
@@ -914,23 +914,23 @@ class LDL_Decomposition(DecompositionBase):
     def matrix_both_sides_multiplication(self, x, y=None):
         x = matrix.util.as_matrix_or_vector(x)
         x = x[self.p]
-        x = self.L.transpose().conj() @ x
+        x = matrix.util.conjugate_transpose(self.L) @ x
         if y is not None:
             y = matrix.util.as_matrix_or_vector(y)
             y = y[self.p]
-            y = y.transpose().conj()
+            y = matrix.util.conjugate_transpose(y)
             y = y @ self.L
         else:
-            y = x.transpose().conj()
-        return y @ self.D @ x
+            y = matrix.util.conjugate_transpose(x)
+        return (y * self.d) @ x
 
     def inverse_matrix_right_side_multiplication(self, x):
         x = matrix.util.as_matrix_or_vector(x)
         self.check_invertible()
         x = x[self.p]
         x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True)
-        x = scipy.sparse.diags(1 / self.d) @ x
-        x = matrix.util.solve_triangular(self.L.transpose().conj(), x, lower=False, unit_diagonal=True, overwrite_b=True)
+        x = (x.transpose() / self.d).transpose()
+        x = matrix.util.solve_triangular(matrix.util.conjugate_transpose(self.L), x, lower=False, unit_diagonal=True, overwrite_b=True)
         x = x[self.p_inverse]
         return x
 
@@ -943,10 +943,10 @@ class LDL_Decomposition(DecompositionBase):
             y = matrix.util.as_matrix_or_vector(y)
             y = y[self.p]
             y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=True, overwrite_b=True)
-            y = y.transpose().conj()
         else:
-            y = x.transpose().conj()
-        return y @ scipy.sparse.diags(1 / self.d) @ x
+            y = x
+        y = matrix.util.conjugate_transpose(y)
+        return (y / self.d) @ x
 
 
 class LDL_DecompositionCompressed(DecompositionBase):
@@ -1129,7 +1129,7 @@ class LL_Decomposition(DecompositionBase):
 
     @property
     def composed_matrix(self):
-        A = self.L @ self.L.transpose().conj()
+        A = self.L @ matrix.util.conjugate_transpose(self.L)
         A = self.unpermute_matrix(A)
         return A
 
@@ -1253,7 +1253,7 @@ class LL_Decomposition(DecompositionBase):
     def matrix_right_side_multiplication(self, x):
         x = matrix.util.as_matrix_or_vector(x)
         x = x[self.p]
-        x = self.L.transpose().conj() @ x
+        x = matrix.util.conjugate_transpose(self.L) @ x
         x = self.L @ x
         x = x[self.p_inverse]
         return x
@@ -1261,15 +1261,14 @@ class LL_Decomposition(DecompositionBase):
     def matrix_both_sides_multiplication(self, x, y=None):
         x = matrix.util.as_matrix_or_vector(x)
         x = x[self.p]
-        L_H = self.L.transpose().conj()
-        x = L_H @ x
+        x = matrix.util.conjugate_transpose(self.L) @ x
         if y is not None:
             y = matrix.util.as_matrix_or_vector(y)
             y = y[self.p]
-            y = L_H @ y
+            y = matrix.util.conjugate_transpose(y)
+            y = y @ self.L
         else:
-            y = x
-        y = y.transpose().conj()
+            y = matrix.util.conjugate_transpose(x)
         return y @ x
 
     def inverse_matrix_right_side_multiplication(self, x):
@@ -1277,7 +1276,7 @@ class LL_Decomposition(DecompositionBase):
         self.check_invertible()
         x = x[self.p]
         x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True)
-        x = matrix.util.solve_triangular(self.L.transpose().conj(), x, lower=False, unit_diagonal=False, overwrite_b=True)
+        x = matrix.util.solve_triangular(matrix.util.conjugate_transpose(self.L), x, lower=False, unit_diagonal=False, overwrite_b=True)
         x = x[self.p_inverse]
         return x
 
@@ -1292,7 +1291,7 @@ class LL_Decomposition(DecompositionBase):
             y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=False, overwrite_b=True)
         else:
             y = x
-        y = y.transpose().conj()
+        y = matrix.util.conjugate_transpose(y)
         return y @ x
 
 

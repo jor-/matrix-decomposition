@@ -82,6 +82,10 @@ def lower_triangle_matrix(n, dense=True, complex_values=False, real_values_diago
 def hermitian_matrix(n, dense=True, complex_values=False, positive_semidefinite=False, invertible=False, min_diag_value=None):
     # generate hermitian and maybe positive (semi-)definite matrix
     A = universal_matrix(n, n, dense=dense, complex_values=complex_values)
+    if dense:
+        copy_kwargs = {}
+    else:
+        copy_kwargs = {'copy': False}
     if positive_semidefinite or invertible:
         d = np.random.rand(n)
         if invertible:
@@ -98,9 +102,9 @@ def hermitian_matrix(n, dense=True, complex_values=False, positive_semidefinite=
             warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
             for i in range(n):
                 L[i, i] = 1
-        A = L @ D @ L.transpose().conj()
+        A = L @ D @ L.transpose(**copy_kwargs).conj(**copy_kwargs)
     else:
-        A = A + A.transpose().conj()
+        A = A + A.transpose(**copy_kwargs).conj(**copy_kwargs)
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)

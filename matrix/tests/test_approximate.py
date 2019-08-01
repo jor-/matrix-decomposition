@@ -311,7 +311,7 @@ def test_hermitian(n, dense, complex_values, permutation, min_diag_B, max_diag_B
     # test hermitian
     for i in range(n):
         for j in range(i - 1):
-            assert B[i, j] == np.conjugate(B[j, i])
+            assert B[i, j] == np.conj(B[j, i])
 
 
 test_positive_semidefiniteness_setup = [

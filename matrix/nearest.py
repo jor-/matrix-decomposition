@@ -36,7 +36,7 @@ def symmetric_matrix(A):
     """
 
     A = np.asanyarray(A)
-    B = (A + A.T) / 2
+    B = (A + A.transpose()) / 2
     return B
 
 
@@ -57,7 +57,7 @@ def skew_symmetric_matrix(A):
     """
 
     A = np.asanyarray(A)
-    B = (A - A.T) / 2
+    B = (A - A.transpose()) / 2
     return B
 
 
@@ -97,7 +97,7 @@ def positive_semidefinite_matrix(A, symmetric=False):
     else:
         B = A
     d, v = np.linalg.eigh(B)
-    C = (v * np.maximum(d, 0)).dot(v.T)
+    C = (v * np.maximum(d, 0)).dot(v.transpose())
     C = symmetric_matrix(C)  # to force numerical symmetry
     return C
 

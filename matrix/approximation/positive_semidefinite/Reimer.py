@@ -572,7 +572,7 @@ def _decomposition(
             else:
                 assert not overwrite_A
                 if A.format in ('csr', 'lil'):
-                    A_column_i = A[p_i, :].conj().T
+                    A_column_i = A[p_i, :].conj(copy=False).transpose(copy=False)
                 else:
                     A_column_i = A[:, p_i]
                 A_column_i = A_column_i.toarray().reshape(-1)
@@ -597,7 +597,7 @@ def _decomposition(
                 else:
                     assert L.format == 'lil'
                     if len(L_rows[i]) > 0:
-                        L_row_i_mul_d = L[i, :].conj().multiply(d).toarray().reshape(-1)
+                        L_row_i_mul_d = L[i, :].conj(copy=False).multiply(d).toarray().reshape(-1)
                         assert np.all(np.isfinite(L_row_i_mul_d))
                         L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
                         L_below_row_i.rows = L_rows[i + 1:]
@@ -927,11 +927,15 @@ def positive_semidefinite_matrix(
                 B_i_j = 0
             else:
                 if q[a] > 0:
+                    r_i = L[q[i], :q[a]]
+                    r_j = L[q[j], :q[a]]
                     if is_dense:
-                        r_i = L[q[i], :q[a]] * d[:q[a]]
+                        r_i = r_i * d[:q[a]]
+                        r_j = r_j.conj().transpose()
                     else:
-                        r_i = L[q[i], :q[a]].multiply(d[:q[a]])
-                    B_i_j = r_i @ L[q[j], :q[a]].T.conj()
+                        r_i = r_i.multiply(d[:q[a]])
+                        r_j = r_j.conj(copy=False).transpose(copy=False)
+                    B_i_j = r_i @ r_j
                     if not is_dense:
                         assert B_i_j.shape == (1, 1)
                         B_i_j = B_i_j[0, 0]

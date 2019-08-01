@@ -139,3 +139,10 @@ def set_diagonal_nearly_real_to_real(A, min_abs_value=None):
                     A[i, i] = A_ii
 
     return A
+
+
+def conjugate_transpose(x, copy=False):
+    if scipy.sparse.issparse(x):
+        return x.conj(copy=copy).transpose(copy=copy)
+    else:
+        return x.conj().transpose()
