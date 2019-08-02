@@ -55,8 +55,11 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
     assert max(min_diag_D, min_abs_value_D, min_diag_B) <= min(max_diag_D, max_diag_B)
 
     # global solution
+    min_diag_D_without_zero = max(min_diag_D, min_abs_value_D)
+    a = max(min_diag_D_without_zero, min_diag_B - alpha)
+    b = min(max_diag_D, max_diag_B - alpha)
     d = gamma - alpha
-    if max(min_diag_D, min_abs_value_D, min_diag_B - alpha) <= d <= min(max_diag_D, max_diag_B - alpha):
+    if a <= d <= b:
         assert alpha != math.inf
         omega = 1
         f_value = 0
@@ -70,19 +73,21 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
         # alpha is finite
         add_best_d_omega_zero = False
         if math.isfinite(alpha):
-            a = max(min_diag_D, min_abs_value_D, min_diag_B - alpha)
-            b = min(max_diag_D, max_diag_B - alpha)
             if a <= b:
-                d = min(max(a, gamma - alpha), b)
-                C.append((d, 1))
+                if d < a:
+                    C.append((a, 1))
+                elif d > b:
+                    C.append((b, 1))
+                else:
+                    assert False
 
             # alpha and beta are finite
             if math.isfinite(beta):
                 if alpha != 0:
                     # add feasible d values
                     d_values = []
-                    if min_diag_B - alpha <= max(min_diag_D, min_abs_value_D):
-                        d_values.append(max(min_diag_D, min_abs_value_D))
+                    if min_diag_B - alpha <= min_diag_D_without_zero:
+                        d_values.append(min_diag_D_without_zero)
                     if math.isfinite(max_diag_D) and max_diag_D <= max_diag_B:
                         d_values.append(max_diag_D)
                     # add feasible d and omega values
@@ -133,7 +138,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
 
         # add (d, 0) where d is best if omega is zero
         if add_best_d_omega_zero:
-            d = max(min_diag_D, min_abs_value_D, min_diag_B, min(gamma, max_diag_D, max_diag_B))
+            d = max(min_diag_D_without_zero, min_diag_B, min(gamma, max_diag_D, max_diag_B))
             C.append((d, 0))
 
         # add (0, 0)
