@@ -481,8 +481,6 @@ def _decomposition(
                     min_diag_B=min_diag_B_i, max_diag_B=max_diag_B_i, min_abs_value_D=min_abs_value_D)
 
             # determine next value for p, d, omega
-            all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in possible_indices)
-
             if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
                                       MAXIMAL_STABILITY_PERMUTATION_METHOD):
                 if permutation_method == MINIMAL_DIFFERENCE_PERMUTATION_METHOD:
@@ -493,6 +491,7 @@ def _decomposition(
                     def order(value):
                         k, d_k, omega_k, f_value_k = value
                         return -d_k, f_value_k, omega_k, k
+                all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in possible_indices)
                 (j, d_i, omega_i, f_value_i) = min(all_minimal_changes, key=order)
                 # swap p[i] and p[j]
                 p_i = p[j]
@@ -510,8 +509,7 @@ def _decomposition(
                             iterable[i] = iterable[j]
                             iterable[j] = tmp
             else:
-                (j, d_i, omega_i, f_value_i) = tuple(all_minimal_changes)[0]
-                assert i == j
+                (d_i, omega_i, f_value_i) = minimal_change_for_index(i)
                 p_i = p[i]
 
             # update d
