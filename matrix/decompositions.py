@@ -329,6 +329,26 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         else:
             return self.as_type(type_strs[0])
 
+    def as_same_type(self, dec, copy=False):
+        """ Converts the passed decompositions to the same type as this decomposition.
+
+        Parameters
+        ----------
+        doc : DecompositionBase
+            The decomposition that should be converted.
+        copy : bool
+            Whether the data of the decomposition that sould be converted should always be copied or only if needed.
+
+        Returns
+        -------
+        matrix.decompositions.DecompositionBase
+            If the type of the passed decomposition is not same type as this decomposition,
+            a decomposition of this type is returned which represents the same decomposed matrix as
+            the passed decomposition. Otherwise this decomposition or a copy of it is returned,
+            depending on `copy`.
+        """
+        return dec.as_type(self.type_str, copy=copy)
+
     # *** features of decomposition *** #
 
     @abc.abstractmethod
