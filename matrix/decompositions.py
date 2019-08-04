@@ -750,6 +750,27 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         # solve
         return self.inverse_matrix_right_side_multiplication(b)
 
+    # *** modify decompostion *** #
+
+    @abc.abstractmethod
+    def append_block_decomposition(self, dec):
+        """
+        Makes a new decomposition where this decompsition and the passed one are appended.
+
+        Parameters
+        ----------
+        dec : DecompositionBase
+            The decomposition that should be appended to this decomposition.
+
+        Returns
+        ----------
+        dec : DecompositionBase
+            A new decomposition where this decompsition and the passed one are appended.
+            This desomposition represents the first block and the passed one the second block.
+        """
+
+        raise NotImplementedError
+
 
 class LDL_Decomposition(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -968,6 +989,14 @@ class LDL_Decomposition(DecompositionBase):
         y = matrix.util.conjugate_transpose(y)
         return (y / self.d) @ x
 
+    def append_block_decomposition(self, dec):
+        dec = self.as_same_type(dec, copy=False)
+        p = np.concatenate((self.p, dec.p + self.n))
+        d = np.concatenate((self.d, dec.d))
+        L = matrix.util.block_diag(self.L, dec.L)
+        res = LDL_Decomposition(p=p, L=L, d=d)
+        return res
+
 
 class LDL_DecompositionCompressed(DecompositionBase):
     """ A matrix decomposition where :math:`LDL^H` is the decomposed (permuted) matrix.
@@ -1114,6 +1143,13 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     def inverse_matrix_both_sides_multiplication(self, x, y=None):
         return self.as_LDL_Decomposition().inverse_matrix_both_sides_multiplication(x, y=y)
+
+    def append_block_decomposition(self, dec):
+        dec = self.as_same_type(dec, copy=False)
+        p = np.concatenate((self.p, dec.p + self.n))
+        LD = matrix.util.block_diag(self.LD, dec.LD)
+        res = LDL_DecompositionCompressed(p=p, LD=LD)
+        return res
 
 
 class LL_Decomposition(DecompositionBase):
@@ -1313,6 +1349,13 @@ class LL_Decomposition(DecompositionBase):
             y = x
         y = matrix.util.conjugate_transpose(y)
         return y @ x
+
+    def append_block_decomposition(self, dec):
+        dec = self.as_same_type(dec, copy=False)
+        p = np.concatenate((self.p, dec.p + self.n))
+        L = matrix.util.block_diag(self.L, dec.L)
+        res = LL_Decomposition(p=p, L=L)
+        return res
 
 
 # functions handling decompositions

@@ -146,3 +146,18 @@ def conjugate_transpose(x, copy=False):
         return x.conj(copy=copy).transpose(copy=copy)
     else:
         return x.conj().transpose()
+
+
+def block_diag(A, B):
+    if scipy.sparse.issparse(A) and not scipy.sparse.issparse(B):
+        A = A.toarray()
+    elif not scipy.sparse.issparse(A) and scipy.sparse.issparse(B):
+        B = B.toarray()
+
+    if scipy.sparse.issparse(A) and scipy.sparse.issparse(B):
+        D = scipy.sparse.block_diag((A, B), format=A.format)
+    else:
+        n = A.shape[0]
+        m = B.shape[0]
+        D = np.block([[A, np.zeros((n, m))], [np.zeros((m, n)), B]])
+    return D
