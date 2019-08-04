@@ -15,8 +15,8 @@ def solver_depressed_cubic(p, q, include_complex_values=True):
         D_sqrt = math.sqrt(D)
         u = - 0.5 * q + D_sqrt
         v = - 0.5 * q - D_sqrt
-        u = scipy.special.cbrt(u)
-        v = scipy.special.cbrt(v)
+        u = scipy.special.cbrt(float(u))
+        v = scipy.special.cbrt(float(v))
         assert math.isclose(u * v, - p / 3, abs_tol=10**-8)
 
         # compute roots

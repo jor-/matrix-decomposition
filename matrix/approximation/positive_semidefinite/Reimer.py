@@ -280,7 +280,7 @@ def _decomposition(
             gamma = gamma.real
 
         # data type to use for calculations
-        DTYPE = np.float64
+        DTYPE = np.float128
         d_eps = np.finfo(DTYPE).eps
 
         # check diag values

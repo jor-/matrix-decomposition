@@ -373,6 +373,10 @@ test_condition_number_matrix_setup = [
 def _condition_number(B):
     if scipy.sparse.issparse(B):
         B = B.toarray()
+    if B.dtype == np.float128:
+        B = B.astype(np.float64, copy=False)
+    elif B.dtype == np.complex256:
+        B = B.astype(np.complex128, copy=False)
     condition_number = np.linalg.cond(B, p=2)
     return condition_number
 
