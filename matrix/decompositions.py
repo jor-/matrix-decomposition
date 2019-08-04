@@ -133,7 +133,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         return P
 
     def permute_matrix(self, A):
-        """ Permute a matrix by the permutation of the decomposition.
+        """ Permutes a matrix by the permutation of the decomposition.
 
         Parameters
         ----------
@@ -152,7 +152,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             return A
 
     def unpermute_matrix(self, A):
-        """ Unpermute a matrix permuted by the permutation of the decomposition.
+        """ Unpermutes a matrix permuted by the permutation of the decomposition.
 
         Parameters
         ----------
@@ -232,7 +232,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
     # *** convert type *** #
 
     def copy(self):
-        """ Copy this decomposition.
+        """ Copies this decomposition.
 
         Returns
         -------
@@ -246,7 +246,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         return copy.deepcopy(self)
 
     def is_type(self, type_str):
-        """ Whether this is a decomposition of the passed type.
+        """ Whether this decomposition is of the passed type.
 
         Parameters
         ----------
@@ -268,7 +268,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
                 return False
 
     def as_type(self, type_str, copy=False):
-        """ Convert decomposition to passed type.
+        """ Converts this decomposition to passed type.
 
         Parameters
         ----------
@@ -299,7 +299,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             raise matrix.errors.NoDecompositionConversionImplementedError(self, type_str)
 
     def as_any_type(self, *type_strs, copy=False):
-        """ Convert decomposition to any of the passed types.
+        """ Converts this decomposition to any of the passed types.
 
         Parameters
         ----------
