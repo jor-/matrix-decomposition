@@ -547,17 +547,16 @@ def _decomposition(
                         L[i, :i] = 0
                 else:
                     assert L.format == 'lil'
-
                     if omega_i != 0:
-                        L_i_rows = L_rows[i]
-                        L_i_data_array = np.asarray(L_data[i])
-                        if omega_i != 1:
-                            L_i_data_array *= omega_i
-                        L_i_nonzero_mask = np.abs(L_i_data_array) >= L_eps
-                        L_rows[i] = [L_i_rows[i] for i in range(len(L_i_nonzero_mask))
-                                     if L_i_nonzero_mask[i]]
-                        L_data[i] = [L_i_data_array[i] for i in range(len(L_i_nonzero_mask))
-                                     if L_i_nonzero_mask[i]]
+                        L_i_rows = []
+                        L_i_data = []
+                        for row, data in zip(L_rows[i], L_data[i]):
+                            data = data * omega_i
+                            if np.abs(data) >= L_eps:
+                                L_i_rows.append(row)
+                                L_i_data.append(data)
+                        L_rows[i] = L_i_rows
+                        L_data[i] = L_i_data
                     else:
                         L_rows[i] = []
                         L_data[i] = []
