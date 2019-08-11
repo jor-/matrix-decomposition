@@ -111,15 +111,7 @@ def convert_index_dtype(A, dtype, overwrite_A=False):
     return A
 
 
-def set_diagonal(A, diagonal_value):
-    assert A.ndim == 2
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', scipy.sparse.SparseEfficiencyWarning)
-        for i in range(min(A.shape)):
-            A[i, i] = diagonal_value
-
-
-def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):
+def solve_triangular(A, b, lower=True, overwrite_b=False, check_finite=True, dtype=None):
     if check_finite:
         matrix.sparse.util.check_finite(A)
         if is_sparse(b):
@@ -127,10 +119,11 @@ def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, c
         else:
             matrix.dense.util.check_finite(b)
     A = A.tocsr(copy=True)
-    if unit_diagonal:
-        set_diagonal(A, 1)
-    b = b.astype(np.result_type(A.data, b, np.float), copy=not overwrite_b)  # this has to be done due to a bug in scipy (see pull reqeust #7449)
-    return scipy.sparse.linalg.spsolve_triangular(A, b, lower=lower, overwrite_A=True, overwrite_b=overwrite_b)
+    if dtype is None:
+        dtype = np.float
+    dtype = np.result_type(A.dtype, b.dtype, dtype)
+    b = b.astype(dtype, copy=not overwrite_b)
+    return scipy.sparse.linalg.spsolve_triangular(A, b, lower=lower, overwrite_A=True, overwrite_b=True)
 
 
 def compressed_matrix_indices(A, i, A_i_start_index=None, A_i_stop_index=None, A_ii_index=None, A_ii=None):

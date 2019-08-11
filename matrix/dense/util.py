@@ -21,5 +21,9 @@ def check_finite(A, check_finite=True):
         raise matrix.errors.MatrixNotFiniteError(A)
 
 
-def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):
-    return scipy.linalg.solve_triangular(A, b, lower=lower, unit_diagonal=unit_diagonal, overwrite_b=overwrite_b, check_finite=check_finite)
+def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True, dtype=None):
+    if dtype is None:
+        dtype = np.float
+    dtype = np.result_type(A.dtype, b.dtype, dtype)
+    b = b.astype(dtype, copy=not overwrite_b)
+    return scipy.linalg.solve_triangular(A, b, lower=lower, unit_diagonal=unit_diagonal, overwrite_b=True, check_finite=check_finite)

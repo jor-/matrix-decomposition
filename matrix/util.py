@@ -7,25 +7,29 @@ import matrix.dense.util
 import matrix.sparse.util
 
 
-def as_matrix_or_array(A, check_ndim_values=None):
+def as_matrix_or_array(A, check_ndim_values=None, dtype=None, copy=True):
     if not scipy.sparse.issparse(A):
-        A = np.asarray(A)
+        A = np.array(A, dtype=dtype, copy=copy)
+    elif dtype is not None:
+        A = A.astype(dtype=dtype, copy=copy)
+    elif copy:
+        A = A.copy()
     if check_ndim_values is not None and A.ndim not in check_ndim_values:
         raise ValueError('The number of dimensions of the input should be in '
                          '{} but it is {}.'.format(check_ndim_values, A.ndim))
     return A
 
 
-def as_matrix_or_vector(A):
-    return as_matrix_or_array(A, check_ndim_values=(1, 2))
+def as_matrix_or_vector(A, dtype=None, copy=True):
+    return as_matrix_or_array(A, check_ndim_values=(1, 2), dtype=dtype, copy=copy)
 
 
-def as_matrix(A):
-    return as_matrix_or_array(A, check_ndim_values=(2,))
+def as_matrix(A, dtype=None, copy=True):
+    return as_matrix_or_array(A, check_ndim_values=(2,), dtype=dtype, copy=copy)
 
 
-def as_vector(A):
-    A = np.asarray(A)
+def as_vector(A, dtype=None, copy=True):
+    A = np.array(A, dtype=dtype, copy=copy)
     if A.ndim != 1:
         raise ValueError('The number of dimensions of the input should be 1 '
                          'but it is {}.'.format(A.ndim))
@@ -76,17 +80,15 @@ def check_finite(A, check_finite=True):
         raise matrix.errors.MatrixNotFiniteError(matrix=A)
 
 
-def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True):
+def solve_triangular(A, b, lower=True, unit_diagonal=False, overwrite_b=False, check_finite=True, dtype=None):
     if scipy.sparse.issparse(A):
         return matrix.sparse.util.solve_triangular(
-            A, b,
-            lower=lower, unit_diagonal=unit_diagonal,
-            overwrite_b=overwrite_b, check_finite=check_finite)
+            A, b, lower=lower,
+            overwrite_b=overwrite_b, check_finite=check_finite, dtype=dtype)
     else:
         return matrix.dense.util.solve_triangular(
-            A, b,
-            lower=lower, unit_diagonal=unit_diagonal,
-            overwrite_b=overwrite_b, check_finite=check_finite)
+            A, b, lower=lower, unit_diagonal=unit_diagonal,
+            overwrite_b=overwrite_b, check_finite=check_finite, dtype=dtype)
 
 
 def set_nearly_zero_to_zero(A, min_abs_value=None):

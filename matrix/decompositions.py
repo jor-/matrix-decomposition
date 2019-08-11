@@ -616,7 +616,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
 
     # *** multiply *** #
 
-    def matrix_right_side_multiplication(self, x):
+    def matrix_right_side_multiplication(self, x, dtype=None):
         """
         Calculates the right side (matrix-matrix or matrix-vector) product `A @ x`, where `A` is the composed matrix represented by this decomposition.
 
@@ -626,6 +626,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Vector or matrix in the product in the
             matrix-matrix or matrix-vector `A @ x`.
             It must hold `self.n == x.shape[0]`.
+        dtype : numpy.dtype
+            Type to use in computation.
+            optional, default: Determined by the method.
 
         Returns
         -------
@@ -633,10 +636,10 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             The result of `A @ x`.
         """
 
-        x = matrix.util.as_matrix_or_vector(x)
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         return self.composed_matrix @ x
 
-    def matrix_both_sides_multiplication(self, x, y=None):
+    def matrix_both_sides_multiplication(self, x, y=None, dtype=None):
         """
         Calculates the both sides (matrix-matrix or matrix-vector) product `y.H @ A @ x`, where `A` is the composed matrix represented by this decomposition.
 
@@ -649,6 +652,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Vector or matrix in the product `y.H @ A @ x`.
             It must hold `self.n == y.shape[0]`.
             optional, default: If y is not passed, x is used as y.
+        dtype : numpy.dtype
+            Type to use in computation.
+            optional, default: Determined by the method.
 
         Returns
         -------
@@ -656,16 +662,16 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             The result of `y.H @ A @ x`.
         """
 
-        x = matrix.util.as_matrix_or_vector(x)
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         if y is None:
             y = x
         else:
-            y = matrix.util.as_matrix_or_vector(y)
+            y = matrix.util.as_matrix_or_vector(y, dtype=dtype, copy=False)
         y = matrix.util.conjugate_transpose(y)
-        return y @ self.matrix_right_side_multiplication(x)
+        return y @ self.matrix_right_side_multiplication(x, dtype=dtype)
 
     @abc.abstractmethod
-    def inverse_matrix_right_side_multiplication(self, x):
+    def inverse_matrix_right_side_multiplication(self, x, dtype=None):
         """
         Calculates the right side (matrix-matrix or matrix-vector) product `B @ x`, where `B` is the matrix inverse of the composed matrix represented by this decomposition.
 
@@ -675,6 +681,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Vector or matrix in the product in the
             matrix-matrix or matrix-vector `B @ x`.
             It must hold `self.n == x.shape[0]`.
+        dtype : numpy.dtype
+            Type to use in computation.
+            optional, default: Determined by the method.
 
         Returns
         -------
@@ -688,7 +697,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
-    def inverse_matrix_both_sides_multiplication(self, x, y=None):
+    def inverse_matrix_both_sides_multiplication(self, x, y=None, dtype=None):
         """
         Calculates the both sides (matrix-matrix or matrix-vector) product `y.H @ B @ x`, where `B` is the mattrix inverse of the composed matrix represented by this decomposition.
 
@@ -701,6 +710,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             Vector or matrix in the product `y.H @ B @ x`.
             It must hold `self.n == y.shape[0]`.
             optional, default: If y is not passed, x is used as y.
+        dtype : numpy.dtype
+            Type to use in computation.
+            optional, default: Determined by the method.
 
         Returns
         -------
@@ -713,17 +725,17 @@ class DecompositionBase(metaclass=abc.ABCMeta):
             If this is a decomposition representing a singular matrix.
         """
 
-        x = matrix.util.as_matrix_or_vector(x)
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         if y is None:
             y = x
         else:
-            y = matrix.util.as_matrix_or_vector(y)
+            y = matrix.util.as_matrix_or_vector(y, dtype=dtype, copy=False)
         y = matrix.util.conjugate_transpose(y)
-        return y @ self.inverse_matrix_right_side_multiplication(x)
+        return y @ self.inverse_matrix_right_side_multiplication(x, dtype=dtype)
 
     # *** solve systems of linear equations *** #
 
-    def solve(self, b):
+    def solve(self, b, dtype=None):
         """
         Solves the equation `A x = b` regarding `x`, where `A` is the composed matrix represented by this decomposition.
 
@@ -732,6 +744,9 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         b : numpy.ndarray or scipy.sparse.spmatrix
             Right-hand side vector or matrix in equation `A x = b`.
             It must hold `self.n == b.shape[0]`.
+        dtype : numpy.dtype
+            Type to use in computation.
+            optional, default: Determined by the method.
 
         Returns
         -------
@@ -748,7 +763,7 @@ class DecompositionBase(metaclass=abc.ABCMeta):
         # debug info
         matrix.logger.debug('Solving linear system with {}.'.format(self))
         # solve
-        return self.inverse_matrix_right_side_multiplication(b)
+        return self.inverse_matrix_right_side_multiplication(b, dtype=dtype)
 
     # *** modify decompostion *** #
 
@@ -943,8 +958,8 @@ class LDL_Decomposition(DecompositionBase):
 
     # *** multiply *** #
 
-    def matrix_right_side_multiplication(self, x):
-        x = matrix.util.as_matrix_or_vector(x)
+    def matrix_right_side_multiplication(self, x, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         x = x[self.p]
         x = matrix.util.conjugate_transpose(self.L) @ x
         x = (self.d * x.transpose()).transpose()
@@ -952,12 +967,12 @@ class LDL_Decomposition(DecompositionBase):
         x = x[self.p_inverse]
         return x
 
-    def matrix_both_sides_multiplication(self, x, y=None):
-        x = matrix.util.as_matrix_or_vector(x)
+    def matrix_both_sides_multiplication(self, x, y=None, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         x = x[self.p]
         x = matrix.util.conjugate_transpose(self.L) @ x
         if y is not None:
-            y = matrix.util.as_matrix_or_vector(y)
+            y = matrix.util.as_matrix_or_vector(y, dtype=dtype, copy=False)
             y = y[self.p]
             y = matrix.util.conjugate_transpose(y)
             y = y @ self.L
@@ -965,25 +980,25 @@ class LDL_Decomposition(DecompositionBase):
             y = matrix.util.conjugate_transpose(x)
         return (y * self.d) @ x
 
-    def inverse_matrix_right_side_multiplication(self, x):
-        x = matrix.util.as_matrix_or_vector(x)
+    def inverse_matrix_right_side_multiplication(self, x, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         self.check_invertible()
         x = x[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True)
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, dtype=dtype)
         x = (x.transpose() / self.d).transpose()
-        x = matrix.util.solve_triangular(matrix.util.conjugate_transpose(self.L), x, lower=False, unit_diagonal=True, overwrite_b=True)
+        x = matrix.util.solve_triangular(matrix.util.conjugate_transpose(self.L), x, lower=False, unit_diagonal=True, overwrite_b=True, dtype=dtype)
         x = x[self.p_inverse]
         return x
 
-    def inverse_matrix_both_sides_multiplication(self, x, y=None):
-        x = matrix.util.as_matrix_or_vector(x)
+    def inverse_matrix_both_sides_multiplication(self, x, y=None, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         self.check_invertible()
         x = x[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True)
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=True, overwrite_b=True, dtype=dtype)
         if y is not None:
-            y = matrix.util.as_matrix_or_vector(y)
+            y = matrix.util.as_matrix_or_vector(y, dtype=dtype, copy=False)
             y = y[self.p]
-            y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=True, overwrite_b=True)
+            y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=True, overwrite_b=True, dtype=dtype)
         else:
             y = x
         y = matrix.util.conjugate_transpose(y)
@@ -1132,17 +1147,17 @@ class LDL_DecompositionCompressed(DecompositionBase):
 
     # *** multiply *** #
 
-    def matrix_right_side_multiplication(self, x):
-        return self.as_LDL_Decomposition().matrix_right_side_multiplication(x)
+    def matrix_right_side_multiplication(self, x, dtype=None):
+        return self.as_LDL_Decomposition().matrix_right_side_multiplication(x, dtype=dtype)
 
-    def matrix_both_sides_multiplication(self, x, y=None):
-        return self.as_LDL_Decomposition().matrix_both_sides_multiplication(x, y=y)
+    def matrix_both_sides_multiplication(self, x, y=None, dtype=None):
+        return self.as_LDL_Decomposition().matrix_both_sides_multiplication(x, y=y, dtype=dtype)
 
-    def inverse_matrix_right_side_multiplication(self, x):
-        return self.as_LDL_Decomposition().inverse_matrix_right_side_multiplication(x)
+    def inverse_matrix_right_side_multiplication(self, x, dtype=None):
+        return self.as_LDL_Decomposition().inverse_matrix_right_side_multiplication(x, dtype=dtype)
 
-    def inverse_matrix_both_sides_multiplication(self, x, y=None):
-        return self.as_LDL_Decomposition().inverse_matrix_both_sides_multiplication(x, y=y)
+    def inverse_matrix_both_sides_multiplication(self, x, y=None, dtype=None):
+        return self.as_LDL_Decomposition().inverse_matrix_both_sides_multiplication(x, y=y, dtype=dtype)
 
     def append_block_decomposition(self, dec):
         dec = self.as_same_type(dec, copy=False)
@@ -1306,20 +1321,20 @@ class LL_Decomposition(DecompositionBase):
 
     # *** multiply *** #
 
-    def matrix_right_side_multiplication(self, x):
-        x = matrix.util.as_matrix_or_vector(x)
+    def matrix_right_side_multiplication(self, x, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         x = x[self.p]
         x = matrix.util.conjugate_transpose(self.L) @ x
         x = self.L @ x
         x = x[self.p_inverse]
         return x
 
-    def matrix_both_sides_multiplication(self, x, y=None):
-        x = matrix.util.as_matrix_or_vector(x)
+    def matrix_both_sides_multiplication(self, x, y=None, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         x = x[self.p]
         x = matrix.util.conjugate_transpose(self.L) @ x
         if y is not None:
-            y = matrix.util.as_matrix_or_vector(y)
+            y = matrix.util.as_matrix_or_vector(y, dtype=dtype, copy=False)
             y = y[self.p]
             y = matrix.util.conjugate_transpose(y)
             y = y @ self.L
@@ -1327,24 +1342,24 @@ class LL_Decomposition(DecompositionBase):
             y = matrix.util.conjugate_transpose(x)
         return y @ x
 
-    def inverse_matrix_right_side_multiplication(self, x):
-        x = matrix.util.as_matrix_or_vector(x)
+    def inverse_matrix_right_side_multiplication(self, x, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         self.check_invertible()
         x = x[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True)
-        x = matrix.util.solve_triangular(matrix.util.conjugate_transpose(self.L), x, lower=False, unit_diagonal=False, overwrite_b=True)
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True, dtype=dtype)
+        x = matrix.util.solve_triangular(matrix.util.conjugate_transpose(self.L), x, lower=False, unit_diagonal=False, overwrite_b=True, dtype=dtype)
         x = x[self.p_inverse]
         return x
 
-    def inverse_matrix_both_sides_multiplication(self, x, y=None):
-        x = matrix.util.as_matrix_or_vector(x)
+    def inverse_matrix_both_sides_multiplication(self, x, y=None, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
         self.check_invertible()
         x = x[self.p]
-        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True)
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True, dtype=dtype)
         if y is not None:
-            y = matrix.util.as_matrix_or_vector(y)
+            y = matrix.util.as_matrix_or_vector(y, dtype=dtype, copy=False)
             y = y[self.p]
-            y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=False, overwrite_b=True)
+            y = matrix.util.solve_triangular(self.L, y, lower=True, unit_diagonal=False, overwrite_b=True, dtype=dtype)
         else:
             y = x
         y = matrix.util.conjugate_transpose(y)
