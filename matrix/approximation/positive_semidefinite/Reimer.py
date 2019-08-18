@@ -41,6 +41,12 @@ def _difference_frobenius_norm(d, omega, alpha, beta, gamma):
 
 def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
                     min_diag_B=-math.inf, max_diag_B=math.inf, min_abs_value_D=0):
+    # debug info
+    matrix.logger.debug(f'Searching best value for '
+                        f'alpha {alpha}, beta {beta}, gamma {gamma}, min_diag_D {min_diag_D}, '
+                        f'max_diag_D {max_diag_D}, min_abs_value_D {min_abs_value_D}, '
+                        f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}.')
+
     # check input
     assert math.isfinite(alpha) or alpha == math.inf
     assert math.isfinite(beta) or beta == math.inf
@@ -154,10 +160,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
         (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
     # debug info
-    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} and f = {f_value} for '
-                        f'alpha {alpha}, beta {beta}, gamma {gamma}, min_diag_D {min_diag_D}, '
-                        f'max_diag_D {max_diag_D}, min_abs_value_D {min_abs_value_D}, '
-                        f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}.')
+    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} with f = {f_value}.')
 
     # return value
     assert min_diag_D <= d <= max_diag_D
@@ -532,7 +535,7 @@ def _decomposition(
             delta[p_i] = delta_i
 
             # debug info
-            matrix.logger.debug(f'Using permutation index {p_i}, d {d_i}, omega {omega[p_i]}, delta '
+            matrix.logger.debug(f'Using permutation index {p_i} with d={d_i}, omega={omega[p_i]}, delta='
                                 f'{delta[p_i]} and additional approximation error {f_value_i} for '
                                 f'iteration {i} of {n - 1}. ({(i + 1) / n:.1%} done.)')
 
