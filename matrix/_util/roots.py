@@ -17,7 +17,7 @@ def solver_depressed_cubic(p, q, include_complex_values=True):
         v = - 0.5 * q - D_sqrt
         u = scipy.special.cbrt(float(u))
         v = scipy.special.cbrt(float(v))
-        assert math.isclose(u * v, - p / 3, abs_tol=10**-8)
+        assert math.isclose(u * v, - p / 3, abs_tol=1e-08)
 
         # compute roots
         x1 = u + v
@@ -38,7 +38,7 @@ def solver_depressed_cubic(p, q, include_complex_values=True):
         v = - 0.5 * q - D_sqrt
         u = u**(1 / 3)
         v = v**(1 / 3)
-        assert cmath.isclose(u * v, - p / 3, abs_tol=10**-8)
+        assert cmath.isclose(u * v, - p / 3, rel_tol=1e-06, abs_tol=1e-06)
 
         # compute roots
         x1 = u + v
@@ -47,7 +47,7 @@ def solver_depressed_cubic(p, q, include_complex_values=True):
         x2 = u * a + v * b
         x3 = u * b + v * a
         roots = (x1, x2, x3)
-        assert all(math.isclose(x.imag, 0, abs_tol=10**-8) for x in roots)
+        assert all(math.isclose(x.imag, 0, abs_tol=1e-08) for x in roots)
         roots = [x.real for x in roots]
 
     # one or two real roots
@@ -64,5 +64,5 @@ def solver_depressed_cubic(p, q, include_complex_values=True):
             roots = (x1, x2)
 
     # return
-    assert all(cmath.isclose(x**3 + p * x + q, 0, abs_tol=10**-8) for x in roots)
+    assert all(cmath.isclose(x**3 + p * x + q, 0, abs_tol=1e-08) for x in roots)
     return roots
