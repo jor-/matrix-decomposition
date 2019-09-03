@@ -160,7 +160,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
         (d, omega, f_value) = min(C_with_f_value, key=lambda x: (x[2], -x[0], x[1]))
 
     # debug info
-    matrix.logger.debug(f'Best value is d = {d}, omega = {omega} with f = {f_value}.')
+    matrix.logger.debug(f'Best value is d {d}, omega {omega} with f {f_value}.')
 
     # return value
     assert min_diag_D <= d <= max_diag_D
@@ -168,7 +168,6 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
     assert 0 <= omega <= 1
     assert d != 0 or omega == 0
     assert f_value >= 0
-    assert math.isfinite(alpha) or alpha == math.inf
     assert alpha != math.inf or omega == 0
     assert alpha == math.inf or (min_diag_B <= d + omega**2 * alpha or math.isclose(min_diag_B, d + omega**2 * alpha))
     assert alpha == math.inf or (max_diag_B >= d + omega**2 * alpha or math.isclose(max_diag_B, d + omega**2 * alpha))
@@ -254,15 +253,16 @@ def _decomposition(
 
     # debug info
     matrix.logger.debug(f'Calculating approximated LDL decomposition with passed values: '
-                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                        f'min_abs_value_D={min_abs_value_D}, '
-                        f'permutation={permutation}, overwrite_A={overwrite_A}, '
-                        f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
+                        f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
+                        f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, '
+                        f'permutation {permutation}, overwrite_A {overwrite_A}, '
+                        f'strict_lower_triangular_only_L {strict_lower_triangular_only_L}.')
 
     # raise error at overflow
     with warnings.catch_warnings():
-        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars', category=RuntimeWarning)
+        warnings.filterwarnings(action='error', message='overflow encountered in double_scalars',
+                                category=RuntimeWarning)
 
         # check A
         is_dense = not matrix.sparse.util.is_sparse(A)
@@ -297,8 +297,8 @@ def _decomposition(
                     matrix.logger.error(error)
                     raise error from original_error
                 if not (f.ndim == 0 or (f.ndim == 1 and f.shape[0] == n)):
-                    error = ValueError(f'{f_name} must be a scalar or a vector with the same dimension '
-                                       f'as A but its shape is {f.shape}.')
+                    error = ValueError(f'{f_name} must be a scalar or a vector with the same '
+                                       f'dimension as A but its shape is {f.shape}.')
                     matrix.logger.error(error)
                     raise error
                 if not (np.all(np.isreal(f))):
@@ -338,8 +338,8 @@ def _decomposition(
                     matrix.logger.error(error)
                     raise error
                 if lower_bound is not None and f < lower_bound:
-                    error = ValueError(f'{f_name} must be finite and greater or equal to {lower_bound} '
-                                       f'but it is {f}.')
+                    error = ValueError(f'{f_name} must be finite and greater or equal to '
+                                       f'{lower_bound} but it is {f}.')
                     matrix.logger.error(error)
                     raise error
             else:
@@ -423,8 +423,8 @@ def _decomposition(
             permutation_method = None
             p = np.asanyarray(permutation)
             if p.ndim != 1 or p.shape[0] != n:
-                error = ValueError(f'Permutation vector must have same length as the dimensions of A. '
-                                   f'Its shape is {p.shape} and the shape of A is {A.shape}.')
+                error = ValueError(f'Permutation vector must have same length as the dimensions of '
+                                   f'A. Its shape is {p.shape} and the shape of A is {A.shape}.')
                 matrix.logger.error(error)
                 raise error
 
@@ -450,20 +450,14 @@ def _decomposition(
 
         # debug info
         matrix.logger.debug(f'Using the following values: '
-                            f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                            f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                            f'min_abs_value_D={min_abs_value_D} '
-                            f'permutation={permutation}, overwrite_A={overwrite_A}, '
-                            f'strict_lower_triangular_only_L={strict_lower_triangular_only_L}.')
+                            f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
+                            f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
+                            f'min_abs_value_D {min_abs_value_D} '
+                            f'permutation {permutation}, overwrite_A {overwrite_A}, '
+                            f'strict_lower_triangular_only_L {strict_lower_triangular_only_L}.')
 
         # calculate values iteratively
         for i in range(n):
-            # determine possible next indices
-            if permutation_method in (MINIMAL_DIFFERENCE_PERMUTATION_METHOD,
-                                      MAXIMAL_STABILITY_PERMUTATION_METHOD):
-                possible_indices = range(i, n)
-            else:
-                possible_indices = (i,)
 
             # choose current min d
             def minimal_change_for_index(j):
@@ -494,7 +488,7 @@ def _decomposition(
                     def order(value):
                         k, d_k, omega_k, f_value_k = value
                         return -d_k, f_value_k, omega_k, k
-                all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in possible_indices)
+                all_minimal_changes = ((j, *minimal_change_for_index(j)) for j in range(i, n))
                 (j, d_i, omega_i, f_value_i) = min(all_minimal_changes, key=order)
                 # swap p[i] and p[j]
                 p_i = p[j]
@@ -535,9 +529,9 @@ def _decomposition(
             delta[p_i] = delta_i
 
             # debug info
-            matrix.logger.debug(f'Using permutation index {p_i} with d={d_i}, omega={omega[p_i]}, delta='
-                                f'{delta[p_i]} and additional approximation error {f_value_i} for '
-                                f'iteration {i} of {n - 1}. ({(i + 1) / n:.1%} done.)')
+            matrix.logger.debug(f'Using permutation index {p_i} with d {d_i}, omega {omega[p_i]}, '
+                                f'delta {delta[p_i]} and additional approximation error {f_value_i}'
+                                f' for iteration {i} of {n - 1}. ({(i + 1) / n:.1%} done.)')
 
             # update i-th row of L with omega
             if i > 0:
@@ -762,11 +756,11 @@ def decomposition(
 
     # debug info
     matrix.logger.debug(f'Calculating approximated decomposition with passed values: '
-                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                        f'min_abs_value_D={min_abs_value_D}, '
-                        f'permutation={permutation}, overwrite_A={overwrite_A}, '
-                        f'return_type={return_type}.')
+                        f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
+                        f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, '
+                        f'permutation {permutation}, overwrite_A {overwrite_A}, '
+                        f'return_type {return_type}.')
 
     # check return type
     supported_return_types = matrix.constants.DECOMPOSITION_TYPES
@@ -857,10 +851,10 @@ def positive_semidefinite_matrix(
 
     # debug info
     matrix.logger.debug(f'Calculating approximation of a matrix with passed values: '
-                        f'min_diag_B={min_diag_B}, max_diag_B={max_diag_B}, '
-                        f'min_diag_D={min_diag_D}, max_diag_D={max_diag_D}, '
-                        f'min_abs_value_D={min_abs_value_D}, '
-                        f'permutation={permutation}, overwrite_A={overwrite_A}.')
+                        f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
+                        f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, '
+                        f'permutation {permutation}, overwrite_A {overwrite_A}.')
 
     # calculate decomposition
     L, d, p, omega, delta = _decomposition(
