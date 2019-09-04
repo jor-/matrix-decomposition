@@ -178,7 +178,7 @@ def _minimal_change(alpha, beta, gamma, min_diag_D, max_diag_D=math.inf,
 
 def _decomposition(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation=None, overwrite_A=False,
+        min_abs_value_D=None, min_abs_value_L=None, permutation=None, overwrite_A=False,
         strict_lower_triangular_only_L=False):
     """
     Computes an (approximative) :math:`LDL^H` decomposition of a matrix with the specified properties.
@@ -213,6 +213,11 @@ def _decomposition(
         in the matrix `D` of an approximated :math:`LDL^H` decomposition.
         `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
+    min_abs_value_L : float
+        Absolute values below `min_abs_value_L` are considered as zero
+        in the matrix `L` of an approximated :math:`LDL^H` decomposition.
+        `min_abs_value_L` must be greater or equal to 0.
+        optional, default : The resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
@@ -255,7 +260,7 @@ def _decomposition(
     matrix.logger.debug(f'Calculating approximated LDL decomposition with passed values: '
                         f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
                         f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
-                        f'min_abs_value_D {min_abs_value_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, min_abs_value_L {min_abs_value_L}, '
                         f'permutation {permutation}, overwrite_A {overwrite_A}, '
                         f'strict_lower_triangular_only_L {strict_lower_triangular_only_L}.')
 
@@ -281,10 +286,6 @@ def _decomposition(
                 index_with_complex_value = np.where(~np.isreal(gamma))[0][0]
                 raise matrix.errors.MatrixComplexDiagonalValueError(A, i=index_with_complex_value)
             gamma = gamma.real
-
-        # data type to use for calculations
-        DTYPE = np.float128
-        d_eps = np.finfo(DTYPE).eps
 
         # check diag values
         def check_float_scalar_or_vector(f, f_name='variable', default_value=None,
@@ -320,7 +321,8 @@ def _decomposition(
                 f = np.asarray(default_value)
             return f
 
-        def check_float_scalar(f, f_name='variable', default_value=None, lower_bound=-math.inf,
+        def check_float_scalar(f, f_name='variable', default_value=None,
+                               lower_bound=None, upper_bound=None,
                                minus_inf_okay=False, plus_inf_okay=False):
             if f is not None:
                 try:
@@ -338,8 +340,13 @@ def _decomposition(
                     matrix.logger.error(error)
                     raise error
                 if lower_bound is not None and f < lower_bound:
-                    error = ValueError(f'{f_name} must be finite and greater or equal to '
-                                       f'{lower_bound} but it is {f}.')
+                    error = ValueError(f'{f_name} must be greater or equal to {lower_bound} but '
+                                       f'it is {f}.')
+                    matrix.logger.error(error)
+                    raise error
+                if upper_bound is not None and f > upper_bound:
+                    error = ValueError(f'{f_name} must be less or equal to {upper_bound} but '
+                                       f'it is {f}.')
                     matrix.logger.error(error)
                     raise error
             else:
@@ -365,11 +372,6 @@ def _decomposition(
             matrix.logger.error(error)
             raise error
 
-        min_abs_value_D = check_float_scalar(min_abs_value_D, f_name='min_abs_value_D',
-                                             default_value=d_eps**0.5, lower_bound=0,
-                                             minus_inf_okay=False, plus_inf_okay=False)
-        min_abs_value_D = max(min_abs_value_D, d_eps)
-
         # check overwrite_A
         if overwrite_A is None or not is_dense:
             overwrite_A = False
@@ -378,15 +380,41 @@ def _decomposition(
             matrix.logger.debug(f'A has an integer dtype ({A.dtype}) which can not be used to store '
                                 f'the values of L. Thus L is not overwritten.')
 
+        # init L
+        if overwrite_A:
+            L = A
+        else:
+            L_dtype = np.promote_types(A.dtype, np.float64)
+            if is_dense:
+                L = np.zeros((n, n), dtype=L_dtype)
+            else:
+                L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
+                L_rows = L.rows
+                L_data = L.data
+
+        # check min_abs_value_D and min_abs_value_L
+        DTYPE = np.float128
+
+        d_eps = np.finfo(DTYPE).eps
+        min_abs_value_D = check_float_scalar(min_abs_value_D, f_name='min_abs_value_D',
+                                             default_value=d_eps**0.5, lower_bound=0,
+                                             minus_inf_okay=False, plus_inf_okay=False)
+        min_abs_value_D = max(min_abs_value_D, d_eps)
+
+        L_eps = np.finfo(L.dtype).eps
+        min_abs_value_L = check_float_scalar(min_abs_value_L, f_name='min_abs_value_L',
+                                             default_value=L_eps, lower_bound=0, upper_bound=1,
+                                             minus_inf_okay=False, plus_inf_okay=False)
+        min_abs_value_L = max(min_abs_value_L, L_eps)
+
         # check strict_lower_triangular_only_L
         if strict_lower_triangular_only_L is None:
             strict_lower_triangular_only_L = False
 
-        # check permutation method
+        # check permutation method and calculate permutation vector p
         if permutation is None:
             permutation = MAXIMAL_STABILITY_PERMUTATION_METHOD
 
-        # name of permutation method passed
         if isinstance(permutation, str):
             # check permutation method
             permutation_method = permutation.lower()
@@ -427,19 +455,6 @@ def _decomposition(
                                    f'A. Its shape is {p.shape} and the shape of A is {A.shape}.')
                 matrix.logger.error(error)
                 raise error
-
-        # init L
-        if overwrite_A:
-            L = A
-        else:
-            L_dtype = np.promote_types(A.dtype, np.float64)
-            if is_dense:
-                L = np.zeros((n, n), dtype=L_dtype)
-            else:
-                L = scipy.sparse.lil_matrix((n, n), dtype=L_dtype)
-                L_rows = L.rows
-                L_data = L.data
-        L_eps = np.finfo(L.dtype).eps
 
         # init other values
         alpha = np.zeros(n, dtype=DTYPE)
@@ -539,7 +554,7 @@ def _decomposition(
                     if omega_i != 0:
                         if omega_i != 1:
                             L[i, :i] *= omega_i
-                        L[i, np.where(abs(L[i, :i]) < L_eps)[0]] = 0
+                        L[i, np.where(np.abs(L[i, :i]) < min_abs_value_L)[0]] = 0
                     else:
                         L[i, :i] = 0
                 else:
@@ -549,7 +564,7 @@ def _decomposition(
                         L_i_data = []
                         for row, data in zip(L_rows[i], L_data[i]):
                             data = data * omega_i
-                            if np.abs(data) >= L_eps:
+                            if np.abs(data) >= min_abs_value_L:
                                 L_i_rows.append(row)
                                 L_i_data.append(data)
                         L_rows[i] = L_i_rows
@@ -691,7 +706,8 @@ def _decomposition(
 
 def decomposition(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation=None, overwrite_A=False, return_type=None):
+        min_abs_value_D=None, min_abs_value_L=None, permutation=None, overwrite_A=False,
+        return_type=None):
     """
     Computes an approximative decomposition of a matrix with the specified properties.
 
@@ -725,6 +741,11 @@ def decomposition(
         in the matrix `D` of an approximated :math:`LDL^H` decomposition.
         `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
+    min_abs_value_L : float
+        Absolute values below `min_abs_value_L` are considered as zero
+        in the matrix `L` of an approximated :math:`LDL^H` decomposition.
+        `min_abs_value_L` must be greater or equal to 0.
+        optional, default : The resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
@@ -758,7 +779,7 @@ def decomposition(
     matrix.logger.debug(f'Calculating approximated decomposition with passed values: '
                         f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
                         f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
-                        f'min_abs_value_D {min_abs_value_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, min_abs_value_L {min_abs_value_L}, '
                         f'permutation {permutation}, overwrite_A {overwrite_A}, '
                         f'return_type {return_type}.')
 
@@ -773,7 +794,8 @@ def decomposition(
     # calculate decomposition
     L, d, p, omega, delta = _decomposition(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+        min_abs_value_D=min_abs_value_D, min_abs_value_L=min_abs_value_L,
         permutation=permutation, overwrite_A=overwrite_A,
         strict_lower_triangular_only_L=False)
 
@@ -791,7 +813,7 @@ def decomposition(
 
 def positive_semidefinite_matrix(
         A, min_diag_B=None, max_diag_B=None, min_diag_D=None, max_diag_D=None,
-        min_abs_value_D=None, permutation=None, overwrite_A=False):
+        min_abs_value_D=None, min_abs_value_L=None, permutation=None, overwrite_A=False):
     """
     Computes an approximation of `A` which has a :math:`LDL^H` decomposition with the specified properties.
 
@@ -824,6 +846,11 @@ def positive_semidefinite_matrix(
         in the matrix `D` in a :math:`LDL^H` decomposition of the returned matrix.
         `min_abs_value_D` must be greater or equal to 0.
         optional, default : The square root of the resolution of the underlying data type.
+    min_abs_value_L : float
+        Absolute values below `min_abs_value_L` are considered as zero
+        in the matrix `L` of an approximated :math:`LDL^H` decomposition.
+        `min_abs_value_L` must be greater or equal to 0.
+        optional, default : The resolution of the underlying data type.
     permutation : str or numpy.ndarray
         The symmetric permutation method that is applied to the matrix before it is decomposed.
         It has to be a value in :const:`matrix.UNIVERSAL_PERMUTATION_METHODS` or
@@ -853,13 +880,14 @@ def positive_semidefinite_matrix(
     matrix.logger.debug(f'Calculating approximation of a matrix with passed values: '
                         f'min_diag_B {min_diag_B}, max_diag_B {max_diag_B}, '
                         f'min_diag_D {min_diag_D}, max_diag_D {max_diag_D}, '
-                        f'min_abs_value_D {min_abs_value_D}, '
+                        f'min_abs_value_D {min_abs_value_D}, min_abs_value_L {min_abs_value_L}, '
                         f'permutation {permutation}, overwrite_A {overwrite_A}.')
 
     # calculate decomposition
     L, d, p, omega, delta = _decomposition(
         A, min_diag_B=min_diag_B, max_diag_B=max_diag_B,
-        min_diag_D=min_diag_D, max_diag_D=max_diag_D, min_abs_value_D=min_abs_value_D,
+        min_diag_D=min_diag_D, max_diag_D=max_diag_D,
+        min_abs_value_D=min_abs_value_D, min_abs_value_L=min_abs_value_L,
         permutation=permutation, overwrite_A=overwrite_A,
         strict_lower_triangular_only_L=True)
 
