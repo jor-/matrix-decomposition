@@ -462,6 +462,7 @@ def _decomposition(
         delta = np.empty(n, dtype=DTYPE)
         omega = np.empty(n, dtype=DTYPE)
         d = np.empty(n, dtype=DTYPE)
+        L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
 
         # debug info
         matrix.logger.debug(f'Using the following values: '
@@ -582,19 +583,23 @@ def _decomposition(
                 if not overwrite_A:
                     A_column_i = A[:, p_i]
                 else:
-                    A_column_i = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conj()])
+                    A_column_i = np.concatenate([A[:p_i, p_i], A[p_i, p_i:].conjugate()])
             else:
                 assert not overwrite_A
-                if A.format in ('csr', 'lil'):
-                    A_column_i = A[p_i, :].conj(copy=False).transpose(copy=False)
+                if A.format in ('csc', 'csr', 'lil'):
+                    A_column_i = np.zeros(n, dtype=A.dtype)
+                    values = A.data[A.indptr[p_i]: A.indptr[p_i + 1]]
+                    if A.format in ('csr', 'lil'):
+                        values = values.conjugate()
+                    indices = A.indices[A.indptr[p_i]: A.indptr[p_i + 1]]
+                    A_column_i[indices] = values
                 else:
-                    A_column_i = A[:, p_i]
-                A_column_i = A_column_i.toarray().reshape(-1)
+                    A_column_i = A[:, p_i].toarray().reshape(-1)
             A_column_i = A_column_i[p_after_i]
             assert np.all(np.isfinite(A_column_i))
 
             # update beta
-            beta_add = 2 * A_column_i * A_column_i.conj()
+            beta_add = 2 * A_column_i * A_column_i.conjugate()
             assert np.all(np.isreal(beta_add))
             beta[p_after_i] += beta_add.real
 
@@ -603,7 +608,7 @@ def _decomposition(
                 # get auxiliary variables for calculation of i-th column of L
                 if is_dense:
                     if i > 0:
-                        L_row_i_mul_d = L[i, :i].conj() * d[:i]
+                        L_row_i_mul_d = L[i, :i].conjugate() * d[:i]
                         assert np.all(np.isfinite(L_row_i_mul_d))
                         L_below_row_i = L[i + 1:, :i]
                         assert np.all(np.logical_or(np.isfinite(L_below_row_i),
@@ -611,9 +616,9 @@ def _decomposition(
                 else:
                     assert L.format == 'lil'
                     if len(L_rows[i]) > 0:
-                        L_row_i_mul_d = L[i, :].conj(copy=False).multiply(d).toarray().reshape(-1)
+                        L_row_i_mul_d = L[i, :].toarray()[0]
+                        L_row_i_mul_d[:i] = L_row_i_mul_d[:i].conjugate() * d[:i]
                         assert np.all(np.isfinite(L_row_i_mul_d))
-                        L_below_row_i = scipy.sparse.lil_matrix((1, 1), dtype=L.dtype)
                         L_below_row_i.rows = L_rows[i + 1:]
                         L_below_row_i.data = L_data[i + 1:]
                         L_below_row_i._shape = (n - (i + 1), n)
@@ -671,7 +676,7 @@ def _decomposition(
                             L_data[j].append(L_column_i_k)
 
                     # update alpha
-                    alpha_add = L_column_i * L_column_i.conj() * d_i
+                    alpha_add = L_column_i * L_column_i.conjugate() * d_i
                     assert np.all(np.isreal(alpha_add))
                     alpha_add = alpha_add.real
                     assert np.all(np.logical_or(np.isfinite(alpha_add), alpha_add == math.inf))
@@ -958,10 +963,10 @@ def positive_semidefinite_matrix(
                     r_j = L[q[j], :q[a]]
                     if is_dense:
                         r_i = r_i * d[:q[a]]
-                        r_j = r_j.conj().transpose()
+                        r_j = r_j.conjugate()
                     else:
                         r_i = r_i.multiply(d[:q[a]])
-                        r_j = r_j.conj(copy=False).transpose(copy=False)
+                        r_j = r_j.conjugate(copy=False).transpose(copy=False)
                     B_i_j = r_i @ r_j
                     if not is_dense:
                         assert B_i_j.shape == (1, 1)
@@ -974,7 +979,7 @@ def positive_semidefinite_matrix(
     # set lower diagonal entries
     for i in range(n):
         for j in range(i + 1, n):
-            B[j, i] = np.conj(B[i, j])
+            B[j, i] = np.conjugate(B[i, j])
 
     # return B
     if not is_dense:
