@@ -4,19 +4,19 @@ dist: xenial
 matrix:
   include:
     - env:
-        - PYTHON=3.7
+        - PYTHON=3.8
         - CODE_TEST=1
         - COVERAGE=1
         - DOC_TEST=0
         - STYLE_TEST=0
     - env:
-        - PYTHON=3.7
+        - PYTHON=3.8
         - CODE_TEST=0
         - COVERAGE=0
         - DOC_TEST=1
         - STYLE_TEST=0
     - env:
-        - PYTHON=3.7
+        - PYTHON=3.8
         - CODE_TEST=0
         - COVERAGE=0
         - DOC_TEST=0
