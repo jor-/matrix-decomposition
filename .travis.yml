@@ -32,17 +32,18 @@ install:
     # create test environment
     - conda create -q -n test-environment
     - conda activate test-environment
+    - conda config --env --add channels conda-forge
     # install needed packages
     - conda install -q python=$PYTHON
     - conda install -q numpy>=1.15
     - conda install -q scipy
-    - conda install -q scikit-sparse -c conda-forge
+    - conda install -q scikit-sparse
     - if [ "${CODE_TEST}" == "1" ]; then
           conda install -q nose;
           conda install -q pytest;
           if [ "${COVERAGE}" == "1" ]; then
               conda install -q pytest-cov;
-              conda install -q codecov -c conda-forge;
+              conda install -q codecov;
           fi
       fi
     - if [ "${STYLE_TEST}" == "1" ]; then
