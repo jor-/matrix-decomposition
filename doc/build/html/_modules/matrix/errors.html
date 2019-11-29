@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>matrix.errors &#8212; matrix-decomposition 1.0.1.post0.dev40+dirty.ge60ca81 documentation</title>
+    <title>matrix.errors &#8212; matrix-decomposition 1.1.post0.dev32+dirty.gbb29596 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -42,11 +42,11 @@
 <div class="viewcode-block" id="BaseError"><a class="viewcode-back" href="../../errors.html#matrix.errors.BaseError">[docs]</a><span class="k">class</span> <span class="nc">BaseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This is the base exception for all exceptions in this package. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span></div>
 
 
@@ -55,7 +55,7 @@
 <div class="viewcode-block" id="MatrixError"><a class="viewcode-back" href="../../errors.html#matrix.errors.MatrixError">[docs]</a><span class="k">class</span> <span class="nc">MatrixError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; An exception related to a matrix. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">matrix</span> <span class="o">=</span> <span class="n">matrix</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error with matrix with shape </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -65,7 +65,7 @@
 <div class="viewcode-block" id="MatrixNotSquareError"><a class="viewcode-back" href="../../errors.html#matrix.errors.MatrixNotSquareError">[docs]</a><span class="k">class</span> <span class="nc">MatrixNotSquareError</span><span class="p">(</span><span class="n">MatrixError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A matrix is not a square matrix although a square matrix is required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Matrix with shape </span><span class="si">{}</span><span class="s1"> is not a square matrix.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span></div>
 
@@ -73,7 +73,7 @@
 <div class="viewcode-block" id="MatrixNotFiniteError"><a class="viewcode-back" href="../../errors.html#matrix.errors.MatrixNotFiniteError">[docs]</a><span class="k">class</span> <span class="nc">MatrixNotFiniteError</span><span class="p">(</span><span class="n">MatrixError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A matrix has non-finite entries although a finite matrix is required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Matrix with shape </span><span class="si">{}</span><span class="s1"> has not finite entries.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span></div>
 
@@ -81,7 +81,7 @@
 <div class="viewcode-block" id="MatrixSingularError"><a class="viewcode-back" href="../../errors.html#matrix.errors.MatrixSingularError">[docs]</a><span class="k">class</span> <span class="nc">MatrixSingularError</span><span class="p">(</span><span class="n">MatrixError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A matrix is singular although an invertible matrix is required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Matrix with shape </span><span class="si">{}</span><span class="s1"> is singular.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span></div>
 
@@ -89,7 +89,7 @@
 <div class="viewcode-block" id="MatrixNotHermitianError"><a class="viewcode-back" href="../../errors.html#matrix.errors.MatrixNotHermitianError">[docs]</a><span class="k">class</span> <span class="nc">MatrixNotHermitianError</span><span class="p">(</span><span class="n">MatrixError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A matrix is not Hermitian although a Hermitian matrix is required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Matrix with shape </span><span class="si">{}</span><span class="s1"> is not Hermitian.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">j</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
@@ -105,7 +105,7 @@
 <div class="viewcode-block" id="MatrixComplexDiagonalValueError"><a class="viewcode-back" href="../../errors.html#matrix.errors.MatrixComplexDiagonalValueError">[docs]</a><span class="k">class</span> <span class="nc">MatrixComplexDiagonalValueError</span><span class="p">(</span><span class="n">MatrixNotHermitianError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A matrix has complex diagonal values although real diagonal values are required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">i</span><span class="p">)</span></div>
 
 
@@ -114,7 +114,7 @@
 <div class="viewcode-block" id="DecompositionError"><a class="viewcode-back" href="../../errors.html#matrix.errors.DecompositionError">[docs]</a><span class="k">class</span> <span class="nc">DecompositionError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; An exception related to a decomposition. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span> <span class="o">=</span> <span class="n">decomposition</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Error with decomposition </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="p">)</span>
@@ -124,7 +124,7 @@
 <div class="viewcode-block" id="DecompositionNotFiniteError"><a class="viewcode-back" href="../../errors.html#matrix.errors.DecompositionNotFiniteError">[docs]</a><span class="k">class</span> <span class="nc">DecompositionNotFiniteError</span><span class="p">(</span><span class="n">DecompositionError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A decomposition of a matrix has non-finite entries although a finite matrix is required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Decomposition </span><span class="si">{}</span><span class="s1"> has non-finite entries.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">decomposition</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">decomposition</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
 
@@ -132,7 +132,7 @@
 <div class="viewcode-block" id="DecompositionSingularError"><a class="viewcode-back" href="../../errors.html#matrix.errors.DecompositionSingularError">[docs]</a><span class="k">class</span> <span class="nc">DecompositionSingularError</span><span class="p">(</span><span class="n">DecompositionError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A decomposition represents a singular matrix although a non-singular matrix is required. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">):</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Decomposition </span><span class="si">{}</span><span class="s1"> represents a singular matrix.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">decomposition</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">decomposition</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
 
@@ -140,7 +140,7 @@
 <div class="viewcode-block" id="DecompositionInvalidFile"><a class="viewcode-back" href="../../errors.html#matrix.errors.DecompositionInvalidFile">[docs]</a><span class="k">class</span> <span class="nc">DecompositionInvalidFile</span><span class="p">(</span><span class="n">DecompositionError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; An attempt was made to load a decomposition from an invalid file. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;File </span><span class="si">{}</span><span class="s1"> is not a valid decomposition file.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
@@ -149,7 +149,7 @@
 <div class="viewcode-block" id="DecompositionInvalidDecompositionTypeFile"><a class="viewcode-back" href="../../errors.html#matrix.errors.DecompositionInvalidDecompositionTypeFile">[docs]</a><span class="k">class</span> <span class="nc">DecompositionInvalidDecompositionTypeFile</span><span class="p">(</span><span class="n">DecompositionInvalidFile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; An attempt was made to load a decomposition from an file in which another decomposition type is stored. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">type_file</span><span class="p">,</span> <span class="n">type_needed</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">type_file</span><span class="p">,</span> <span class="n">type_needed</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;File </span><span class="si">{}</span><span class="s1"> contains a decomposition of type </span><span class="si">{}</span><span class="s1"> but type </span><span class="si">{}</span><span class="s1"> is needed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">type_file</span><span class="p">,</span> <span class="n">type_needed</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
@@ -160,7 +160,7 @@
 <div class="viewcode-block" id="NoDecompositionPossibleError"><a class="viewcode-back" href="../../errors.html#matrix.errors.NoDecompositionPossibleError">[docs]</a><span class="k">class</span> <span class="nc">NoDecompositionPossibleError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; It is not possible to calculate a desired matrix decomposition. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">desired_type</span> <span class="o">=</span> <span class="n">desired_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">base</span> <span class="o">=</span> <span class="n">base</span>
         <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Base </span><span class="si">{}</span><span class="s1"> can not be converted to type </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">)</span>
@@ -170,7 +170,7 @@
 <div class="viewcode-block" id="NoDecompositionPossibleWithProblematicSubdecompositionError"><a class="viewcode-back" href="../../errors.html#matrix.errors.NoDecompositionPossibleWithProblematicSubdecompositionError">[docs]</a><span class="k">class</span> <span class="nc">NoDecompositionPossibleWithProblematicSubdecompositionError</span><span class="p">(</span><span class="n">NoDecompositionPossibleError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; It is not possible to calculate a desired matrix decomposition. Only a subdecompostion could be calculated &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">,</span> <span class="n">problematic_leading_principal_submatrix_index</span><span class="p">,</span> <span class="n">subdecomposition</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">,</span> <span class="n">problematic_leading_principal_submatrix_index</span><span class="p">,</span> <span class="n">subdecomposition</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">problematic_leading_principal_submatrix_index</span> <span class="o">=</span> <span class="n">problematic_leading_principal_submatrix_index</span>
         <span class="k">if</span> <span class="n">subdecomposition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -180,14 +180,14 @@
 <div class="viewcode-block" id="NoDecompositionPossibleTooManyEntriesError"><a class="viewcode-back" href="../../errors.html#matrix.errors.NoDecompositionPossibleTooManyEntriesError">[docs]</a><span class="k">class</span> <span class="nc">NoDecompositionPossibleTooManyEntriesError</span><span class="p">(</span><span class="n">NoDecompositionPossibleError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; The decomposition is not possible for this matrix because it would have too many entries. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="NoDecompositionConversionImplementedError"><a class="viewcode-back" href="../../errors.html#matrix.errors.NoDecompositionConversionImplementedError">[docs]</a><span class="k">class</span> <span class="nc">NoDecompositionConversionImplementedError</span><span class="p">(</span><span class="n">NoDecompositionPossibleError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A decomposition conversion is not implemented for this type. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decomposition</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">decomposition</span><span class="p">,</span> <span class="n">desired_type</span><span class="p">)</span></div>
 
 
@@ -196,12 +196,12 @@
 <div class="viewcode-block" id="TooManyIterationsError"><a class="viewcode-back" href="../../errors.html#matrix.errors.TooManyIterationsError">[docs]</a><span class="k">class</span> <span class="nc">TooManyIterationsError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Too many iterations are needed for the calculation. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">result</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;No solution found in maximal number of iterations.&#39;</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="n">f</span><span class="s1">&#39;No solution found in </span><span class="si">{iteration}</span><span class="s1"> iterations.&#39;</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;No solution found in </span><span class="si">{iteration}</span><span class="s1"> iterations.&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">iteration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -231,6 +231,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../decompositions.html">Matrix decompositions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../errors.html">Errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 </ul>
 
 <div class="relations">
@@ -243,10 +244,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -268,7 +269,7 @@
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

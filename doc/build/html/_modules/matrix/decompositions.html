@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta charset="utf-8" />
-    <title>matrix.decompositions &#8212; matrix-decomposition 1.0.1.post0.dev40+dirty.ge60ca81 documentation</title>
+    <title>matrix.decompositions &#8212; matrix-decomposition 1.1.post0.dev32+dirty.gbb29596 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -62,7 +62,7 @@
     <span class="n">type_str</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">BASE_DECOMPOSITION_TYPE</span>
     <span class="sd">&quot;&quot;&quot; :class:`str`: The type of this decomposition represented as string. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -76,7 +76,7 @@
 
     <span class="c1"># *** str *** #</span>
 
-    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{type_str}</span><span class="s1"> decomposition of matrix with shape (</span><span class="si">{n}</span><span class="s1">, </span><span class="si">{n}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="n">type_str</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_str</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
 
@@ -167,7 +167,7 @@
         <span class="k">return</span> <span class="n">P</span>
 
 <div class="viewcode-block" id="DecompositionBase.permute_matrix"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.permute_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">permute_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Permute a matrix by the permutation of the decomposition.</span>
+        <span class="sd">&quot;&quot;&quot; Permutes a matrix by the permutation of the decomposition.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -186,7 +186,7 @@
             <span class="k">return</span> <span class="n">A</span></div>
 
 <div class="viewcode-block" id="DecompositionBase.unpermute_matrix"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.unpermute_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">unpermute_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Unpermute a matrix permuted by the permutation of the decomposition.</span>
+        <span class="sd">&quot;&quot;&quot; Unpermutes a matrix permuted by the permutation of the decomposition.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -241,7 +241,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_same_type_and_permutation</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_equal</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DecompositionBase.is_almost_equal"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.is_almost_equal">[docs]</a>    <span class="k">def</span> <span class="nf">is_almost_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="mf">1e-04</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-06</span><span class="p">):</span>
@@ -266,7 +266,7 @@
     <span class="c1"># *** convert type *** #</span>
 
 <div class="viewcode-block" id="DecompositionBase.copy"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Copy this decomposition.</span>
+        <span class="sd">&quot;&quot;&quot; Copies this decomposition.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -280,7 +280,7 @@
         <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DecompositionBase.is_type"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.is_type">[docs]</a>    <span class="k">def</span> <span class="nf">is_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Whether this is a decomposition of the passed type.</span>
+        <span class="sd">&quot;&quot;&quot; Whether this decomposition is of the passed type.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -302,7 +302,7 @@
                 <span class="k">return</span> <span class="kc">False</span></div>
 
 <div class="viewcode-block" id="DecompositionBase.as_type"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.as_type">[docs]</a>    <span class="k">def</span> <span class="nf">as_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_str</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Convert decomposition to passed type.</span>
+        <span class="sd">&quot;&quot;&quot; Converts this decomposition to passed type.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -333,7 +333,7 @@
             <span class="k">raise</span> <span class="n">matrix</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">NoDecompositionConversionImplementedError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_str</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DecompositionBase.as_any_type"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.as_any_type">[docs]</a>    <span class="k">def</span> <span class="nf">as_any_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">type_strs</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Convert decomposition to any of the passed types.</span>
+        <span class="sd">&quot;&quot;&quot; Converts this decomposition to any of the passed types.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -362,6 +362,26 @@
                 <span class="k">return</span> <span class="bp">self</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_type</span><span class="p">(</span><span class="n">type_strs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="DecompositionBase.as_same_type"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.as_same_type">[docs]</a>    <span class="k">def</span> <span class="nf">as_same_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Converts the passed decompositions to the same type as this decomposition.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        doc : DecompositionBase</span>
+<span class="sd">            The decomposition that should be converted.</span>
+<span class="sd">        copy : bool</span>
+<span class="sd">            Whether the data of the decomposition that sould be converted should always be copied or only if needed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        matrix.decompositions.DecompositionBase</span>
+<span class="sd">            If the type of the passed decomposition is not same type as this decomposition,</span>
+<span class="sd">            a decomposition of this type is returned which represents the same decomposed matrix as</span>
+<span class="sd">            the passed decomposition. Otherwise this decomposition or a copy of it is returned,</span>
+<span class="sd">            depending on `copy`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">dec</span><span class="o">.</span><span class="n">as_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_str</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span></div>
 
     <span class="c1"># *** features of decomposition *** #</span>
 
@@ -630,7 +650,7 @@
 
     <span class="c1"># *** multiply *** #</span>
 
-<div class="viewcode-block" id="DecompositionBase.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<div class="viewcode-block" id="DecompositionBase.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the right side (matrix-matrix or matrix-vector) product `A @ x`, where `A` is the composed matrix represented by this decomposition.</span>
 
@@ -640,6 +660,9 @@
 <span class="sd">            Vector or matrix in the product in the</span>
 <span class="sd">            matrix-matrix or matrix-vector `A @ x`.</span>
 <span class="sd">            It must hold `self.n == x.shape[0]`.</span>
+<span class="sd">        dtype : numpy.dtype</span>
+<span class="sd">            Type to use in computation.</span>
+<span class="sd">            optional, default: Determined by the method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -647,10 +670,10 @@
 <span class="sd">            The result of `A @ x`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">composed_matrix</span> <span class="o">@</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="DecompositionBase.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DecompositionBase.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the both sides (matrix-matrix or matrix-vector) product `y.H @ A @ x`, where `A` is the composed matrix represented by this decomposition.</span>
 
@@ -663,23 +686,26 @@
 <span class="sd">            Vector or matrix in the product `y.H @ A @ x`.</span>
 <span class="sd">            It must hold `self.n == y.shape[0]`.</span>
 <span class="sd">            optional, default: If y is not passed, x is used as y.</span>
+<span class="sd">        dtype : numpy.dtype</span>
+<span class="sd">            Type to use in computation.</span>
+<span class="sd">            optional, default: Determined by the method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray or scipy.sparse.spmatrix</span>
-<span class="sd">            The result of `x.H @ A @ y`.</span>
+<span class="sd">            The result of `y.H @ A @ x`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DecompositionBase.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the right side (matrix-matrix or matrix-vector) product `B @ x`, where `B` is the matrix inverse of the composed matrix represented by this decomposition.</span>
 
@@ -689,6 +715,9 @@
 <span class="sd">            Vector or matrix in the product in the</span>
 <span class="sd">            matrix-matrix or matrix-vector `B @ x`.</span>
 <span class="sd">            It must hold `self.n == x.shape[0]`.</span>
+<span class="sd">        dtype : numpy.dtype</span>
+<span class="sd">            Type to use in computation.</span>
+<span class="sd">            optional, default: Determined by the method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -702,7 +731,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
-<div class="viewcode-block" id="DecompositionBase.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="DecompositionBase.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Calculates the both sides (matrix-matrix or matrix-vector) product `y.H @ B @ x`, where `B` is the mattrix inverse of the composed matrix represented by this decomposition.</span>
 
@@ -715,11 +744,14 @@
 <span class="sd">            Vector or matrix in the product `y.H @ B @ x`.</span>
 <span class="sd">            It must hold `self.n == y.shape[0]`.</span>
 <span class="sd">            optional, default: If y is not passed, x is used as y.</span>
+<span class="sd">        dtype : numpy.dtype</span>
+<span class="sd">            Type to use in computation.</span>
+<span class="sd">            optional, default: Determined by the method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        numpy.ndarray or scipy.sparse.spmatrix</span>
-<span class="sd">            The result of `x.H @ A @ y`.</span>
+<span class="sd">            The result of `y.H @ A @ x`.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -727,17 +759,17 @@
 <span class="sd">            If this is a decomposition representing a singular matrix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
     <span class="c1"># *** solve systems of linear equations *** #</span>
 
-<div class="viewcode-block" id="DecompositionBase.solve"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<div class="viewcode-block" id="DecompositionBase.solve"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.solve">[docs]</a>    <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Solves the equation `A x = b` regarding `x`, where `A` is the composed matrix represented by this decomposition.</span>
 
@@ -746,6 +778,9 @@
 <span class="sd">        b : numpy.ndarray or scipy.sparse.spmatrix</span>
 <span class="sd">            Right-hand side vector or matrix in equation `A x = b`.</span>
 <span class="sd">            It must hold `self.n == b.shape[0]`.</span>
+<span class="sd">        dtype : numpy.dtype</span>
+<span class="sd">            Type to use in computation.</span>
+<span class="sd">            optional, default: Determined by the method.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -762,7 +797,28 @@
         <span class="c1"># debug info</span>
         <span class="n">matrix</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Solving linear system with </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="c1"># solve</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">b</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+
+    <span class="c1"># *** modify decompostion *** #</span>
+
+<div class="viewcode-block" id="DecompositionBase.append_block_decomposition"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.DecompositionBase.append_block_decomposition">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">append_block_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dec</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Makes a new decomposition where this decompsition and the passed one are appended.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dec : DecompositionBase</span>
+<span class="sd">            The decomposition that should be appended to this decomposition.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dec : DecompositionBase</span>
+<span class="sd">            A new decomposition where this decompsition and the passed one are appended.</span>
+<span class="sd">            This desomposition represents the first block and the passed one the second block.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div></div>
 
 
 <div class="viewcode-block" id="LDL_Decomposition"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition">[docs]</a><span class="k">class</span> <span class="nc">LDL_Decomposition</span><span class="p">(</span><span class="n">DecompositionBase</span><span class="p">):</span>
@@ -775,7 +831,7 @@
     <span class="n">type_str</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">LDL_DECOMPOSITION_TYPE</span>
     <span class="sd">&quot;&quot;&quot; :class:`str`: The type of this decomposition represented as string. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -803,7 +859,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">composed_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">@</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
         <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpermute_matrix</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">A</span>
 
@@ -936,51 +992,59 @@
 
     <span class="c1"># *** multiply *** #</span>
 
-<div class="viewcode-block" id="LDL_Decomposition.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LDL_Decomposition.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">x</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">@</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">@</span> <span class="n">x</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p_inverse</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="LDL_Decomposition.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LDL_Decomposition.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">@</span> <span class="n">x</span></div>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="LDL_Decomposition.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LDL_Decomposition.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_invertible</span><span class="p">()</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p_inverse</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="LDL_Decomposition.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LDL_Decomposition.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_invertible</span><span class="p">()</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="n">scipy</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">diags</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span></div></div>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">y</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="LDL_Decomposition.append_block_decomposition"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_Decomposition.append_block_decomposition">[docs]</a>    <span class="k">def</span> <span class="nf">append_block_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dec</span><span class="p">):</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_same_type</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">d</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">d</span><span class="p">))</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">block_diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">LDL_Decomposition</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">,</span> <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div></div>
 
 
 <div class="viewcode-block" id="LDL_DecompositionCompressed"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed">[docs]</a><span class="k">class</span> <span class="nc">LDL_DecompositionCompressed</span><span class="p">(</span><span class="n">DecompositionBase</span><span class="p">):</span>
@@ -994,7 +1058,7 @@
     <span class="n">type_str</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">LDL_DECOMPOSITION_COMPRESSED_TYPE</span>
     <span class="sd">&quot;&quot;&quot; :class:`str`: The type of this decomposition represented as string. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">LD</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">LD</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1117,17 +1181,24 @@
 
     <span class="c1"># *** multiply *** #</span>
 
-<div class="viewcode-block" id="LDL_DecompositionCompressed.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+<div class="viewcode-block" id="LDL_DecompositionCompressed.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LDL_DecompositionCompressed.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">matrix_both_sides_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span></div>
+<div class="viewcode-block" id="LDL_DecompositionCompressed.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">matrix_both_sides_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LDL_DecompositionCompressed.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+<div class="viewcode-block" id="LDL_DecompositionCompressed.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="LDL_DecompositionCompressed.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="LDL_DecompositionCompressed.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_LDL_Decomposition</span><span class="p">()</span><span class="o">.</span><span class="n">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LDL_DecompositionCompressed.append_block_decomposition"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LDL_DecompositionCompressed.append_block_decomposition">[docs]</a>    <span class="k">def</span> <span class="nf">append_block_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dec</span><span class="p">):</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_same_type</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="n">LD</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">block_diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LD</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">LD</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">LDL_DecompositionCompressed</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">LD</span><span class="o">=</span><span class="n">LD</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div></div>
 
 
 <div class="viewcode-block" id="LL_Decomposition"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition">[docs]</a><span class="k">class</span> <span class="nc">LL_Decomposition</span><span class="p">(</span><span class="n">DecompositionBase</span><span class="p">):</span>
@@ -1140,7 +1211,7 @@
     <span class="n">type_str</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">LL_DECOMPOSITION_TYPE</span>
     <span class="sd">&quot;&quot;&quot; :class:`str`: The type of this decomposition represented as string. &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1163,7 +1234,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">composed_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">@</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
         <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpermute_matrix</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">A</span>
 
@@ -1284,50 +1355,56 @@
 
     <span class="c1"># *** multiply *** #</span>
 
-<div class="viewcode-block" id="LL_Decomposition.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LL_Decomposition.matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span> <span class="o">@</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span>
         <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">@</span> <span class="n">x</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p_inverse</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="LL_Decomposition.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LL_Decomposition.matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">L_H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">L_H</span> <span class="o">@</span> <span class="n">x</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)</span> <span class="o">@</span> <span class="n">x</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">L_H</span> <span class="o">@</span> <span class="n">y</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">@</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="LL_Decomposition.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LL_Decomposition.inverse_matrix_right_side_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.inverse_matrix_right_side_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_right_side_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_invertible</span><span class="p">()</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">),</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p_inverse</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">x</span></div>
 
-<div class="viewcode-block" id="LL_Decomposition.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="viewcode-block" id="LL_Decomposition.inverse_matrix_both_sides_multiplication"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.inverse_matrix_both_sides_multiplication">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_matrix_both_sides_multiplication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">check_invertible</span><span class="p">()</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">as_matrix_or_vector</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">]</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">solve_triangular</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unit_diagonal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_b</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">conj</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="n">x</span></div></div>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">conjugate_transpose</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span> <span class="o">@</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="LL_Decomposition.append_block_decomposition"><a class="viewcode-back" href="../../decompositions.html#matrix.decompositions.LL_Decomposition.append_block_decomposition">[docs]</a>    <span class="k">def</span> <span class="nf">append_block_decomposition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dec</span><span class="p">):</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_same_type</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">p</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="n">L</span> <span class="o">=</span> <span class="n">matrix</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">block_diag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">,</span> <span class="n">dec</span><span class="o">.</span><span class="n">L</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">LL_Decomposition</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">,</span> <span class="n">L</span><span class="o">=</span><span class="n">L</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div></div>
 
 
 <span class="c1"># functions handling decompositions</span>
@@ -1399,6 +1476,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../decompositions.html">Matrix decompositions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../errors.html">Errors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 </ul>
 
 <div class="relations">
@@ -1411,10 +1489,10 @@
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -1436,7 +1514,7 @@
       &copy;2017, AGPLv3+.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.0.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

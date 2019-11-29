@@ -14,6 +14,7 @@ Contents
     decompositions
     errors
     changelog
+    requirements
 
 
 Indices and tables

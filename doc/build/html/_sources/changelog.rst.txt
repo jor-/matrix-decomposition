@@ -1,6 +1,13 @@
 Changelog
 =========
 
+1.2
+---
+    * Several functions to solve nearness problems (nearest symmetric matrix, nearest skew symmetric matrix, nearest positive semidefinite matrix, nearest correlation matrix) added.
+    * Significant speedup of approximation algorithms in `matrix.approximation.positive_semidefinite.Reimer`.
+    * Overflow handling improved in several functions.
+    * Decompositions in matrix.decompositions now have an `append_block_decomposition` and `as_same_type` method and their mutiplication methods have now a `dtype` argument.
+    * The approximation algorithms in `matrix.approximation.positive_semidefinite.Reimer` now have a `min_abs_value_L` argument.
 
 1.1
 ---
