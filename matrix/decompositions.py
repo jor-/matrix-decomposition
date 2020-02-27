@@ -1372,6 +1372,13 @@ class LL_Decomposition(DecompositionBase):
         res = LL_Decomposition(p=p, L=L)
         return res
 
+    def inverse_L_right_side_multiplication(self, x, dtype=None):
+        x = matrix.util.as_matrix_or_vector(x, dtype=dtype, copy=False)
+        self.check_invertible()
+        x = x[self.p]
+        x = matrix.util.solve_triangular(self.L, x, lower=True, unit_diagonal=False, overwrite_b=True, dtype=dtype)
+        return x
+
 
 # functions handling decompositions
 
